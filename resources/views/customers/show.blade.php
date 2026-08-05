@@ -1,0 +1,196 @@
+@extends('Layouts.app')
+
+@section('title', $customer->name)
+@section('page-title', 'Detail Customer')
+@section('subtitle', $customer->name)
+
+@push('styles')
+<style>
+.rental-status-returned{background:#F0FDF4}
+.rental-status-overdue{background:#FFF1F0}
+.rental-status-active{background:#EFF6FF}
+.rental-status-default{background:#FFF8E7}
+.rental-status-icon-returned{color:#15803D}
+.rental-status-icon-overdue{color:#C0392B}
+.rental-status-icon-active{color:#1D4ED8}
+.rental-status-icon-default{color:#B7791F}
+.btn-blacklist{background:linear-gradient(135deg,#EF4444,#DC2626);box-shadow:0 2px 8px rgba(239,68,68,0.3)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;display:flex;align-items:center;justify-content:center}
+.modal-box{background:white;border-radius:1rem;padding:1.5rem;max-width:40rem;width:90%;max-height:90vh;overflow:auto}
+</style>
+@endpush
+
+@section('content')
+<div class="space-y-5" x-data="{ showBlacklist: false, showPhotoPreview: false }">
+@php $isDeactivated = $customer->trashed(); @endphp
+
+@if($isDeactivated)
+<div class="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+<i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 text-amber-600"></i>
+<div class="flex-1">
+<p class="font-semibold text-amber-800">Customer ini dalam status Dinonaktifkan</p>
+@if($customer->deleted_at)<p class="text-sm text-amber-600">Dinonaktifkan pada: {{ $customer->deleted_at->format('d M Y H:i') }}</p>@endif
+</div>
+@auth @if(auth()->user()->isSuperAdmin())
+<form method="POST" action="{{ route('customers.restore', $customer->id) }}" class="inline">
+@csrf
+<button type="submit" class="btn-secondary bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Pulihkan Customer</button>
+</form>
+@endif @endauth
+</div>
+@endif
+
+<div class="flex flex-wrap items-center gap-3">
+<a href="{{ route('customers.index') }}" class="btn-secondary"><i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali</a>
+@if(!$isDeactivated)
+<a href="{{ route('customers.edit', $customer) }}" class="btn-secondary"><i data-lucide="edit-2" class="w-4 h-4"></i> Edit</a>
+<a href="{{ route('rentals.create', ['customer_id' => $customer->id]) }}" class="btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> Buat Penyewaan Baru</a>
+<a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', str_starts_with($customer->phone, '0') ? '62'.substr($customer->phone,1) : $customer->phone) }}" target="_blank" class="btn-secondary" style="color:#25D366;border-color:#25D366"><i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp</a>
+@if(auth()->user()->isSuperAdmin())
+<button @click="showBlacklist = true" class="btn-secondary {{ $customer->is_blacklisted ? 'border-green-400 text-green-600' : 'border-red-300 text-red-500' }}"><i data-lucide="{{ $customer->is_blacklisted ? 'user-check' : 'user-x' }}" class="w-4 h-4"></i> {{ $customer->is_blacklisted ? 'Hapus Blacklist' : 'Blacklist' }}</button>
+<button type="button" onclick="confirmDelete('deleteCustomerForm','customer {{ $customer->name }}')" class="btn-secondary text-red-500 hover:bg-red-50"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus</button>
+@endif
+@else
+@auth @if(auth()->user()->isSuperAdmin())
+<form method="POST" action="{{ route('customers.force-destroy', $customer->id) }}" id="forceDeleteCustomerForm" class="hidden">@csrf @method('DELETE')</form>
+<button type="button" onclick="confirmForceDelete('forceDeleteCustomerForm', 'customer {{ $customer->name }}')" class="btn-secondary text-red-500 hover:bg-red-50"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus Permanen</button>
+@endif @endauth
+@endif
+</div>
+
+<div class="flex items-center gap-2 flex-wrap">
+@if($isDeactivated) <span class="badge bg-amber-100 text-amber-700 border border-amber-200">Dinonaktifkan</span>
+@elseif($customer->is_blacklisted) <span class="badge badge-red">Blacklist</span>
+@else <span class="badge badge-green">Aktif</span>
+@endif
+</div>
+
+@if($customer->is_blacklisted)
+<div class="flex items-center gap-3 p-4 rounded-xl" style="background:#FFF1F0;border:1px solid #FECACA">
+<i data-lucide="shield-off" class="w-5 h-5 flex-shrink-0" style="color:#C0392B"></i>
+<div><p class="font-semibold" style="color:#C0392B">Customer ini di-Blacklist</p>
+@if($customer->blacklist_reason)<p class="text-sm" style="color:#E74C3C">Alasan: {{ $customer->blacklist_reason }}</p>@endif
+</div>
+</div>
+@endif
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="lg:col-span-1">
+        <div class="ds-card p-6">
+            <h3 class="font-semibold text-base mb-4" style="color:var(--text-dark)">
+                <i data-lucide="user" class="w-4 h-4 inline mr-2" style="color:var(--primary)"></i> Informasi Customer
+            </h3>
+
+            <div class="flex flex-col items-center mb-5">
+                <div class="w-24 h-24 rounded-full border border-gold/30 bg-gold text-bark flex items-center justify-center font-bold text-2xl shadow-sm ds-hover-lift {{ $isDeactivated ? 'grayscale' : '' }}">
+                    {{ strtoupper(substr($customer->name, 0, 2)) }}
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div><p class="text-xs text-stone-500 mb-1">Nama Lengkap</p><p class="text-sm font-semibold text-bark-dark">{{ $customer->name }}</p></div>
+                <div><p class="text-xs text-stone-500 mb-1">Nomor WhatsApp</p><p class="text-sm font-semibold text-bark-dark">{{ $customer->phone }}</p></div>
+                @if($customer->email) <div><p class="text-xs text-stone-500 mb-1">Email</p><p class="text-sm font-semibold text-bark-dark">{{ $customer->email }}</p></div> @endif
+                @if($customer->address) <div><p class="text-xs text-stone-500 mb-1">Alamat</p><p class="text-sm font-semibold text-bark-dark">{{ $customer->address }}</p></div> @endif
+                <hr class="border-cream-sand/50 my-3">
+                <div class="flex items-center justify-between gap-3">
+                    <div><p class="text-xs text-stone-500 mb-1">Total Sewa</p><p class="text-lg font-bold text-bark-dark">{{ $customer->rentals->count() }}</p></div>
+                    <div class="text-right"><p class="text-xs text-stone-500 mb-1">Selesai</p><p class="text-lg font-bold text-green-600">{{ $customer->rentals->where('rental_status','returned')->count() }}</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lg:col-span-2">
+        <div class="ds-card overflow-hidden">
+<div class="p-5 border-b" style="border-color:var(--border)">
+<div class="flex items-center justify-between">
+<h3 class="font-semibold text-base" style="color:var(--text-dark)"><i data-lucide="shirt" class="w-4 h-4 inline mr-2" style="color:var(--primary)"></i> Riwayat Penyewaan</h3>
+<a href="{{ route('rentals.index', ['customer_id' => $customer->id]) }}" class="text-xs font-semibold hover:underline" style="color:var(--primary)">Lihat Semua →</a>
+</div>
+</div>
+<div class="divide-y divide-cream-sand/30">
+@forelse($customer->rentals as $rental)
+<div class="flex items-center gap-4 p-4 transition-colors hover:bg-cream/10 ds-transition">
+    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 rental-status-{{ $rental->rental_status }}">
+        <i data-lucide="{{ match($rental->rental_status) { 'returned' => 'check-circle', 'overdue' => 'alert-circle', 'active' => 'clock', default => 'hourglass' } }}" class="w-5 h-5 rental-status-icon-{{ $rental->rental_status }}"></i>
+    </div>
+    <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+            <a href="{{ route('rentals.show', $rental) }}" class="font-mono font-semibold text-sm hover:underline" style="color:var(--primary)">{{ $rental->invoice_number }}</a>
+            <span class="badge badge-{{ $rental->status_badge_color }} text-[10px]">{{ $rental->status_label }}</span>
+        </div>
+        <p class="text-xs mt-0.5" style="color:var(--text-soft)">{{ optional($rental->rental_date)->format('d M Y') }} → {{ optional($rental->return_due_date)->format('d M Y') }} ({{ $rental->duration_days }} hari)</p>
+        <div class="flex flex-wrap gap-1 mt-1">
+            @foreach($rental->items->take(3) as $item)
+            <span class="text-[10px] px-1.5 py-0.5 rounded-lg" style="background:var(--secondary);color:var(--text-soft)">{{ $item->product_name }}</span>
+            @endforeach
+        </div>
+    </div>
+    <div class="text-right flex-shrink-0">
+        <p class="font-bold text-sm" style="color:var(--text-dark)">Rp {{ number_format($rental->total_amount, 0, ',', '.') }}</p>
+        <span class="badge {{ match($rental->payment_status) { 'paid' => 'badge-green', 'partial' => 'badge-yellow', default => 'badge-red' } }} text-[10px] mt-1">{{ $rental->payment_status_label }}</span>
+    </div>
+</div>
+@empty
+<div class="py-12 text-center">
+<i data-lucide="shirt" class="w-8 h-8 mx-auto mb-2" style="color:var(--border)"></i>
+<p class="text-sm" style="color:var(--text-soft)">Belum ada riwayat penyewaan</p>
+</div>
+@endforelse
+</div>
+</div>
+
+<div x-show="showBlacklist" x-cloak class="modal-overlay" @click.self="showBlacklist = false">
+<div class="modal-box">
+<h3 class="font-semibold text-base mb-4" style="color:var(--text-dark)">{{ $customer->is_blacklisted ? 'Hapus dari Blacklist' : 'Blacklist Customer' }}</h3>
+<form method="POST" action="{{ route('customers.blacklist', $customer) }}">
+@csrf @method('PATCH')
+@if(!$customer->is_blacklisted)
+<div class="mb-4">
+<label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Alasan Blacklist</label>
+<textarea name="reason" rows="3" class="form-input" placeholder="Tulis alasan blacklist..." required></textarea>
+</div>
+@endif
+<div class="flex gap-3">
+<button type="button" @click="showBlacklist = false" class="btn-secondary flex-1 justify-center">Batal</button>
+<button type="submit" class="btn-primary flex-1 justify-center {{ $customer->is_blacklisted ? '' : 'btn-blacklist' }}"><i data-lucide="{{ $customer->is_blacklisted ? 'user-check' : 'user-x' }}" class="w-4 h-4"></i> {{ $customer->is_blacklisted ? 'Hapus Blacklist' : 'Blacklist Customer' }}</button>
+</div>
+</form>
+</div>
+</div>
+@endsection
+
+<form id="deleteCustomerForm" method="POST" action="{{ route('customers.destroy', $customer) }}" class="hidden">@csrf @method('DELETE')</form>
+
+@push('scripts')
+<script>
+function confirmForceDelete(formId, label) {
+    Swal.fire({
+        title: 'Hapus Permanen',
+        html: 'Apakah Anda yakin ingin menghapus permanen <strong>' + label + '</strong>?<br><br>Data yang dihapus <span class="text-red-600 font-bold">TIDAK DAPAT</span> dipulihkan kembali.',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus Permanen',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'rounded-xl px-5 py-2.5 text-sm font-semibold',
+            cancelButton: 'rounded-xl px-5 py-2.5 text-sm font-semibold',
+            popup: 'rounded-2xl'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+            });
+            document.getElementById(formId).submit();
+        }
+    });
+}
+</script>
+@endpush

@@ -1,0 +1,50 @@
+:root { --customers-prefix-width: 3.25rem; }
+
+.input-group-phone {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    background: #fff;
+    min-height: 50px;
+    overflow: hidden;
+    transition: border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+}
+
+.input-group-phone:focus-within {
+    border-color: rgba(37, 99, 235, 0.85);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+}
+
+.input-group-phone__prefix {
+    flex: 0 0 var(--customers-prefix-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(37, 99, 235, 0.08);
+    border-right: 1px solid var(--border);
+    height: 100%;
+}
+
+.input-group-phone__input {
+    flex: 1 1 auto;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 0.875rem;
+    height: 100%;
+    padding: 0 1rem 0 0.5rem;
+    min-width: 0;
+    color: var(--text);
+}
+
+.input-group-phone__input::placeholder {
+    color: #94a3b8;
+}
+
+.customers-search-input { padding-left: 2.5rem !important; }
+.search-icon { width: 20px !important; height: 20px !important; }
+.customers-search-input:focus + .search-icon { color: var(--primary); }
+
