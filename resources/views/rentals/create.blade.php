@@ -11,7 +11,7 @@
             Kembali ke Penyewaan
         </a>
     </div>
-    <form method="POST" action="{{ route('rentals.store') }}" enctype="multipart/form-data" x-data="rentalForm()" @submit="submitting = true">
+        <form method="POST" action="{{ route('rentals.store') }}" enctype="multipart/form-data" x-data="rentalForm()" @submit.prevent="submitForm()" novalidate>
         @csrf
 
         <!-- Customer & Rental Info -->
@@ -27,12 +27,13 @@
                         <input type="text"
                             x-model="customerSearch"
                             @focus="customerDropdownOpen = true"
-                            @input="selectedCustomer = null"
+                            @input="selectedCustomer = null; customerError = false"
+                            :class="{ 'is-error': customerError }"
                             class="form-input"
                             placeholder="Ketik nama atau nomor HP pelanggan..."
                             autocomplete="off"
                         >
-                        <input type="hidden" name="customer_id" :value="selectedCustomer?.id ?? ''" required>
+                        <input type="hidden" name="customer_id" :value="selectedCustomer?.id ?? ''">
 
                         <div x-show="customerDropdownOpen && customerSearch"
                              x-transition
@@ -58,6 +59,7 @@
                         </div>
                     </div>
                     @error('customer_id')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    <p x-show="customerError" x-transition class="text-xs text-red-400 mt-1">Pelanggan wajib dipilih</p>
                 </div>
 
                 <!-- Modal Tambah Pelanggan Baru -->
@@ -73,7 +75,8 @@
                         <form @submit.prevent="addCustomer()" class="p-6 space-y-4">
                             <div>
                                 <label class="block text-sm font-medium mb-1.5 text-slate-700">Nama Lengkap <span class="text-red-400">*</span></label>
-                                <input type="text" x-model="newCustomer.name" class="form-input" required>
+                                <input type="text" x-model="newCustomer.name" class="form-input" @input="newCustomerNameError = false">
+                                <p x-show="newCustomerNameError" x-transition class="text-xs text-red-400 mt-1">Nama lengkap wajib diisi</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-1.5 text-slate-700">Nomor Handphone <span class="text-red-400">*</span></label>
@@ -83,13 +86,13 @@
                                         x-model="newCustomer.phone"
                                         class="input-group-phone__input"
                                         placeholder="8123456789"
-                                        required
                                         inputmode="numeric"
-                                        @input="filterPhoneInput($event)"
+                                        @input="filterPhoneInput($event); newCustomerPhoneError = false"
                                         @keydown="preventNonNumeric($event)"
                                         autocomplete="tel"
                                     >
                                 </div>
+                                <p x-show="newCustomerPhoneError" x-transition class="text-xs text-red-400 mt-1">Nomor handphone wajib diisi</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-1.5 text-slate-700">Alamat</label>
@@ -115,14 +118,16 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Tanggal Sewa <span class="text-red-400">*</span></label>
-                    <input type="date" name="rental_date" value="{{ old('rental_date', now()->format('Y-m-d')) }}" class="form-input" required>
+                    <input type="date" name="rental_date" value="{{ old('rental_date', now()->format('Y-m-d')) }}" class="form-input" @input="rentalDateError = false">
                     @error('rental_date')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    <p x-show="rentalDateError" x-transition class="text-xs text-red-400 mt-1">Tanggal sewa wajib diisi</p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Durasi (Hari) <span class="text-red-400">*</span></label>
-                    <input type="number" name="duration_days" value="{{ old('duration_days', 1) }}" min="1" class="form-input" required>
+                    <input type="number" name="duration_days" value="{{ old('duration_days', 1) }}" min="1" class="form-input" @input="durationDaysError = false">
                     @error('duration_days')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    <p x-show="durationDaysError" x-transition class="text-xs text-red-400 mt-1">Durasi hari wajib diisi</p>
                 </div>
         </div>
 
@@ -135,13 +140,15 @@
             <div id="products-container" class="space-y-3">
                 <template x-for="(item, index) in items" :key="index">
                     <div class="flex gap-3 items-center flex-wrap">
-                        <select x-model="item.product_id" :name="`items[${index}][product_id]`" class="form-input flex-1" required>
+                        <select x-model="item.product_id" :name="`items[${index}][product_id]`" class="form-input flex-1" :class="{ 'is-error': itemsErrors[index]?.product_id || itemsErrors[index]?.stock_exceeded }" @change="onProductChange(index)">
                             <option value="">Pilih Produk</option>
                             @foreach ($products as $product)
-                                <option value="{{ $product->id }}" data-price="{{ $product->rental_price }}">{{ $product->name }} (Stok: {{ $product->stock_available }}) - Rp {{ number_format($product->rental_price, 0, ',', '.') }}/hari</option>
+                                <option value="{{ $product->id }}" data-price="{{ $product->rental_price }}" data-deposit-price="{{ $product->deposit_price }}" data-stock="{{ $product->stock_available }}">{{ $product->name }} (Stok: {{ $product->stock_available }}) - Rp {{ number_format($product->rental_price, 0, ',', '.') }}/hari</option>
                             @endforeach
                         </select>
-                        <select x-model="item.product_size" :name="`items[${index}][product_size]`" class="form-input w-32" required>
+                        <p x-show="itemsErrors[index]?.product_id" x-transition class="text-xs text-red-400 mt-1">Pilih produk</p>
+                        <p x-show="itemsErrors[index]?.stock_exceeded" x-transition class="text-xs text-red-400 mt-1" x-text="itemsErrors[index]?.stock_message || 'Qty melebihi stok tersedia'"></p>
+                        <select x-model="item.product_size" :name="`items[${index}][product_size]`" class="form-input w-32" :class="{ 'is-error': itemsErrors[index]?.product_size }" @change="itemsErrors[index].product_size = false">
                             <option value="">Ukuran</option>
                             <option value="XS">XS</option>
                             <option value="S">S</option>
@@ -152,13 +159,16 @@
                             <option value="3XL">3XL</option>
                             <option value="4XL">4XL</option>
                         </select>
-                        <input type="number" x-model="item.quantity" :name="`items[${index}][quantity]`" value="1" min="1" class="form-input w-24" required placeholder="Qty">
+                        <p x-show="itemsErrors[index]?.product_size" x-transition class="text-xs text-red-400 mt-1">Pilih ukuran</p>
+                        <input type="number" x-model="item.quantity" :name="`items[${index}][quantity]`" value="1" min="1" class="form-input w-24" :class="{ 'is-error': itemsErrors[index]?.quantity || itemsErrors[index]?.stock_exceeded }" @input="onQtyInput(index)">
+                        <p x-show="itemsErrors[index]?.quantity" x-transition class="text-xs text-red-400 mt-1">Jumlah minimal 1</p>
                         <button type="button" x-show="items.length > 1" @click="removeItem(index)" class="btn-danger px-3 py-2">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
                 </template>
             </div>
+            <p x-show="productsError" x-transition class="text-xs text-red-400 mt-2">Lengkapi semua data produk yang ditambahkan</p>
             <button type="button" @click="addItem()" class="btn-secondary mt-3">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 Tambah Produk
@@ -193,25 +203,38 @@
             <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Metode Pembayaran <span class="text-red-400">*</span></label>
-                    <select name="payment_method" class="form-input" required>
+                    <select name="payment_method" class="form-input" @change="paymentMethodError = false" x-model="paymentMethod">
                         <option value="">Pilih Metode</option>
                         <option value="cash" {{ old('payment_method') === 'cash' ? 'selected' : '' }}>Cash</option>
                         <option value="qris" {{ old('payment_method') === 'qris' ? 'selected' : '' }}>QRIS</option>
                         <option value="transfer" {{ old('payment_method') === 'transfer' ? 'selected' : '' }}>Transfer</option>
                     </select>
                     @error('payment_method')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    <p x-show="paymentMethodError" x-transition class="text-xs text-red-400 mt-1">Metode pembayaran wajib dipilih</p>
+                    <div x-show="paymentMethod === 'qris'" x-transition class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 text-center">
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Scan QR code di bawah untuk membayar via QRIS</p>
+                        <img src="{{ asset('images/qris-payment.png') }}" alt="QRIS Payment" class="mx-auto h-48 w-48 rounded-xl border border-slate-100 object-contain">
+                    </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Jenis Jaminan <span class="text-red-400">*</span></label>
-                    <select name="guarantee_type" class="form-input" required>
+                    <select name="guarantee_type" class="form-input" @change="guaranteeTypeError = false" x-model="guaranteeType">
                         <option value="">Pilih Jenis Jaminan</option>
                         <option value="ktp" {{ old('guarantee_type') === 'ktp' ? 'selected' : '' }}>KTP</option>
                         <option value="sim" {{ old('guarantee_type') === 'sim' ? 'selected' : '' }}>SIM</option>
-                        <option value="deposit" hidden {{ old('guarantee_type') === 'deposit' ? 'selected' : '' }}>Deposit Uang</option>
-                        <option value="custom" hidden {{ old('guarantee_type') === 'custom' ? 'selected' : '' }}>Jaminan Custom</option>
+                        <option value="deposit" {{ old('guarantee_type') === 'deposit' ? 'selected' : '' }}>Deposit Uang</option>
+                        <option value="custom" {{ old('guarantee_type') === 'custom' ? 'selected' : '' }}>Jaminan Custom</option>
                     </select>
                     @error('guarantee_type')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    <p x-show="guaranteeTypeError" x-transition class="text-xs text-red-400 mt-1">Jenis jaminan wajib dipilih</p>
+
+                    <div x-show="guaranteeType === 'deposit'" x-transition class="mt-3">
+                        <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Jumlah Deposit <span class="text-red-400">*</span></label>
+                        <input type="text" name="guarantee_deposit" x-model="guaranteeDeposit" @input="onDepositInput()" placeholder="Masukkan jumlah deposit" class="form-input">
+                        <p class="text-xs text-slate-500 mt-1">Saran minimum: Rp <span x-text="suggestedDeposit"></span></p>
+                        <p x-show="guaranteeDepositError" x-transition class="text-xs text-red-400 mt-1">Jumlah deposit wajib diisi</p>
+                    </div>
 
                     <!-- Hidden field for backward compatibility -->
                     <input type="hidden" name="guarantee_id_number" value="{{ old('guarantee_id_number', '') }}">
@@ -259,6 +282,7 @@
                         <input type="file" x-ref="fileInput" name="guarantee_id_photo" accept="image/jpeg,image/png" @change="handleFileSelect($event)" class="hidden">
                     </div>
                     @error('guarantee_id_photo')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    <p x-show="photoError" x-transition class="text-xs text-red-400 mt-1">Foto KTP/SIM wajib diupload</p>
 
                     <!-- Quality Check Status -->
                     <div x-show="photoState.checked" class="mt-3 space-y-1.5">
@@ -336,14 +360,30 @@
     $oldCustomer = $oldCustomerId ? $customers->firstWhere('id', $oldCustomerId) : null;
 @endphp
 <script>
-function rentalForm() {
-    return {
-        submitting: false,
-        items: [
-            { product_id: '', product_size: '', quantity: 1 }
-        ],
-        dragOver: false,
-        photoState: {
+    function rentalForm() {
+        return {
+            submitting: false,
+            customerError: false,
+            rentalDateError: false,
+            durationDaysError: false,
+            paymentMethodError: false,
+            paymentMethod: '{{ old('payment_method', '') }}',
+            guaranteeTypeError: false,
+            guaranteeType: '{{ old('guarantee_type', '') }}',
+            guaranteeDeposit: '{{ old('guarantee_deposit', '') }}',
+            depositManualEdited: false,
+            guaranteeDepositError: false,
+            photoError: false,
+            productsError: false,
+            newCustomerNameError: false,
+            newCustomerPhoneError: false,
+            itemsErrors: [],
+            items: [
+                { product_id: '', product_size: '', quantity: 1 }
+            ],
+            dragOver: false,
+            stockExceeded: false,
+            photoState: {
             file: null,
             previewUrl: null,
             checked: false,
@@ -370,9 +410,71 @@ function rentalForm() {
             );
         },
 
+        get suggestedDeposit() {
+            if (!this.items) return 0;
+            const productIds = this.items.map(i => i.product_id).filter(Boolean);
+            if (!productIds.length) return 0;
+            const productOptions = Array.from(document.querySelectorAll('#products-container select[name^="items"][name$="[product_id]"] option'));
+            let total = 0;
+            productOptions.forEach(opt => {
+                if (productIds.includes(opt.value)) {
+                    total += parseFloat(opt.dataset.depositPrice || 0);
+                }
+            });
+            return total;
+        },
+
+        onDepositInput() {
+            this.depositManualEdited = true;
+            this.guaranteeDepositError = false;
+        },
+
+        getStockForProduct(productId) {
+            if (!productId) return 0;
+            const option = Array.from(document.querySelectorAll('#products-container select[name^="items"][name$="[product_id]"] option'))
+                .find(opt => opt.value === String(productId));
+            return option ? parseInt(option.dataset.stock || '0', 10) : 0;
+        },
+
+        onProductChange(index) {
+            const item = this.items[index];
+            const stock = this.getStockForProduct(item.product_id);
+
+            if (item.product_id && stock > 0 && item.quantity > stock) {
+                item.quantity = stock;
+            }
+
+            if (!this.itemsErrors[index]) {
+                this.itemsErrors[index] = {};
+            }
+            this.itemsErrors[index].product_id = false;
+            this.itemsErrors[index].stock_exceeded = false;
+            this.itemsErrors[index].stock_message = '';
+        },
+
+        onQtyInput(index) {
+            const item = this.items[index];
+            const stock = this.getStockForProduct(item.product_id);
+
+            if (!this.itemsErrors[index]) {
+                this.itemsErrors[index] = {};
+            }
+
+            if (item.product_id && stock > 0 && item.quantity > stock) {
+                this.itemsErrors[index].stock_exceeded = true;
+                this.itemsErrors[index].stock_message = `Qty melebihi stok tersedia (maks: ${stock})`;
+            } else {
+                this.itemsErrors[index].stock_exceeded = false;
+                this.itemsErrors[index].stock_message = '';
+            }
+
+            this.itemsErrors[index].quantity = !item.quantity || item.quantity < 1;
+        },
+
         selectCustomer(customer) {
             this.selectedCustomer = customer;
             this.customerSearch = customer.name + ' - ' + customer.phone;
+            this.customerError = false;
             this.customerDropdownOpen = false;
         },
 
@@ -381,6 +483,8 @@ function rentalForm() {
             this.newCustomer.phone = '';
             this.newCustomer.address = '';
             this.newCustomer.notes = '';
+            this.newCustomerNameError = false;
+            this.newCustomerPhoneError = false;
             this.showAddModal = true;
         },
 
@@ -388,8 +492,119 @@ function rentalForm() {
             this.showAddModal = false;
         },
 
+        submitForm() {
+            this.customerError = false;
+            this.rentalDateError = false;
+            this.durationDaysError = false;
+            this.paymentMethodError = false;
+            this.guaranteeTypeError = false;
+            this.photoError = false;
+            this.productsError = false;
+            this.itemsErrors = this.items.map(() => ({ product_id: false, product_size: false, quantity: false }));
+
+            let hasError = false;
+
+            if (!this.selectedCustomer) {
+                this.customerError = true;
+                hasError = true;
+            }
+
+            const rentalDateInput = document.querySelector('input[name="rental_date"]');
+            if (!rentalDateInput || !rentalDateInput.value) {
+                this.rentalDateError = true;
+                hasError = true;
+            }
+
+            const durationInput = document.querySelector('input[name="duration_days"]');
+            if (!durationInput || !durationInput.value || parseInt(durationInput.value) < 1) {
+                this.durationDaysError = true;
+                hasError = true;
+            }
+
+            let itemsInvalid = false;
+            this.itemsErrors = this.items.map((item) => {
+                const errors = {
+                    product_id: !item.product_id,
+                    product_size: !item.product_size,
+                    quantity: !item.quantity || item.quantity < 1,
+                    stock_exceeded: false,
+                    stock_message: ''
+                };
+
+                if (item.product_id) {
+                    const stock = this.getStockForProduct(item.product_id);
+                    if (stock > 0 && item.quantity > stock) {
+                        errors.stock_exceeded = true;
+                        errors.stock_message = `Qty melebihi stok tersedia (maks: ${stock})`;
+                        itemsInvalid = true;
+                    }
+                }
+
+                if (errors.product_id || errors.product_size || errors.quantity) {
+                    itemsInvalid = true;
+                }
+                return errors;
+            });
+            if (itemsInvalid) {
+                this.productsError = true;
+                hasError = true;
+            }
+
+            const paymentInput = document.querySelector('select[name="payment_method"]');
+            if (!paymentInput || !paymentInput.value) {
+                this.paymentMethodError = true;
+                hasError = true;
+            }
+
+            const guaranteeInput = document.querySelector('select[name="guarantee_type"]');
+            if (!guaranteeInput || !guaranteeInput.value) {
+                this.guaranteeTypeError = true;
+                hasError = true;
+            }
+
+            if (this.guaranteeType === 'deposit') {
+                const depositInput = document.querySelector('input[name="guarantee_deposit"]');
+                if (!depositInput || !depositInput.value || parseFloat(depositInput.value.replace(/[^0-9]/g, '')) <= 0) {
+                    this.guaranteeDepositError = true;
+                    hasError = true;
+                }
+            }
+
+            if (!this.photoState.file) {
+                this.photoError = true;
+                hasError = true;
+            }
+
+            if (hasError) {
+                this.$nextTick(() => {
+                    const firstErrorInput = document.querySelector('input.is-error, select.is-error, .input-group-phone__input.is-error');
+                    if (firstErrorInput) {
+                        firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                return;
+            }
+
+            this.submitting = true;
+            this.$el.submit();
+        },
+
         async addCustomer() {
             this.addingCustomer = true;
+            this.newCustomerNameError = false;
+            this.newCustomerPhoneError = false;
+
+            if (!this.newCustomer.name.trim()) {
+                this.newCustomerNameError = true;
+                this.addingCustomer = false;
+                return;
+            }
+            if (!this.newCustomer.phone.trim()) {
+                this.newCustomerPhoneError = true;
+                this.addingCustomer = false;
+                return;
+            }
+
             try {
                 const response = await fetch('{{ route('customers.store') }}', {
                     method: 'POST',
@@ -565,6 +780,26 @@ function rentalForm() {
                 this.photoState.verified = this.photoState.resolutionOk && this.photoState.blurOk && this.photoState.brightnessOk;
             };
             img.src = this.photoState.previewUrl;
+        },
+
+        watch: {
+            items: {
+                handler() {
+                    if (this.guaranteeType === 'deposit' && !this.depositManualEdited) {
+                        this.guaranteeDeposit = this.suggestedDeposit;
+                    }
+                },
+                deep: true
+            },
+            guaranteeType(newVal) {
+                if (newVal === 'deposit') {
+                    this.guaranteeDeposit = this.suggestedDeposit;
+                    this.depositManualEdited = false;
+                } else {
+                    this.guaranteeDeposit = '';
+                    this.depositManualEdited = false;
+                }
+            }
         }
     }
 }

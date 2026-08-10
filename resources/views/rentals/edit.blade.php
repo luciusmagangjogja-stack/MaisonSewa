@@ -11,7 +11,7 @@
             Kembali ke Detail Penyewaan
         </a>
     </div>
-    <form method="POST" action="{{ route('rentals.update', $rental) }}" enctype="multipart/form-data" x-data="rentalForm({{ $rental->id }})" @submit="submitting = true">
+    <form method="POST" action="{{ route('rentals.update', $rental) }}" enctype="multipart/form-data" x-data="rentalForm({{ $rental->id }})" @submit.prevent="submitForm()">
         @csrf
         @method('PATCH')
 
@@ -138,7 +138,7 @@
             <div id="products-container" class="space-y-3">
                 <template x-for="(item, index) in items" :key="index">
                     <div class="flex gap-3 items-center flex-wrap">
-                        <select x-model="item.product_id" :name="`items[${index}][product_id]`" class="form-input flex-1" required>
+                        <select x-model="item.product_id" :name="`items[${index}][product_id]`" class="form-input flex-1" :class="{ 'is-error': itemsErrors[index]?.product_id || itemsErrors[index]?.stock_exceeded }" @change="onProductChange(index)">
                             <option value="">Pilih Produk</option>
                             @foreach ($products as $product)
                                 @php
@@ -147,6 +147,7 @@
                                 <option
                                     value="{{ $product->id }}"
                                     data-price="{{ $product->rental_price }}"
+                                    data-stock="{{ $product->stock_available }}"
                                     :selected="String(item.product_id) === String({{ $product->id }})"
                                     {{ $isOut ? 'disabled' : '' }}
                                 >
@@ -156,7 +157,7 @@
                             @endforeach
                         </select>
 
-                        <select x-model="item.product_size" :name="`items[${index}][product_size]`" class="form-input w-32" required>
+                        <select x-model="item.product_size" :name="`items[${index}][product_size]`" class="form-input w-32" :class="{ 'is-error': itemsErrors[index]?.product_size }" @change="itemsErrors[index].product_size = false">
                             <option value="">Ukuran</option>
                             <option value="XS">XS</option>
                             <option value="S">S</option>
@@ -168,7 +169,8 @@
                             <option value="4XL">4XL</option>
                         </select>
 
-                        <input type="number" x-model="item.quantity" :name="`items[${index}][quantity]`" value="1" min="1" class="form-input w-24" required placeholder="Qty">
+                        <input type="number" x-model="item.quantity" :name="`items[${index}][quantity]`" value="1" min="1" class="form-input w-24" :class="{ 'is-error': itemsErrors[index]?.quantity || itemsErrors[index]?.stock_exceeded }" @input="onQtyInput(index)">
+                        <p x-show="itemsErrors[index]?.stock_exceeded" x-transition class="text-xs text-red-400 mt-1" x-text="itemsErrors[index]?.stock_message || 'Qty melebihi stok tersedia'"></p>
 
                         <button type="button" x-show="items.length > 1" @click="removeItem(index)" class="btn-danger px-3 py-2">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -410,6 +412,7 @@ function rentalForm(rentalId) {
             { product_id: {{ $rentalItem->product_id ?? 'null' }}, product_size: '{{ $rentalItem->product_size }}', quantity: {{ (int)$rentalItem->quantity }} },
             @endforeach
         ],
+        itemsErrors: [],
         dragOver: false,
         photoState: {
             file: null,
@@ -429,6 +432,46 @@ function rentalForm(rentalId) {
         addingCustomer: false,
         newCustomer: { name: '', phone: '', address: '', notes: '' },
         customers: @json($customers->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'phone' => $c->phone])),
+
+        getStockForProduct(productId) {
+            if (!productId) return 0;
+            const option = Array.from(document.querySelectorAll('#products-container select[name^="items"][name$="[product_id]"] option'))
+                .find(opt => opt.value === String(productId));
+            return option ? parseInt(option.dataset.stock || '0', 10) : 0;
+        },
+
+        onProductChange(index) {
+            const item = this.items[index];
+            const stock = this.getStockForProduct(item.product_id);
+
+            if (item.product_id && stock > 0 && item.quantity > stock) {
+                item.quantity = stock;
+            }
+
+            if (!this.itemsErrors[index]) {
+                this.itemsErrors[index] = {};
+            }
+            this.itemsErrors[index].product_id = false;
+            this.itemsErrors[index].stock_exceeded = false;
+            this.itemsErrors[index].stock_message = '';
+        },
+
+        onQtyInput(index) {
+            const item = this.items[index];
+            const stock = this.getStockForProduct(item.product_id);
+
+            if (!this.itemsErrors[index]) {
+                this.itemsErrors[index] = {};
+            }
+
+            if (item.product_id && stock > 0 && item.quantity > stock) {
+                this.itemsErrors[index].stock_exceeded = true;
+                this.itemsErrors[index].stock_message = `Qty melebihi stok tersedia (maks: ${stock})`;
+            } else {
+                this.itemsErrors[index].stock_exceeded = false;
+                this.itemsErrors[index].stock_message = '';
+            }
+        },
 
         get filteredCustomers() {
             if (!this.customerSearch) return this.customers;
@@ -523,6 +566,42 @@ function rentalForm(rentalId) {
             if (this.items.length > 1) {
                 this.items.splice(index, 1);
             }
+        },
+
+        submitForm() {
+            this.itemsErrors = this.items.map((item) => {
+                const errors = {
+                    product_id: !item.product_id,
+                    product_size: !item.product_size,
+                    quantity: !item.quantity || item.quantity < 1,
+                    stock_exceeded: false,
+                    stock_message: ''
+                };
+
+                if (item.product_id) {
+                    const stock = this.getStockForProduct(item.product_id);
+                    if (stock > 0 && item.quantity > stock) {
+                        errors.stock_exceeded = true;
+                        errors.stock_message = `Qty melebihi stok tersedia (maks: ${stock})`;
+                    }
+                }
+
+                return errors;
+            });
+
+            const hasStockError = this.itemsErrors.some(err => err.stock_exceeded);
+            if (hasStockError) {
+                this.$nextTick(() => {
+                    const firstError = document.querySelector('.is-error');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                return;
+            }
+
+            this.submitting = true;
+            this.$el.submit();
         },
 
         handleDrop(event) {

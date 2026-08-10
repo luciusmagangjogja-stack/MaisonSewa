@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRentalRequest extends FormRequest
@@ -25,9 +26,44 @@ class StoreRentalRequest extends FormRequest
             'notes'                 => 'nullable|string',
             'payment_method'        => 'required|string|in:cash,qris,transfer',
             'guarantee_type'        => 'required|string|in:ktp,sim,deposit,custom',
+            'guarantee_deposit'     => 'nullable|numeric|min:0',
             'guarantee_id_number'   => 'nullable|string|max:50',
             'guarantee_notes'       => 'nullable|string|max:500',
             'guarantee_id_photo'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ];
+    }
+
+    protected function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $items = $this->input('items', []);
+
+            $aggregated = [];
+            foreach ($items as $item) {
+                $productId = (int) ($item['product_id'] ?? 0);
+                $quantity = (int) ($item['quantity'] ?? 0);
+                if ($productId <= 0 || $quantity <= 0) {
+                    continue;
+                }
+                $aggregated[$productId] = ($aggregated[$productId] ?? 0) + $quantity;
+            }
+
+            if (empty($aggregated)) {
+                return;
+            }
+
+            $productIds = array_keys($aggregated);
+            $products = Product::whereIn('id', $productIds)->get(['id', 'name', 'stock_available']);
+
+            foreach ($products as $product) {
+                $requested = $aggregated[$product->id] ?? 0;
+                if ($requested > (int) $product->stock_available) {
+                    $validator->errors()->add(
+                        'items',
+                        "Stok produk {$product->name} tidak mencukupi (tersedia: {$product->stock_available}, diminta: {$requested})."
+                    );
+                }
+            }
+        });
     }
 }
