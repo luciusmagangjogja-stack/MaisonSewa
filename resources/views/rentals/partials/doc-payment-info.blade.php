@@ -31,9 +31,18 @@
         <span class="payment-value">{{ $methodLabel }}</span>
     </div>
     <div class="payment-row">
-        <span class="payment-label">Status</span>
+        <span class="payment-label">Status Sewa</span>
         <span class="status-badge {{ $statusBadgeClass }}">{{ $statusLabel }}</span>
     </div>
+    @if($rental->fine_status === 'unpaid' || $rental->fine_status === 'partial')
+    <div class="payment-row">
+        <span class="payment-label">Status Denda</span>
+        <span class="status-badge status-partial">{{ match($rental->fine_status) { 'unpaid' => 'BELUM DIBAYAR', 'partial' => 'SEBAGIAN', default => strtoupper($rental->fine_status) } }}</span>
+        @if($rental->fine_amount > 0)
+        <span class="payment-value" style="color:#B91C1C; font-weight:700;">Rp {{ number_format($rental->fine_amount, 0, ',', '.') }}</span>
+        @endif
+    </div>
+    @endif
     @if(!empty($rental->payments) && $rental->payments->count() > 0)
         @php
             $latestPayment = $rental->payments->sortByDesc('paid_at')->first();

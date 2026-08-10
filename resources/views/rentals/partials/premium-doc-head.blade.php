@@ -21,8 +21,8 @@
             padding: 0;
             height: auto;
             font-family: Segoe UI, Tahoma, Arial, Helvetica, sans-serif;
-            font-size: 11px;
-            line-height: 1.5;
+            font-size: 9px;
+            line-height: 1.3;
             color: #111827;
             background: #ffffff;
         }
@@ -64,7 +64,7 @@
         }
 
         th, td {
-            padding: 8px 10px;
+            padding: 6px 8px;
             vertical-align: top;
         }
 
@@ -91,8 +91,8 @@
         /* Header */
         .header-section {
             border-bottom: 2px solid #E5E7EB;
-            padding-bottom: 12px;
-            margin-bottom: 14px;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .header-table td {
@@ -201,40 +201,40 @@
         .info-card {
             background: #ffffff;
             border: 1px solid #E5E7EB;
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
         }
 
         .info-card-title {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             color: #1E40AF;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
+            margin-bottom: 4px;
+            padding-bottom: 3px;
             border-bottom: 1px solid #E5E7EB;
         }
 
         .section-title {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: #64748B;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 6px;
+            letter-spacing: 0.06em;
+            margin-bottom: 3px;
         }
 
         .info-row {
-            padding: 4px 0;
+            padding: 1px 0;
         }
 
         .info-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #64748B;
             display: inline-block;
-            width: 100px;
+            width: 80px;
             vertical-align: middle;  
         }
 
@@ -248,35 +248,35 @@
         .payment-card {
             background: #ffffff;
             border: 1px solid #E5E7EB;
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
         }
 
         .payment-card-title {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             color: #1E40AF;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
+            margin-bottom: 4px;
+            padding-bottom: 3px;
             border-bottom: 1px solid #E5E7EB;
         }
 
         .payment-row {
-            padding: 4px 0;
+            padding: 2px 0;
         }
 
         .payment-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #64748B;
             display: inline-block;
-            width: 100px;
+            width: 90px;
         }
 
         .payment-value {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 600;
             color: #111827;
         }
@@ -380,25 +380,25 @@
         .summary-card {
             background: #ffffff;
             border: 1px solid #E5E7EB;
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
         }
 
         .summary-card-title {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             color: #1E40AF;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
+            margin-bottom: 4px;
+            padding-bottom: 3px;
             border-bottom: 1px solid #E5E7EB;
         }
 
         .summary-table td {
-            padding: 6px 0;
-            font-size: 11px;
+            padding: 3px 0;
+            font-size: 9px;
         }
 
         .summary-table .summary-label {
@@ -425,19 +425,19 @@
             background: #F8FAFC;
             border: 1px solid #E5E7EB;
             border-radius: 10px;
-            padding: 12px 14px;
-            margin-top: 14px;
-            font-size: 10px;
+            padding: 8px 10px;
+            margin-top: 10px;
+            font-size: 9px;
             color: #64748B;
-            line-height: 1.6;
+            line-height: 1.4;
         }
 
         /* Footer */
         .doc-footer {
             border-top: 1px solid #E5E7EB;
-            padding-top: 14px;
-            margin-top: 18px;
-            font-size: 10px;
+            padding-top: 10px;
+            margin-top: 12px;
+            font-size: 9px;
             color: #64748B;
             text-align: center;
             line-height: 1.6;
@@ -477,40 +477,10 @@
             .no-print { display: none !important; }
             .page { padding: 0 !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .header-section { break-inside: avoid; }
-            .info-card { break-inside: avoid; }
-            .items-table tr { break-inside: avoid; }
-            .summary-table { break-inside: avoid; }
-            .doc-footer { break-inside: avoid; }
-            .notes-box { break-inside: avoid; }
         }
 
         .mode-pdf .page {
             padding: 0;
-        }
-
-        .mode-pdf .header-section {
-            break-inside: avoid;
-        }
-
-        .mode-pdf .info-card {
-            break-inside: avoid;
-        }
-
-        .mode-pdf .items-table tr {
-            break-inside: avoid;
-        }
-
-        .mode-pdf .summary-table {
-            break-inside: avoid;
-        }
-
-        .mode-pdf .notes-box {
-            break-inside: avoid;
-        }
-
-        .mode-pdf .doc-footer {
-            break-inside: avoid;
         }
     </style>
 </head>

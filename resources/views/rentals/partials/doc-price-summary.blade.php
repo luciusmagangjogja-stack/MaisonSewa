@@ -33,32 +33,34 @@
             <td class="summary-value">Rp {{ number_format($deposit, 0, ',', '.') }}</td>
         </tr>
         @endif
-        @if($additionalCharges > 0)
-        <tr>
-            <td class="summary-label">Biaya Tambahan</td>
-            <td class="summary-value">Rp {{ number_format($additionalCharges, 0, ',', '.') }}</td>
-        </tr>
-        @endif
-        @if($lateFee > 0)
+        @if($lateFee > 0 && $damageFee > 0)
         <tr>
             <td class="summary-label">Denda Telat</td>
             <td class="summary-value" style="color:#B91C1C;">Rp {{ number_format($lateFee, 0, ',', '.') }}</td>
         </tr>
-        @endif
-        @if($damageFee > 0)
+        <tr>
+            <td class="summary-label">Biaya Kerusakan</td>
+            <td class="summary-value" style="color:#B91C1C;">Rp {{ number_format($damageFee, 0, ',', '.') }}</td>
+        </tr>
+        @elseif($lateFee > 0)
+        <tr>
+            <td class="summary-label">Denda Telat</td>
+            <td class="summary-value" style="color:#B91C1C;">Rp {{ number_format($lateFee, 0, ',', '.') }}</td>
+        </tr>
+        @elseif($damageFee > 0)
         <tr>
             <td class="summary-label">Biaya Kerusakan</td>
             <td class="summary-value" style="color:#B91C1C;">Rp {{ number_format($damageFee, 0, ',', '.') }}</td>
         </tr>
         @endif
         <tr style="border-top:1px solid #E5E7EB;">
-            <td class="summary-label" style="padding-top:10px; padding-bottom:10px; font-weight:700;">Grand Total</td>
-            <td class="summary-value" style="padding-top:10px; padding-bottom:10px; font-weight:800; color:#1E40AF; font-size:24px;">Rp {{ number_format($grandTotal, 0, ',', '.') }}</td>
+            <td class="summary-label" style="padding-top:6px; padding-bottom:6px; font-weight:700;">Grand Total</td>
+            <td class="summary-value" style="padding-top:6px; padding-bottom:6px; font-weight:800; color:#1E40AF; font-size:20px;">Rp {{ number_format($grandTotal, 0, ',', '.') }}</td>
         </tr>
         @if($totalPaid > 0)
         <tr style="border-top:1px solid #E5E7EB;">
-            <td class="summary-label" style="padding-top:8px; color:#15803D; font-weight:700;">Customer Paid</td>
-            <td class="summary-value" style="padding-top:8px; color:#15803D; font-weight:700;">Rp {{ number_format($totalPaid, 0, ',', '.') }}</td>
+            <td class="summary-label" style="padding-top:6px; color:#15803D; font-weight:700;">Customer Paid</td>
+            <td class="summary-value" style="padding-top:6px; color:#15803D; font-weight:700;">Rp {{ number_format($totalPaid, 0, ',', '.') }}</td>
         </tr>
         @if($change > 0)
         <tr>

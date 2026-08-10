@@ -9,7 +9,8 @@
     $paymentVariant = $paymentStatus === 'paid' ? 'paid' : ($paymentStatus === 'partial' ? 'partial' : 'pending');
 
     $deposit = $receipt['deposit'] ?? ($rental->items->sum(fn($i) => $i->product?->deposit_price ?? 0));
-    $lateFee = $receipt['denda'] ?? ($rental->late_fee ?? 0);
+    $lateFee = $receipt['late_fee'] ?? ($rental->late_fee ?? 0);
+    $damageFee = $receipt['damage_fee'] ?? ($rental->items->sum('damage_fee') ?? 0);
 @endphp
 
 @include('rentals.partials.doc-brand-header', [
@@ -36,13 +37,11 @@
             'createdBy'=>$rental->createdBy,
             'branch'=>$rental->branch,
         ])
-
-        @include('rentals.partials.doc-rental-info-summary', ['rental'=>$rental])
     </div>
 </div>
 
-<div style="margin-top: 14px;">
-    <div class="section-title" style="margin-bottom: 10px; padding-left:8px;">Rental Items</div>
+<div style="margin-top: 8px;">
+    <div class="section-title" style="padding-left:8px; margin-bottom:6px;">Rental Items</div>
     @include('rentals.partials.doc-item-list', ['items'=>$rental->items])
 </div>
 
@@ -51,9 +50,17 @@
     'discount' => $rental->discount ?? 0,
     'deposit' => $deposit ?? 0,
     'lateFee' => $lateFee ?? 0,
-    'damageFee' => 0,
+    'damageFee' => $damageFee ?? 0,
     'totalAmount' => $rental->total_amount ?? 0,
 ])
+@if($rental->fine_status === 'unpaid' || $rental->fine_status === 'partial')
+    <div style="margin-top:6px; padding:6px 10px; background:#FEF3C7; border-left:3px solid #F59E0B; border-radius:6px; font-size:10px;">
+        <span style="font-weight:700; color:#92400E;">STATUS DENDA: {{ match($rental->fine_status) { 'unpaid' => 'BELUM DIBAYAR', 'partial' => 'SEBAGIAN', default => strtoupper($rental->fine_status) } }}</span>
+        @if($rental->fine_amount > 0)
+            <span style="color:#92400E; margin-left:6px;">Rp {{ number_format($rental->fine_amount, 0, ',', '.') }}</span>
+        @endif
+    </div>
+@endif
 
 @include('rentals.partials.doc-notes', [
     'notes' => 'Receipt ini dibuat otomatis oleh sistem dan tidak memerlukan tanda tangan.',

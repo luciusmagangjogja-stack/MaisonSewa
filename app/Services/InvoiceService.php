@@ -73,6 +73,8 @@ class InvoiceService
         return [
             'receipt_number' => 'RCPT-' . $invoice->invoice_number,
             'deposit' => $deposit,
+            'late_fee' => $lateFee,
+            'damage_fee' => $damageFee,
             'denda' => $denda,
             'paid_amount' => $paidAmount,
             'total_amount' => (float) ($invoice->total_amount ?? 0),

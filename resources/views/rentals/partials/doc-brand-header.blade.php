@@ -32,7 +32,7 @@
     $qrBase64 = null;
     if (!empty($qrRoute)) {
         try {
-            $qrSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(200)->generate($qrRoute);
+            $qrSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(100)->generate($qrRoute);
             $qrBase64 = 'data:image/svg+xml;base64,' . base64_encode((string) $qrSvg);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('QR generation failed', [

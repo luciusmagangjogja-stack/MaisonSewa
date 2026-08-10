@@ -32,6 +32,8 @@ class RentalReceiptService
         return [
             'receipt_number' => $this->generateReceiptNumber($rental),
             'deposit' => $deposit,
+            'late_fee' => $lateFee,
+            'damage_fee' => $damageFee,
             'denda' => $denda,
             'paid_amount' => (float) ($rental->paid_amount ?? 0),
             'total_amount' => (float) ($rental->total_amount ?? 0),
