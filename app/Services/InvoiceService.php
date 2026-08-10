@@ -117,12 +117,18 @@ class InvoiceService
                 abort(422, 'Invoice tidak bisa dibatalkan karena status sudah selesai/dikembalikan.');
             }
 
-            // Restore stock for all items
+            // Restore stock for items that have not yet been returned.
+            // If an item was already returned, its stock was already restored
+            // during processReturn/updateStatus, so we must NOT restore it again here.
             foreach ($invoice->items as $item) {
+                if ($item->is_returned) {
+                    continue;
+                }
+
                 $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
                 if ($product) {
                     $product->stock_available = (int)$product->stock_available + (int)$item->quantity;
-                    $product->status = 'available';
+                    $product->status = ($product->status === 'rented' && $product->stock_available > 0) ? 'available' : $product->status;
                     $product->save();
                 }
             }
