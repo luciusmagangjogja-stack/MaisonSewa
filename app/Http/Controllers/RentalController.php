@@ -262,7 +262,7 @@ class RentalController extends Controller
                     $existingGuarantee->update($guaranteeData);
                 } else {
                     $guaranteeData["rental_id"] = $rental->id;
-                    $guaranteeData["deposit_amount"] = 0;
+                    $guaranteeData["deposit_amount"] = $guaranteeType === 'deposit' ? (float) ($data["guarantee_deposit"] ?? 0) : 0;
                     $guaranteeData["status"] = "held";
                     \App\Models\Guarantee::create($guaranteeData);
                 }
@@ -345,6 +345,7 @@ class RentalController extends Controller
         $this->rentalService->processPayment($rental, $request->validate([
             "amount" => "required|numeric|min:0",
             "method" => "required|string",
+            "payment_type" => ["nullable", "in:rental,late_fee,damage_fee,deposit"],
             "reference_number" => "nullable|string",
             "notes" => "nullable|string",
         ]));
@@ -465,14 +466,18 @@ class RentalController extends Controller
             }, $itemsPayload)
         ];
 
+        $this->rentalService->processReturn($rental, $processPayload);
         $rental->refresh();
-        $rental->load(["customer", "branch", "createdBy", "items.product.category", "activityLogs.user", "returnedBy"]);
+        $rental->load(["customer", "branch", "createdBy", "items.product.category", "activityLogs.user", "returnedBy", "payments"]);
 
         return response()->json(["success" => true, "rental" => [
             "id" => $rental->id,
             "invoice_number" => $rental->invoice_number,
             "rental_status" => $rental->rental_status,
             "payment_status" => $rental->payment_status,
+            "fine_status" => $rental->fine_status,
+            "fine_amount" => (float) $rental->fine_amount,
+            "fine_paid_amount" => (float) $rental->fine_paid_amount,
             "returned_at" => $rental->returned_at?->format("d M Y H:i"),
             "returned_by" => $rental->returnedBy?->name ?? optional($rental->createdBy)->name,
             "total_amount" => (float) $rental->total_amount,
@@ -482,7 +487,7 @@ class RentalController extends Controller
             "overdue_days" => (int) $rental->overdue_days,
             "subtotal" => $rental->subtotal ?? null,
             "discount" => $rental->discount ?? null,
-            "deposit" => $rental->deposit ?? null,
+            "deposit" => (float) ($rental->guarantees->where('type', 'deposit')->sum('deposit_amount') ?? 0),
             "return_due_date" => $rental->return_due_date?->format("d/m/Y"),
             "customer" => ["name" => optional($rental->customer)->name, "phone" => optional($rental->customer)->phone],
             "items" => $rental->items->map(function ($item) {
@@ -497,6 +502,7 @@ class RentalController extends Controller
                     "return_condition" => $item->return_condition,
                     "return_notes" => $item->return_notes,
                     "is_returned" => (bool) $item->is_returned,
+                    "damage_fee" => (float) ($item->damage_fee ?? 0),
                 ];
             }),
             "activity_logs" => $rental->activityLogs->take(10)->map(function ($log) {
@@ -539,6 +545,108 @@ class RentalController extends Controller
         return back()->with("success", "Void pembayaran berhasil diproses!");
     }
 
+    public function markRefundGiven(Request $request, Rental $rental)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $this->rentalService->recordRefund($rental, $validated['amount'], $validated['notes'] ?? null);
+        $rental->refresh();
+        $rental->load(['customer', 'branch', 'guarantees', 'payments', 'items.product', 'activityLogs.user']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kembalian berhasil dicatat!',
+            'rental' => [
+                'id' => $rental->id,
+                'invoice_number' => $rental->invoice_number,
+                'change_amount' => (float) $rental->change_amount,
+                'overpayment' => (float) $rental->change_amount,
+                'refund_given' => (float) abs($rental->payments()->where('type', 'refund')->sum('amount')),
+                'payment_status' => $rental->payment_status,
+                'fine_status' => $rental->fine_status,
+                'customer' => ['name' => optional($rental->customer)->name, 'phone' => optional($rental->customer)->phone],
+                'branch' => ['name' => optional($rental->branch)->name],
+                'guarantees' => $rental->guarantees->map(fn($g) => ['id' => $g->id, 'type' => $g->type, 'status' => $g->status]),
+                'payments' => $rental->payments->map(fn($p) => ['id' => $p->id, 'payment_number' => $p->payment_number, 'amount' => (float) $p->amount, 'method' => $p->method, 'paid_at' => $p->paid_at?->format('d/m/Y H:i')]),
+                'activity_logs' => $rental->activityLogs->take(10)->map(fn($log) => ['id' => $log->id, 'description' => $log->description, 'user' => optional($log->user)->name, 'created_at' => $log->created_at?->format('d M Y H:i')]),
+                'items' => $rental->items->map(fn($item) => ['id' => $item->id, 'product_name' => optional($item->product)->name, 'size' => $item->size, 'quantity' => $item->quantity, 'price' => (float) optional($item)->price]),
+            ],
+        ]);
+    }
+
+    public function handoverRental(Request $request, Rental $rental)
+    {
+        if ($rental->rental_status !== Rental::STATUS_WAITING) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rental ini sudah tidak dalam status Booking. Serah terima hanya dapat dilakukan untuk rental dengan status Booking.',
+            ], 422);
+        }
+
+        $oldValues = $rental->getAttributes();
+        $updateData = [
+            'rental_status' => Rental::STATUS_ACTIVE,
+        ];
+
+        DB::transaction(function () use ($rental, $oldValues, $updateData) {
+            $rental->update($updateData);
+
+            ActivityLog::create([
+                'user_id'     => auth()->id(),
+                'branch_id'   => auth()->user()->branch_id,
+                'action'      => 'handover_rental',
+                'model_type'  => Rental::class,
+                'model_id'    => $rental->id,
+                'description' => auth()->user()->name . ' melakukan serah-terima jas kepada customer',
+                'old_values'  => $oldValues,
+                'new_values'  => $updateData,
+                'ip_address'  => request()->ip(),
+                'user_agent'  => request()->userAgent(),
+            ]);
+        });
+
+        $rental->refresh();
+        $rental->load(['customer', 'branch', 'createdBy', 'items.product', 'activityLogs.user']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Serah terima berhasil! Rental sekarang aktif.',
+            'rental'  => [
+                'id'                     => $rental->id,
+                'invoice_number'         => $rental->invoice_number,
+                'rental_status'          => $rental->rental_status,
+                'payment_status'         => $rental->payment_status,
+                'returned_at'            => $rental->returned_at?->format('d M Y H:i'),
+                'returned_by'            => optional($rental->returnedBy)->name ?? optional($rental->createdBy)->name,
+                'total_amount'           => (float) $rental->total_amount,
+                'paid_amount'            => (float) $rental->paid_amount,
+                'remaining_amount'       => (float) $rental->remaining_amount,
+                'late_fee'               => (float) $rental->late_fee,
+                'overdue_days'           => (int) $rental->overdue_days,
+                'customer'               => ['name' => optional($rental->customer)->name, 'phone' => optional($rental->customer)->phone],
+                'branch'                 => ['name' => optional($rental->branch)->name],
+                'items'                  => $rental->items->map(fn($item) => [
+                    'id'           => $item->id,
+                    'product_name' => optional($item->product)->name,
+                    'size'         => $item->size,
+                    'quantity'     => $item->quantity,
+                    'price'        => (float) optional($item)->price,
+                ]),
+                'rental_date'            => optional($rental->rental_date)->format('d/m/Y'),
+                'return_due_date'        => optional($rental->return_due_date)->format('d/m/Y'),
+                'activity_logs'          => $rental->activityLogs->take(10)->map(fn($log) => [
+                    'id'          => $log->id,
+                    'description' => $log->description,
+                    'user'        => optional($log->user)->name,
+                    'created_at'  => $log->created_at?->format('d M Y H:i'),
+                ]),
+            ],
+        ]);
+    }
+
     public function updateStatus(Request $request, Rental $rental)
     {
         $validated = $request->validate([
@@ -576,11 +684,13 @@ class RentalController extends Controller
                     $updateData["overdue_days"] = null;
                     $updateData["late_fee"] = 0;
 
-                    foreach ($rental->items as $item) {
-                        $product = Product::whereKey($item->product_id)->lockForUpdate()->firstOrFail();
-                        $newStock = $product->stock_available - $item->quantity;
-                        $product->update(["stock_available" => $newStock, "status" => $newStock <= 0 ? "rented" : $product->status]);
-                        $item->update(["is_returned" => false]);
+                    if ($rental->rental_status === 'returned') {
+                        foreach ($rental->items as $item) {
+                            $product = Product::whereKey($item->product_id)->lockForUpdate()->firstOrFail();
+                            $newStock = $product->stock_available - $item->quantity;
+                            $product->update(["stock_available" => $newStock, "status" => $newStock <= 0 ? "rented" : $product->status]);
+                            $item->update(["is_returned" => false]);
+                        }
                     }
                 }
             }

@@ -12,6 +12,7 @@
     $grandTotal = max($totalAmount, 0);
     $totalPaid = max($paidAmount, 0);
     $change = max($changeAmount, 0);
+    $guaranteeType = $guaranteeType ?? null;
 @endphp
 
 <div class="summary-card">
@@ -27,10 +28,25 @@
             <td class="summary-value" style="color:#B91C1C;">- Rp {{ number_format($discount, 0, ',', '.') }}</td>
         </tr>
         @endif
-        @if($deposit > 0)
+        @if($guaranteeType === 'deposit' && $deposit > 0)
         <tr>
             <td class="summary-label">Deposit Dibayar</td>
             <td class="summary-value">Rp {{ number_format($deposit, 0, ',', '.') }}</td>
+        </tr>
+        @elseif($guaranteeType === 'ktp')
+        <tr>
+            <td class="summary-label">Jaminan</td>
+            <td class="summary-value">KTP</td>
+        </tr>
+        @elseif($guaranteeType === 'sim')
+        <tr>
+            <td class="summary-label">Jaminan</td>
+            <td class="summary-value">SIM</td>
+        </tr>
+        @elseif($guaranteeType === 'custom')
+        <tr>
+            <td class="summary-label">Jaminan</td>
+            <td class="summary-value">Custom</td>
         </tr>
         @endif
         @if($lateFee > 0 && $damageFee > 0)
@@ -72,6 +88,12 @@
         <tr>
             <td class="summary-label" style="color:#B91C1C; font-weight:700;">Remaining Balance</td>
             <td class="summary-value" style="color:#B91C1C; font-weight:700;">Rp {{ number_format($remainingBalance, 0, ',', '.') }}</td>
+        </tr>
+        @endif
+        @if($changeAmount > 0)
+        <tr style="border-top:1px solid #E5E7EB;">
+            <td class="summary-label" style="padding-top:6px; color:#D97706; font-weight:700;">Kembalian</td>
+            <td class="summary-value" style="padding-top:6px; color:#D97706; font-weight:700;">Rp {{ number_format($changeAmount, 0, ',', '.') }}</td>
         </tr>
         @endif
         @endif

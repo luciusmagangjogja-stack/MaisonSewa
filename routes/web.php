@@ -103,9 +103,11 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
         Route::patch('/{rental}/payments/{payment}', [RentalController::class, 'paymentUpdate'])->name('payment.update');
         Route::delete('/{rental}/payments/{payment}', [RentalController::class, 'paymentDestroy'])->name('payment.destroy');
         Route::post('/{rental}/payments/{payment}/refund', [RentalController::class, 'paymentRefund'])->name('payment.refund');
+        Route::post('/{rental}/mark-refund-given', [RentalController::class, 'markRefundGiven'])->name('mark-refund-given');
         Route::post('/{rental}/payments/{payment}/void', [RentalController::class, 'paymentVoid'])->name('payment.void');
         Route::post('/{rental}/return', [RentalController::class, 'processReturn'])->name('return');
         Route::patch('/{rental}/cancel-return', [RentalController::class, 'cancelReturn'])->name('cancel-return');
+        Route::patch('/{rental}/handover', [RentalController::class, 'handoverRental'])->name('handover');
         Route::patch('/{rental}/update-status', [RentalController::class, 'updateStatus'])->name('update-status');
         Route::patch('/{rental}/confirm-return-ajax', [RentalController::class, 'confirmReturnAjax'])->name('confirm-return-ajax');
         Route::get('/{rental}/invoice', [RentalController::class, 'invoice'])->name('invoice');

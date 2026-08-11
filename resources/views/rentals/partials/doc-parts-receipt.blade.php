@@ -8,7 +8,7 @@
     $paymentLabel = $paymentStatus === 'paid' ? 'Lunas' : ($paymentStatus === 'partial' ? 'Sebagian' : 'Belum Bayar');
     $paymentVariant = $paymentStatus === 'paid' ? 'paid' : ($paymentStatus === 'partial' ? 'partial' : 'pending');
 
-    $deposit = $receipt['deposit'] ?? ($rental->items->sum(fn($i) => $i->product?->deposit_price ?? 0));
+    $deposit = $receipt['deposit'] ?? $rental->guarantees->where('type', 'deposit')->sum('deposit_amount');
     $lateFee = $receipt['late_fee'] ?? ($rental->late_fee ?? 0);
     $damageFee = $receipt['damage_fee'] ?? ($rental->items->sum('damage_fee') ?? 0);
 @endphp
@@ -52,6 +52,10 @@
     'lateFee' => $lateFee ?? 0,
     'damageFee' => $damageFee ?? 0,
     'totalAmount' => $rental->total_amount ?? 0,
+    'paidAmount' => $rental->paid_amount ?? 0,
+    'changeAmount' => $rental->change_amount ?? 0,
+    'remainingBalance' => max(0, ($rental->total_amount ?? 0) - ($rental->paid_amount ?? 0)),
+    'guaranteeType' => optional($rental->guarantees->first())->type,
 ])
 @if($rental->fine_status === 'unpaid' || $rental->fine_status === 'partial')
     <div style="margin-top:6px; padding:6px 10px; background:#FEF3C7; border-left:3px solid #F59E0B; border-radius:6px; font-size:10px;">

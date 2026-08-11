@@ -29,6 +29,9 @@
                 <div class="flex flex-wrap gap-2">
                     <span class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold" :class="badgeClass(rental.rental_status, 'rental')" x-text="statusBadgeText(rental.rental_status, 'rental')"></span>
                     <span class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold" :class="badgeClass(rental.payment_status, 'payment')" x-text="statusBadgeText(rental.payment_status, 'payment')"></span>
+                    <template x-if="rental.fine_status === 'unpaid' || rental.fine_status === 'partial'">
+                        <span class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold bg-amber-100 text-amber-700">Ada Denda Belum Dibayar</span>
+                    </template>
                 </div>
             </div>
 
@@ -43,6 +46,12 @@
                     Edit
                 </a>
                 @endif
+                <template x-if="rental.rental_status === 'waiting'">
+                    <button type="button" @click="openHandoverModal()" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        Mulai Sewa / Serah Terima
+                    </button>
+                </template>
                 <a href="{{ route('rentals.invoice', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Invoice</a>
                 <a href="{{ route('rentals.receipt.show', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Receipt</a>
                 <a href="{{ route('rentals.thermal', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Cetak Thermal</a>
@@ -150,6 +159,18 @@
                             <p class="mt-2 text-sm font-semibold text-slate-900 break-all" x-text="rental.invoice_number"></p>
                         </div>
                     </div>
+                </div>
+
+                <div x-show="rental.notes" x-transition class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
+                    <div class="mb-4 flex items-center gap-2">
+                        <div class="rounded-xl bg-blue-50 p-2 text-blue-600">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-lg font-bold text-slate-900">Catatan</h2>
+                    </div>
+                    <p class="text-sm text-slate-700 whitespace-pre-wrap" x-text="rental.notes"></p>
                 </div>
 
                 <div class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
@@ -423,24 +444,62 @@
                             <span class="font-semibold text-slate-900" x-text="fmt(rental.discount)"></span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
-                            <span class="text-slate-500">Denda</span>
-                            <span class="font-semibold" :class="displayFine > 0 ? 'text-red-600' : 'text-slate-900'" x-text="fmt(displayFine)"></span>
+                            <span class="text-slate-500">Sewa (tagihan)</span>
+                            <span class="font-semibold text-slate-900" x-text="fmt(rental.total_amount)"></span>
                         </div>
+                        <div class="flex items-center justify-between text-sm" x-show="rental.fine_amount > 0">
+                            <span class="text-slate-500">Denda</span>
+                            <span class="font-semibold text-red-600" x-text="fmt(rental.fine_amount)"></span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm" x-show="rental.total_amount > 0">
+                            <span class="text-slate-500">Status Sewa</span>
+                            <span class="font-semibold" :class="paymentStatusClass(rental.payment_status)" x-text="paymentStatusLabel(rental.payment_status)"></span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm" x-show="rental.fine_amount > 0">
+                            <span class="text-slate-500">Status Denda</span>
+                            <span class="font-semibold" :class="fineStatusClass(rental.fine_status)" x-text="fineStatusLabel(rental.fine_status)"></span>
+                        </div>
+                        <template x-if="rental.overpayment > 0">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-500">Kembalian</span>
+                                <span class="font-semibold" :class="rental.refund_given > 0 ? 'text-green-600' : 'text-amber-600'" x-text="rental.refund_given > 0 ? 'Kembalian sudah diberikan: ' + fmt(rental.refund_given) : 'Kembalian harus diberikan: ' + fmt(rental.overpayment)"></span>
+                            </div>
+                        </template>
                         <div class="border-t border-slate-200 pt-4">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm font-semibold uppercase tracking-wide text-slate-500">Total</span>
+                                <span class="text-sm font-semibold uppercase tracking-wide text-slate-500">Total Tagihan</span>
                                 <span class="text-3xl font-extrabold text-blue-700" x-text="fmt(displayGrandTotal)"></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                @if ($rental->rental_status != 'returned' && $rental->rental_status != 'cancelled')
+                <template x-if="rental.overpayment > 0 && rental.refund_given === 0">
+                    <div class="rounded-[20px] border border-amber-200 bg-amber-50 p-6 shadow-sm">
+                        <div class="mb-4 flex items-center gap-2">
+                            <div class="rounded-xl bg-amber-100 p-2 text-amber-600">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-lg font-bold text-amber-700">Kembalian Pelanggan</h2>
+                        </div>
+                        <p class="text-sm text-amber-700 mb-4">Ada kelebihan pembayaran sebesar <span class="font-bold" x-text="fmt(rental.overpayment)"></span>. Jangan lupa memberikan kembalian kepada pelanggan.</p>
+                        <button type="button" @click="openRefundModal()" class="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-amber-700">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Tandai Kembalian Sudah Diberikan
+                        </button>
+                    </div>
+                </template>
+
+                @if ($rental->rental_status != 'cancelled' && ($rental->payment_status !== 'paid' || ($rental->fine_status !== 'paid' && $rental->fine_status !== 'none')))
                     <div class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
                         <div class="mb-4 flex items-center gap-2">
                             <div class="rounded-xl bg-blue-50 p-2 text-blue-600">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2v6a2 2v6h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2v6a2 2v6"></path>
                                 </svg>
                             </div>
                             <h2 class="text-lg font-bold text-slate-900">Input Pembayaran</h2>
@@ -449,6 +508,15 @@
                         <form method="POST" action="{{ route('rentals.payment', $rental) }}" class="space-y-3" x-on:submit="preparePaymentSubmit($event)">
                             @csrf
                             <div>
+                                <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tipe Pembayaran</label>
+                                <select name="payment_type" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                    <option value="rental">Sewa</option>
+                                    <option value="late_fee">Denda Telat</option>
+                                    <option value="damage_fee">Denda Kerusakan</option>
+                                    <option value="deposit">Deposit</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Jumlah</label>
                                 <input type="text" name="amount" id="payment_amount" placeholder="Masukkan jumlah pembayaran" required 
                                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -456,11 +524,15 @@
                             </div>
                             <div>
                                 <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Metode</label>
-                                <select name="method" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                                <select name="method" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" x-model="paymentMethod">
                                     <option value="cash">Tunai</option>
                                     <option value="transfer">Transfer</option>
                                     <option value="qris">QRIS</option>
                                 </select>
+                                <div x-show="paymentMethod === 'qris'" x-transition class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 text-center">
+                                    <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Scan QR code di bawah untuk membayar via QRIS</p>
+                                    <img src="{{ asset('images/qris-payment.png') }}" alt="QRIS Payment" class="mx-auto h-48 w-48 rounded-xl border border-slate-100 object-contain">
+                                </div>
                             </div>
                             <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
                                 Proses Pembayaran
@@ -468,6 +540,118 @@
                         </form>
                     </div>
                 @endif
+            </div>
+
+            <!-- Modal Konfirmasi Serah Terima -->
+            <div x-show="showHandoverModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" @click.stop>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="rounded-xl bg-emerald-50 p-2 text-emerald-600">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900">Konfirmasi Serah Terima</h3>
+                    </div>
+
+                    <p class="text-sm text-slate-600 mb-4">Pastikan jas sudah benar-benar diserahkan kepada customer.</p>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Informasi Rental</p>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span class="text-slate-500">Invoice:</span>
+                                    <span class="ml-2 font-semibold text-slate-900" x-text="rental.invoice_number"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500">Customer:</span>
+                                    <span class="ml-2 font-semibold text-slate-900" x-text="rental.customer.name"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500">Status Pembayaran:</span>
+                                    <span class="ml-2 font-semibold" :class="rental.payment_status === 'paid' ? 'text-green-700' : (rental.payment_status === 'partial' ? 'text-amber-700' : 'text-slate-500')" x-text="rental.payment_status === 'paid' ? 'Lunas' : (rental.payment_status === 'partial' ? 'Sebagian' : 'Belum Bayar')"></span>
+                                    <template x-if="rental.fine_status === 'unpaid' || rental.fine_status === 'partial'">
+                                        <span class="ml-2 text-xs font-semibold text-red-600">(Ada Denda Belum Dibayar)</span>
+                                    </template>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500">Jaminan:</span>
+                                    <span class="ml-2 font-semibold" :class="(rental.guarantees || []).some(g => g.status === 'held') ? 'text-blue-700' : ((rental.guarantees || []).length > 0 ? 'text-green-700' : 'text-slate-500')" x-text="(rental.guarantees || []).some(g => g.status === 'held') ? 'Ditahan' : ((rental.guarantees || []).length > 0 ? 'Dikembalikan' : 'Belum Ada')"></span>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-slate-500">Tanggal Kembali:</span>
+                                    <span class="ml-2 font-semibold text-slate-900" x-text="rental.return_due_date"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Produk yang Disewa</p>
+                            <div class="space-y-1">
+                                <template x-for="item in rental.items" :key="item.id">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-900" x-text="item.product_name"></span>
+                                        <span class="text-slate-500">x<span x-text="item.quantity"></span></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3">
+                        <button type="button" @click="showHandoverModal = false" :disabled="handoverLoading" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+                            Batal
+                        </button>
+                        <button type="button" @click="confirmHandover()" :disabled="handoverLoading" class="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60">
+                            <span x-show="!handoverLoading">Konfirmasi Serah Terima</span>
+                            <span x-show="handoverLoading">Memproses...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Konfirmasi Kembalian -->
+            <div x-show="showRefundModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" @click.stop>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="rounded-xl bg-amber-50 p-2 text-amber-600">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900">Konfirmasi Kembalian</h3>
+                    </div>
+
+                    <p class="text-sm text-slate-600 mb-4">Anda akan mencatat pembayaran kembalian sebesar <span class="font-bold" x-text="fmt(rental.overpayment)"></span> untuk invoice <span x-text="rental.invoice_number"></span>.</p>
+
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-6">
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                                <span class="text-slate-500">Invoice:</span>
+                                <span class="ml-2 font-semibold text-slate-900" x-text="rental.invoice_number"></span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500">Customer:</span>
+                                <span class="ml-2 font-semibold text-slate-900" x-text="rental.customer.name"></span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="text-slate-500">Jumlah Kembalian:</span>
+                                <span class="ml-2 font-bold text-amber-700" x-text="fmt(rental.overpayment)"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3">
+                        <button type="button" @click="showRefundModal = false" :disabled="refundLoading" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+                            Batal
+                        </button>
+                        <button type="button" @click="confirmRefund()" :disabled="refundLoading" class="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-700 disabled:opacity-60">
+                            <span x-show="!refundLoading">Ya, Beri Kembalian</span>
+                            <span x-show="refundLoading">Memproses...</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -477,9 +661,14 @@
             return {
                 defaultImage: '{{ asset('images/default-product.png') }}',
                 controlsDisabled: false,
+                showHandoverModal: false,
+                handoverLoading: false,
+                showRefundModal: false,
+                refundLoading: false,
 
                 rental: @json($rentalData),
                 paymentDraft: null,
+                paymentMethod: '{{ $rental->payment_method ?? '' }}',
                 itemCondition: {},
                 itemNotes: {},
                 itemDamageFees: {},
@@ -533,11 +722,11 @@ displayedPhotoModal: null,
                 },
 
                 get displayFine() {
-                    return Number(this.rental.late_fee || 0) + Number(this.totalDenda || 0);
+                    return Number(this.rental.fine_amount || 0);
                 },
 
                 get displayGrandTotal() {
-                    return Number(this.rental.total_amount || 0) + Number(this.totalDenda || 0);
+                    return Number(this.rental.total_amount || 0) + Number(this.rental.fine_amount || 0);
                 },
 
                 progressStepClass(step) {
@@ -598,6 +787,32 @@ displayedPhotoModal: null,
                     if (status === 'returned') return 'Selesai';
                     if (status === 'cancelled') return 'Dibatalkan';
                     return status;
+                },
+
+                paymentStatusLabel(status) {
+                    if (status === 'paid') return 'LUNAS';
+                    if (status === 'partial') return 'SEBAGIAN';
+                    return 'BELUM BAYAR';
+                },
+
+                paymentStatusClass(status) {
+                    if (status === 'paid') return 'text-green-600';
+                    if (status === 'partial') return 'text-amber-600';
+                    return 'text-red-600';
+                },
+
+                fineStatusLabel(status) {
+                    if (status === 'paid') return 'LUNAS';
+                    if (status === 'partial') return 'SEBAGIAN';
+                    if (status === 'unpaid') return 'BELUM DIBAYAR';
+                    return '-';
+                },
+
+                fineStatusClass(status) {
+                    if (status === 'paid') return 'text-green-600';
+                    if (status === 'partial') return 'text-amber-600';
+                    if (status === 'unpaid') return 'text-red-600';
+                    return 'text-slate-500';
                 },
 
                 setItemCondition(itemId, condition) {
@@ -784,6 +999,168 @@ displayedPhotoModal: null,
                             text: 'Silakan coba beberapa saat lagi.',
                         });
                         console.error(error);
+                    }
+                },
+
+                openHandoverModal() {
+                    this.showHandoverModal = true;
+                },
+
+                async confirmHandover() {
+                    if (this.handoverLoading) return;
+
+                    const confirmation = await Swal.fire({
+                        icon: 'question',
+                        title: 'Konfirmasi serah terima?',
+                        text: 'Pastikan jas sudah benar-benar diserahkan kepada customer.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Konfirmasi',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#059669',
+                    });
+
+                    if (!confirmation.isConfirmed) return;
+
+                    this.handoverLoading = true;
+
+                    try {
+                        const response = await fetch('{{ route('rentals.handover', $rental) }}', {
+                            method: 'PATCH',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json',
+                            },
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.message || 'Serah terima gagal.');
+                        }
+
+                        this.rental = {
+                            ...this.rental,
+                            ...data.rental,
+                            customer: data.rental.customer || this.rental.customer,
+                            branch: data.rental.branch || this.rental.branch,
+                            guarantees: data.rental.guarantees || this.rental.guarantees,
+                            payments: data.rental.payments || this.rental.payments,
+                            activity_logs: data.rental.activity_logs || this.rental.activity_logs,
+                            items: (data.rental.items || []).map((item) => {
+                                const existingItem = (this.rental.items || []).find((currentItem) => currentItem.id === item.id) || {};
+                                return {
+                                    ...existingItem,
+                                    ...item,
+                                    category_name: item.category_name || existingItem.category_name || '-',
+                                    damage_fee: Number(item.damage_fee ?? existingItem.damage_fee ?? 0),
+                                    price: Number(item.price ?? existingItem.price ?? 0),
+                                };
+                            }),
+                        };
+
+                        this.showHandoverModal = false;
+
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: data.message || 'Serah terima berhasil!',
+                            confirmButtonColor: '#059669',
+                        });
+                    } catch (error) {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: error.message || 'Serah terima tidak dapat diproses.',
+                            confirmButtonColor: '#2563EB',
+                        });
+                    } finally {
+                        this.handoverLoading = false;
+                    }
+                },
+
+                openRefundModal() {
+                    this.refundLoading = false;
+                    this.showRefundModal = true;
+                },
+
+                async confirmRefund() {
+                    if (this.refundLoading) return;
+
+                    const confirmation = await Swal.fire({
+                        icon: 'question',
+                        title: 'Konfirmasi pembayaran kembalian?',
+                        text: 'Anda akan mencatat kembalian sebesar ' + this.fmt(this.rental.overpayment) + ' untuk ' + this.rental.invoice_number + '.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Beri Kembalian',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#D97706',
+                    });
+
+                    if (!confirmation.isConfirmed) return;
+
+                    this.refundLoading = true;
+
+                    try {
+                        const response = await fetch('{{ route('rentals.mark-refund-given', $rental) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                amount: this.rental.overpayment,
+                                notes: 'Kembalian overpayment',
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.message || 'Pencatatan kembalian gagal.');
+                        }
+
+                        this.rental = {
+                            ...this.rental,
+                            ...data.rental,
+                            customer: data.rental.customer || this.rental.customer,
+                            branch: data.rental.branch || this.rental.branch,
+                            guarantees: data.rental.guarantees || this.rental.guarantees,
+                            payments: data.rental.payments || this.rental.payments,
+                            activity_logs: data.rental.activity_logs || this.rental.activity_logs,
+                            items: (data.rental.items || []).map((item) => {
+                                const existingItem = (this.rental.items || []).find((currentItem) => currentItem.id === item.id) || {};
+                                return {
+                                    ...existingItem,
+                                    ...item,
+                                    category_name: item.category_name || existingItem.category_name || '-',
+                                    damage_fee: Number(item.damage_fee ?? existingItem.damage_fee ?? 0),
+                                    price: Number(item.price ?? existingItem.price ?? 0),
+                                };
+                            }),
+                            change_amount: Number(data.rental.change_amount ?? this.rental.change_amount ?? 0),
+                            overpayment: Number(data.rental.overpayment ?? 0),
+                            refund_given: Number(data.rental.refund_given ?? this.rental.overpayment ?? 0),
+                        };
+
+                        this.showRefundModal = false;
+
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: data.message || 'Kembalian berhasil dicatat.',
+                            confirmButtonColor: '#D97706',
+                        });
+                    } catch (error) {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: error.message || 'Pencatatan kembalian tidak dapat diproses.',
+                            confirmButtonColor: '#DC2626',
+                        });
+                    } finally {
+                        this.refundLoading = false;
                     }
                 },
             };

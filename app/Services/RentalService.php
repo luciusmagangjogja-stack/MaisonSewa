@@ -44,24 +44,70 @@ class RentalService
         $this->recalculatePaymentStatus($rental);
     }
 
+    public function recordRefund(Rental $rental, float $amount, ?string $notes = null): void
+    {
+        DB::transaction(function () use ($rental, $amount, $notes) {
+            Payment::create([
+                'rental_id'        => $rental->id,
+                'received_by'      => Auth::id(),
+                'payment_number'   => 'REFUND-' . now()->format('YmdHis'),
+                'amount'           => 0 - $amount,
+                'method'           => 'other',
+                'type'             => 'refund',
+                'notes'            => $notes ?? 'Kembalian overpayment',
+                'paid_at'          => now(),
+            ]);
+
+            $this->logActivity('record_refund', $rental, "Mencatat kembalian sebesar Rp " . number_format($amount, 0, ',', '.') . " untuk {$rental->invoice_number}");
+        });
+    }
+
     public function recalculatePaymentStatus(Rental $rental): void
     {
-        $totalPaid = (float) $rental->payments()->sum('amount');
-        $paidAmount = $totalPaid;
-        $remainingAmount = (float) max(0, ((float) $rental->total_amount) - $paidAmount);
+        $totalPaidForRental = (float) $rental->paid_amount;
+        $totalPaidForFine = (float) $rental->fine_paid_amount;
 
-        if ($paidAmount <= 0) {
+        $rentalFee = (float) $rental->total_amount;
+        $fineAmount = (float) $rental->fine_amount;
+
+        $remainingRental = max(0, $rentalFee - $totalPaidForRental);
+        $remainingFine = max(0, $fineAmount - $totalPaidForFine);
+
+        if ($totalPaidForRental <= 0) {
             $paymentStatus = Rental::PAYMENT_UNPAID;
-        } elseif ($paidAmount < (float) $rental->total_amount) {
+        } elseif ($totalPaidForRental < $rentalFee) {
             $paymentStatus = Rental::PAYMENT_PARTIAL;
         } else {
             $paymentStatus = Rental::PAYMENT_PAID;
         }
 
+        if ($fineAmount <= 0) {
+            $fineStatus = Rental::FINE_NONE;
+        } elseif ($totalPaidForFine <= 0) {
+            $fineStatus = Rental::FINE_UNPAID;
+        } elseif ($totalPaidForFine < $fineAmount) {
+            $fineStatus = Rental::FINE_PARTIAL;
+        } else {
+            $fineStatus = Rental::FINE_PAID;
+        }
+
+        $totalOwed = max(0, $rentalFee + $fineAmount);
+        $totalPaidRaw = (float) $rental->payments()
+            ->where('type', '!=', 'refund')
+            ->sum('amount');
+        $refundGiven = (float) abs($rental->payments()
+            ->where('type', 'refund')
+            ->sum('amount'));
+        $overpayment = max(0, $totalPaidRaw - $totalOwed);
+        $changeAmount = max(0, $overpayment - $refundGiven);
+
         $rental->update([
-            'paid_amount' => $paidAmount,
+            'paid_amount' => $totalPaidForRental,
             'payment_status' => $paymentStatus,
-            'remaining_amount' => $remainingAmount,
+            'remaining_amount' => $remainingRental,
+            'fine_paid_amount' => $totalPaidForFine,
+            'fine_status' => $fineStatus,
+            'change_amount' => $changeAmount,
         ]);
 
         $this->logActivity('recalculate_payment_status', $rental, "Recalculate payment status untuk {$rental->invoice_number}");
@@ -79,12 +125,20 @@ class RentalService
             'created_by' => optional($rental->createdBy)->name,
             'subtotal' => (float) ($rental->subtotal ?? 0),
             'discount' => (float) ($rental->discount ?? 0),
-            'deposit' => (float) ($rental->deposit ?? 0),
+            'deposit' => (float) ($rental->guarantees->where('type', 'deposit')->sum('deposit_amount') ?? 0),
             'total_amount' => (float) ($rental->total_amount ?? 0),
             'paid_amount' => (float) ($rental->paid_amount ?? 0),
             'remaining_amount' => (float) ($rental->remaining_amount ?? 0),
             'late_fee' => (float) ($rental->late_fee ?? 0),
+            'fine_amount' => (float) ($rental->fine_amount ?? 0),
+            'fine_paid_amount' => (float) ($rental->fine_paid_amount ?? 0),
+            'fine_status' => $rental->fine_status ?? Rental::FINE_NONE,
             'payment_method' => $rental->payment_method ?? null,
+            'notes' => $rental->notes ?? null,
+            'change_amount' => (float) ($rental->change_amount ?? 0),
+            'total_owed' => max(0, (float) ($rental->total_amount ?? 0) + (float) ($rental->fine_amount ?? 0)),
+            'overpayment' => max(0, (float) $rental->payments()->where('type', '!=', 'refund')->sum('amount') - max(0, (float) ($rental->total_amount ?? 0) + (float) ($rental->fine_amount ?? 0))),
+            'refund_given' => (float) abs($rental->payments()->where('type', 'refund')->sum('amount')),
             'customer' => [
                 'name' => $rental->customer->name ?? '-',
                 'phone' => $rental->customer->phone ?? '-',
@@ -362,6 +416,7 @@ class RentalService
             }
             $amount = (float) $amount;
             $now = now();
+            $paymentType = $data['payment_type'] ?? 'rental';
 
             $payment = Payment::create([
                 'rental_id'        => $rental->id,
@@ -370,19 +425,31 @@ class RentalService
                 'amount'           => $amount,
                 'method'           => $data['method'],
                 'reference_number' => $data['reference_number'] ?? null,
-                'type'             => $data['type'] ?? 'rental',
+                'type'             => $paymentType,
                 'notes'            => $data['notes'] ?? null,
                 'paid_at'          => $now,
             ]);
 
-            $newPaidAmount = $rental->paid_amount + $amount;
-            $rental->update([
-                'paid_amount'    => $newPaidAmount,
-                'payment_status' => $newPaidAmount >= $rental->total_amount ? 'paid' : 'partial',
-                'rental_status'  => $newPaidAmount >= $rental->total_amount
-                    ? Rental::STATUS_ACTIVE
-                    : $rental->rental_status,
-            ]);
+            $updateData = [
+                'paid_amount' => (float) $rental->paid_amount + $amount,
+            ];
+
+            if (in_array($paymentType, ['late_fee', 'damage_fee'])) {
+                $updateData['fine_paid_amount'] = (float) $rental->fine_paid_amount + $amount;
+            }
+
+            $newPaidAmount = (float) $rental->paid_amount + $amount;
+            $rentalFee = (float) $rental->total_amount;
+
+            if ($newPaidAmount >= $rentalFee) {
+                $updateData['payment_status'] = Rental::PAYMENT_PAID;
+            } elseif ($newPaidAmount > 0) {
+                $updateData['payment_status'] = Rental::PAYMENT_PARTIAL;
+            } else {
+                $updateData['payment_status'] = Rental::PAYMENT_UNPAID;
+            }
+
+            $rental->update($updateData);
 
             $this->logActivity('process_payment', $rental, "Pembayaran {$payment->payment_number} sebesar Rp " . number_format($data['amount'], 0, ',', '.'));
 
@@ -429,13 +496,15 @@ class RentalService
 
             $rental->guarantees()->update(['status' => 'returned', 'returned_at' => $now]);
 
-            $totalWithFees = $rental->total_amount + $lateFee + $totalDamageFees;
+            $fineAmount = $lateFee + $totalDamageFees;
             $rental->update([
                 'rental_status'      => Rental::STATUS_RETURNED,
                 'actual_return_date' => $now->toDateString(),
                 'returned_at'        => $now,
                 'late_fee'           => $lateFee,
-                'total_amount'       => $totalWithFees,
+                'total_amount'       => $rental->total_amount,
+                'fine_amount'        => $fineAmount,
+                'fine_status'        => $fineAmount > 0 ? Rental::FINE_UNPAID : Rental::FINE_NONE,
             ]);
 
             $this->logActivity('return_rental', $rental, "Pengembalian {$rental->invoice_number}");
