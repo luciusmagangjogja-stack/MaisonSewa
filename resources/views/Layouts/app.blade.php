@@ -28,8 +28,8 @@
             ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'layout-dashboard', 'active' => 'dashboard', 'roles' => ['super_admin','admin_toko','sales']],
         ],
         'Operasional' => [
-['label' => 'Penyewaan', 'route' => 'rentals.index', 'icon' => 'shirt', 'active' => 'rentals.*', 'roles' => ['super_admin','admin_toko','sales']],
-            ['label' => 'Scan QR', 'route' => 'rentals.scan', 'icon' => 'scan-line', 'active' => 'rentals.scan*', 'roles' => ['super_admin','admin_toko','sales']],
+            ['label' => 'Penyewaan', 'route' => 'rentals.index', 'icon' => 'shirt', 'active' => ['rentals.index', 'rentals.create', 'rentals.store', 'rentals.show', 'rentals.edit', 'rentals.update', 'rentals.destroy', 'rentals.qr.download', 'rentals.payment', 'rentals.payment.update', 'rentals.payment.destroy', 'rentals.payment.refund', 'rentals.payment.void', 'rentals.return', 'rentals.cancel-return', 'rentals.update-status', 'rentals.confirm-return-ajax', 'rentals.invoice', 'rentals.thermal', 'rentals.pdf', 'rentals.whatsapp', 'rentals.reminder', 'rentals.receipt.*', 'rentals.cancel'], 'roles' => ['super_admin','admin_toko','sales']],
+            ['label' => 'Scan QR', 'route' => 'rentals.scan', 'icon' => 'scan-line', 'active' => ['rentals.scan', 'rentals.scan.show'], 'roles' => ['super_admin','admin_toko','sales']],
             ['label' => 'Broadcast', 'route' => 'broadcasts.index', 'icon' => 'send', 'active' => 'broadcasts.*', 'roles' => ['super_admin','admin_toko']],
         ],
         'Master Data' => [
@@ -266,7 +266,7 @@
                     <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
                     <span class="text-[10px] font-bold">Dashboard</span>
                 </a>
-                <a href="{{ route('rentals.scan') }}" class="ds-hover-lift flex flex-col items-center justify-center gap-1 rounded-[16px] py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white border border-blue-200 hover:shadow-md hover:shadow-blue-200">
+                <a href="{{ route('rentals.scan') }}" class="ds-hover-lift flex flex-col items-center justify-center gap-1 rounded-[16px] py-2 {{ request()->routeIs('rentals.scan', 'rentals.scan.show') ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-transparent text-slate-500 hover:bg-blue-50 border border-transparent' }}" style="border-color: rgba(226,232,240,.95);">
                     <i data-lucide="scan-line" class="h-5 w-5"></i>
                     <span class="text-[10px] font-bold">Scan QR</span>
                 </a>
