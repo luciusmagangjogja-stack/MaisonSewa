@@ -115,9 +115,6 @@
                                 </a>
                                 @endif
                                 @endauth
-                                <a href="{{ route('rentals.invoice', $rental) }}" class="action-btn" title="Invoice">
-                                    <i data-lucide="file-text" class="w-4 h-4"></i>
-                                </a>
                                 <a href="{{ route('rentals.receipt.show', $rental) }}" class="action-btn" title="Receipt">
                                     <i data-lucide="receipt" class="w-4 h-4"></i>
                                 </a>
