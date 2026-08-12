@@ -1,5 +1,5 @@
 @php
-    $docTitle = $docTitle ?? 'SewaJas Document';
+    $docTitle = $docTitle ?? \App\Services\SettingsService::get('company_name', 'SewaJas') . ' Document';
     $outputMode = $outputMode ?? 'web';
 @endphp
 <!DOCTYPE html>
@@ -481,6 +481,252 @@
 
         .mode-pdf .page {
             padding: 0;
+        }
+
+        /* =========================================================
+           COMPACT RECEIPT (Boarding Pass / Thermal Style)
+           ========================================================= */
+        .receipt-compact-wrapper {
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+            background: #F3F4F6;
+        }
+
+        .receipt-compact-card {
+            width: 100%;
+            max-width: 320px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+            overflow: hidden;
+            font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        .receipt-header {
+            background: linear-gradient(135deg, #1E40AF, #3B82F6);
+            color: #ffffff;
+            padding: 18px 20px 14px;
+        }
+
+        .receipt-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .receipt-app-name {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .receipt-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            opacity: 0.9;
+        }
+
+        .receipt-header-meta {
+            font-size: 11px;
+            opacity: 0.85;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .receipt-meta-sep {
+            opacity: 0.5;
+        }
+
+        .receipt-section {
+            padding: 14px 20px;
+            border-bottom: 1px dashed #E5E7EB;
+        }
+
+        .receipt-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .receipt-section-title {
+            font-size: 9px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+        }
+
+        .receipt-label {
+            font-size: 11px;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .receipt-value {
+            font-size: 11px;
+            color: #111827;
+            font-weight: 600;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-word;
+        }
+
+        .receipt-row-status {
+            margin-top: 4px;
+            padding-top: 6px;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .receipt-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: #F8FAFC;
+            border-radius: 8px;
+            border: 1px solid #F1F5F9;
+        }
+
+        .receipt-item-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #111827;
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        .receipt-item-qty {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748B;
+            background: #E5E7EB;
+            padding: 2px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .receipt-qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 16px 20px;
+            background: #FAFBFC;
+        }
+
+        .receipt-qr-wrapper {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #E5E7EB;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .receipt-qr-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .receipt-qr-label {
+            font-size: 10px;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .receipt-petugas-section {
+            background: #F8FAFC;
+        }
+
+        .receipt-total-section {
+            padding: 14px 20px;
+            background: #F0F9FF;
+            border-top: 2px solid #E5E7EB;
+        }
+
+        .receipt-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .receipt-total-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1E40AF;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .receipt-total-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1E40AF;
+        }
+
+        .receipt-footer {
+            padding: 10px 20px 14px;
+            text-align: center;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .receipt-footer-text {
+            font-size: 9px;
+            color: #64748B;
+            margin-bottom: 2px;
+        }
+
+        .receipt-footer-note {
+            font-size: 8px;
+            color: #94A3B8;
+        }
+
+        /* Print compact: 80mm thermal */
+        @media print {
+            @page {
+                size: 80mm auto;
+                margin: 0;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                background: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .receipt-compact-wrapper {
+                padding: 0 !important;
+                background: #ffffff !important;
+            }
+            .receipt-compact-card {
+                max-width: 80mm !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>

@@ -55,7 +55,7 @@ class RentalReceiptService
         ];
 
         return [
-            'url' => route('rentals.receipt.show', $rental),
+            'url' => route('rentals.show', $rental),
             'payload' => $payload,
         ];
     }

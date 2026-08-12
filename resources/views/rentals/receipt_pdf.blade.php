@@ -1,6 +1,6 @@
 @php
     $outputMode = 'pdf';
-    $receiptPrintedBy = auth()->user()?->name ?? ($rental->createdBy?->name ?? 'SewaJas System');
+    $receiptPrintedBy = auth()->user()?->name ?? ($rental->createdBy?->name ?? \App\Services\SettingsService::get('company_name', 'SewaJas'));
     $receiptPrintedAt = now()->format('d M Y');
 @endphp
 
@@ -10,7 +10,6 @@
 ])
 
 @include('rentals.partials.doc-parts-receipt', ['rental'=>$rental, 'receipt'=>$receipt])
-@include('rentals.partials.doc-premium-footer', ['printedBy' => $receiptPrintedBy, 'printedAt' => $receiptPrintedAt])
 @include('rentals.partials.doc-close-html')
 
 

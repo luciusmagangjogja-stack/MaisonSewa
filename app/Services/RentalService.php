@@ -64,11 +64,18 @@ class RentalService
 
     public function recalculatePaymentStatus(Rental $rental): void
     {
-        $totalPaidForRental = (float) $rental->paid_amount;
-        $totalPaidForFine = (float) $rental->fine_paid_amount;
-
         $rentalFee = (float) $rental->total_amount;
         $fineAmount = (float) $rental->fine_amount;
+
+        $totalPaidForRental = (float) $rental->payments()
+            ->whereIn('type', ['rental', 'deposit'])
+            ->where('type', '!=', 'refund')
+            ->sum('amount');
+
+        $totalPaidForFine = (float) $rental->payments()
+            ->whereIn('type', ['late_fee', 'damage_fee'])
+            ->where('type', '!=', 'refund')
+            ->sum('amount');
 
         $remainingRental = max(0, $rentalFee - $totalPaidForRental);
         $remainingFine = max(0, $fineAmount - $totalPaidForFine);
@@ -111,6 +118,45 @@ class RentalService
         ]);
 
         $this->logActivity('recalculate_payment_status', $rental, "Recalculate payment status untuk {$rental->invoice_number}");
+
+        $this->checkAndCalculateCommission($rental);
+    }
+
+    public function checkAndCalculateCommission(Rental $rental): void
+    {
+        if ($rental->rental_status === Rental::STATUS_CANCELLED) {
+            return;
+        }
+
+        if ($rental->commission_status === 'earned') {
+            return;
+        }
+
+        if ($rental->rental_status !== Rental::STATUS_RETURNED) {
+            return;
+        }
+
+        if ($rental->payment_status !== Rental::PAYMENT_PAID) {
+            return;
+        }
+
+        if (!in_array($rental->fine_status, [Rental::FINE_PAID, Rental::FINE_NONE], true)) {
+            return;
+        }
+
+        $sales = $rental->createdBy;
+
+        if (!$sales || !$sales->isSales()) {
+            return;
+        }
+
+        $commissionable = max(0, (float) $rental->subtotal - (float) $rental->discount);
+        $commissionAmount = $commissionable * ((float) $sales->commission_rate / 100);
+
+        $rental->update([
+            'commission_amount' => $commissionAmount,
+            'commission_status' => 'earned',
+        ]);
     }
 
     public function buildDetailPayload(Rental $rental): array
@@ -136,6 +182,9 @@ class RentalService
             'payment_method' => $rental->payment_method ?? null,
             'notes' => $rental->notes ?? null,
             'change_amount' => (float) ($rental->change_amount ?? 0),
+            'commission_amount' => (float) ($rental->commission_amount ?? 0),
+            'commission_status' => $rental->commission_status ?? 'pending',
+            'sales_rate' => $rental->createdBy && $rental->createdBy->isSales() ? (float) $rental->createdBy->commission_rate : null,
             'total_owed' => max(0, (float) ($rental->total_amount ?? 0) + (float) ($rental->fine_amount ?? 0)),
             'overpayment' => max(0, (float) $rental->payments()->where('type', '!=', 'refund')->sum('amount') - max(0, (float) ($rental->total_amount ?? 0) + (float) ($rental->fine_amount ?? 0))),
             'refund_given' => (float) abs($rental->payments()->where('type', 'refund')->sum('amount')),
@@ -430,15 +479,15 @@ class RentalService
                 'paid_at'          => $now,
             ]);
 
-            $updateData = [
-                'paid_amount' => (float) $rental->paid_amount + $amount,
-            ];
+            $updateData = [];
 
             if (in_array($paymentType, ['late_fee', 'damage_fee'])) {
                 $updateData['fine_paid_amount'] = (float) $rental->fine_paid_amount + $amount;
+            } else {
+                $updateData['paid_amount'] = (float) $rental->paid_amount + $amount;
             }
 
-            $newPaidAmount = (float) $rental->paid_amount + $amount;
+            $newPaidAmount = (float) $rental->paid_amount + (in_array($paymentType, ['late_fee', 'damage_fee']) ? 0 : $amount);
             $rentalFee = (float) $rental->total_amount;
 
             if ($newPaidAmount >= $rentalFee) {
@@ -452,6 +501,8 @@ class RentalService
             $rental->update($updateData);
 
             $this->logActivity('process_payment', $rental, "Pembayaran {$payment->payment_number} sebesar Rp " . number_format($data['amount'], 0, ',', '.'));
+
+            $this->checkAndCalculateCommission($rental);
 
             return $payment;
         });
@@ -501,6 +552,7 @@ class RentalService
                 'rental_status'      => Rental::STATUS_RETURNED,
                 'actual_return_date' => $now->toDateString(),
                 'returned_at'        => $now,
+                'returned_by'        => Auth::id(),
                 'late_fee'           => $lateFee,
                 'total_amount'       => $rental->total_amount,
                 'fine_amount'        => $fineAmount,
@@ -508,6 +560,8 @@ class RentalService
             ]);
 
             $this->logActivity('return_rental', $rental, "Pengembalian {$rental->invoice_number}");
+
+            $this->checkAndCalculateCommission($rental);
 
             return $rental->fresh();
         });
