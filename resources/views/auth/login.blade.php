@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
+    @php
+        $appName = \App\Services\SettingsService::get('app_name', 'SewaJas');
+        $appTagline = \App\Services\SettingsService::get('app_tagline', 'RENTAL JAS');
+        $appLogo = \App\Services\SettingsService::get('app_logo');
+    @endphp
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login — SewaJas</title>
-    <meta name="description" content="Login SewaJas - Rental Jas Management" />
-    <meta property="og:title" content="SewaJas" />
-    <meta property="og:description" content="Rental Jas Management System" />
+    <title>Login — {{ $appName }}</title>
+    <meta name="description" content="Login {{ $appName }} - {{ $appTagline }}" />
+    <meta property="og:title" content="{{ $appName }}" />
+    <meta property="og:description" content="{{ $appTagline }}" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
@@ -55,8 +59,8 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="font-extrabold leading-none">Sewa<span class="text-blue-600 italic">Jas</span></div>
-                    <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 leading-none mt-1">Rental Jas Management</div>
+                    <div class="font-extrabold leading-none">{{ $appName }}</div>
+                    <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 leading-none mt-1">{{ $appTagline }}</div>
                 </div>
             </div>
         </div>
@@ -82,9 +86,9 @@
                         </div>
                         <div>
                             <div class="text-3xl font-extrabold leading-tight">
-                                Sewa<span class="text-white/90 italic">Jas</span>
+                                {{ $appName }}
                             </div>
-                            <div class="text-sm font-semibold text-white/80">Rental Jas Management System</div>
+                            <div class="text-sm font-semibold text-white/80">{{ $appTagline }}</div>
                         </div>
                     </div>
 
@@ -153,16 +157,25 @@
                 <div class="bg-white rounded-3xl shadow-card border border-slate-200 overflow-hidden">
                     <div class="px-6 sm:px-7 pt-7 pb-6 border-b border-slate-100">
                         <div class="flex items-center gap-3">
-                            <div class="h-11 w-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
-                                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 7h18l-1 14H4L3 7z"/>
-                                    <path d="M7 7l1-4h8l1 4"/>
-                                    <path d="M12 11v10"/>
-                                    <path d="M8 21h8"/>
-                                </svg>
-                            </div>
+                            @if($appLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo))
+                                @php
+                                    $fullPath = storage_path('app/public/' . $appLogo);
+                                    $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+                                    $appLogoUrl = 'data:image/' . $extension . ';base64,' . base64_encode(file_get_contents($fullPath));
+                                @endphp
+                                <img src="{{ $appLogoUrl }}" alt="{{ $appName }} Logo" class="h-11 w-11 rounded-2xl object-contain">
+                            @else
+                                <div class="h-11 w-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
+                                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 7h18l-1 14H4L3 7z"/>
+                                        <path d="M7 7l1-4h8l1 4"/>
+                                        <path d="M12 11v10"/>
+                                        <path d="M8 21h8"/>
+                                    </svg>
+                                </div>
+                            @endif
                             <div>
-                                <div class="text-xs font-bold uppercase tracking-widest text-blue-700">SewaJas Login</div>
+                                <div class="text-xs font-bold uppercase tracking-widest text-blue-700">{{ $appName }} Login</div>
                                 <h1 class="text-2xl sm:text-2xl font-extrabold tracking-tight">Selamat Datang</h1>
                                 <p class="text-sm text-slate-500 mt-1">Masuk untuk mengelola rental jas Anda</p>
                             </div>
@@ -331,8 +344,8 @@
                     {{-- Footer --}}
                     <div class="px-6 sm:px-7 pb-7">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                            <div class="text-xs text-slate-500 font-semibold">© {{ date('Y') }} SewaJas</div>
-                            <div class="text-xs text-slate-400">Rental Jas Management System</div>
+                            <div class="text-xs text-slate-500 font-semibold">© {{ date('Y') }} {{ $appName }}</div>
+                            <div class="text-xs text-slate-400">{{ $appTagline }}</div>
                         </div>
                     </div>
                 </div>

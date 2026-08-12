@@ -38,8 +38,8 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              class="overflow-hidden">
-            <p class="font-playfair font-bold text-white text-base leading-tight whitespace-nowrap">SewaJas</p>
-            <p class="text-xs whitespace-nowrap" style="color:#D6B98C">Premium</p>
+            <p class="font-playfair font-bold text-white text-base leading-tight whitespace-nowrap">{{ \App\Services\SettingsService::get('app_name', 'SewaJas') }}</p>
+            <p class="text-xs whitespace-nowrap" style="color:#D6B98C">{{ \App\Services\SettingsService::get('app_tagline', 'RENTAL JAS') }}</p>
         </div>
     </div>
 
@@ -216,8 +216,38 @@
             <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Laporan Stok</span>
         </a>
         @endif
+
+        @if(!auth()->user()->isSales())
+        <a href="{{ route('commissions.index') }}"
+           class="sidebar-item group relative flex items-center gap-3 px-3 py-2.5 text-sm
+                  {{ request()->routeIs('commissions.*') ? 'active' : 'text-white/70' }}"
+           @click="sidebarMobileOpen = false">
+            <i data-lucide="wallet" class="w-4 h-4 flex-shrink-0"></i>
+            <span x-show="sidebarOpen || sidebarMobileOpen" class="whitespace-nowrap">Laporan Komisi</span>
+            <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Laporan Komisi</span>
+        </a>
+        @endif
     </div>
     @endunless
+
+    {{-- ─── KOMISI (sales) ─── --}}
+    @if(auth()->user()->isSales())
+    <div x-show="sidebarOpen || sidebarMobileOpen" class="px-3 pt-4 pb-1">
+        <p class="text-[10px] font-bold uppercase tracking-widest" style="color:rgba(214,185,140,0.4)">Insentif</p>
+    </div>
+    <div x-show="!sidebarOpen && !sidebarMobileOpen" class="mx-3 my-1.5 border-t border-white/10 hidden lg:block"></div>
+
+    <div class="space-y-0.5">
+        <a href="{{ route('commissions.index') }}"
+           class="sidebar-item group relative flex items-center gap-3 px-3 py-2.5 text-sm
+                  {{ request()->routeIs('commissions.*') ? 'active' : 'text-white/70' }}"
+           @click="sidebarMobileOpen = false">
+            <i data-lucide="wallet" class="w-4 h-4 flex-shrink-0"></i>
+            <span x-show="sidebarOpen || sidebarMobileOpen" class="whitespace-nowrap">Komisi Saya</span>
+            <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Komisi Saya</span>
+        </a>
+    </div>
+    @endif
 
     {{-- ─── MANAJEMEN (super admin) ─── --}}
     @if(auth()->user()->isSuperAdmin())
@@ -243,6 +273,15 @@
             <i data-lucide="user-cog" class="w-4 h-4 flex-shrink-0"></i>
             <span x-show="sidebarOpen || sidebarMobileOpen" class="whitespace-nowrap">Kelola Pengguna</span>
             <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Kelola Pengguna</span>
+        </a>
+
+        <a href="{{ route('settings.index') }}"
+           class="sidebar-item group relative flex items-center gap-3 px-3 py-2.5 text-sm
+                  {{ request()->routeIs('settings.*') ? 'active' : 'text-white/70' }}"
+           @click="sidebarMobileOpen = false">
+            <i data-lucide="settings" class="w-4 h-4 flex-shrink-0"></i>
+            <span x-show="sidebarOpen || sidebarMobileOpen" class="whitespace-nowrap">Pengaturan</span>
+            <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Pengaturan</span>
         </a>
     </div>
     @endif
