@@ -1,7 +1,7 @@
 @php
     $backUrl = $backUrl ?? null;
     $pdfUrl = $pdfUrl ?? null;
-    $printLabel = $printLabel ?? 'Cetak';
+    $printLabel = $printLabel ?? ($printAction ?? 'Cetak');
     $whatsAppUrl = $whatsAppUrl ?? null;
     $copyLinkAction = $copyLinkAction ?? null;
     $copyLinkLabel = $copyLinkLabel ?? 'Salin Tautan';

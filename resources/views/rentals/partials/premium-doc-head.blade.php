@@ -477,6 +477,21 @@
             .no-print { display: none !important; }
             .page { padding: 0 !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            /* Compact receipt: show all items without scroll */
+            .receipt-items {
+                max-height: none !important;
+                overflow-y: visible !important;
+            }
+            .receipt-compact-wrapper {
+                padding: 0 !important;
+                background: #ffffff !important;
+            }
+            .receipt-compact-card {
+                max-width: 80mm !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
         }
 
         .mode-pdf .page {
@@ -591,6 +606,8 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .receipt-item {
@@ -700,33 +717,6 @@
         .receipt-footer-note {
             font-size: 8px;
             color: #94A3B8;
-        }
-
-        /* Print compact: 80mm thermal */
-        @media print {
-            @page {
-                size: 80mm auto;
-                margin: 0;
-            }
-            body {
-                margin: 0;
-                padding: 0;
-                background: #ffffff !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            .receipt-compact-wrapper {
-                padding: 0 !important;
-                background: #ffffff !important;
-            }
-            .receipt-compact-card {
-                max-width: 80mm !important;
-                border-radius: 0 !important;
-                box-shadow: none !important;
-            }
-            .no-print {
-                display: none !important;
-            }
         }
     </style>
 </head>
