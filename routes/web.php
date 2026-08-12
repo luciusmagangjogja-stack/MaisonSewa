@@ -98,7 +98,6 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
         Route::get('/create', [RentalController::class, 'create'])->name('create');
         Route::post('/', [RentalController::class, 'store'])->name('store');
         Route::get('/{rental}', [RentalController::class, 'show'])->name('show');
-        Route::get('/{rental}/qr-download', [RentalController::class, 'downloadQr'])->name('qr.download');
         Route::post('/{rental}/payment', [RentalController::class, 'processPayment'])->name('payment');
         Route::patch('/{rental}/payments/{payment}', [RentalController::class, 'paymentUpdate'])->name('payment.update');
         Route::delete('/{rental}/payments/{payment}', [RentalController::class, 'paymentDestroy'])->name('payment.destroy');
@@ -133,6 +132,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
     Route::prefix('products')->name('products.')->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko,sales')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+        Route::patch('/{product}/update-stock', [ProductController::class, 'updateStock'])->name('update-stock');
     });
     Route::prefix('products')->name('products.')->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko')->group(function () {
         Route::get('/create', [ProductController::class, 'create'])->name('create');
@@ -226,6 +226,11 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
             Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('destroy');
         });
     });
+});
+
+// ─── COMMISSIONS ──────────────────────────────────────────────
+Route::middleware(['auth'])->prefix('commissions')->name('commissions.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\CommissionController::class, 'index'])->name('index');
 });
 
 // ─── PUBLIC INVOICE VIEW ──────────────────────────────────────

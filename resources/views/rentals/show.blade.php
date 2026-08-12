@@ -60,7 +60,6 @@
                 <a href="{{ route('rentals.whatsapp', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">WA Invoice</a>
                 <a href="{{ route('rentals.receipt.whatsapp', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">WA Receipt</a>
                 <a href="{{ route('rentals.reminder', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Reminder</a>
-                <a href="{{ route('rentals.qr.download', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Download QR</a>
                 @if(auth()->user()->isSuperAdmin())
                 <button type="button" onclick="confirmDeleteRental('{{ $rental->invoice_number }}')" class="btn-secondary text-red-500 hover:bg-red-50">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -665,6 +664,13 @@
                 handoverLoading: false,
                 showRefundModal: false,
                 refundLoading: false,
+
+                progressSteps: [
+                    { id: 1, label: 'Booking' },
+                    { id: 2, label: 'Disewa' },
+                    { id: 3, label: 'Dikembalikan' },
+                    { id: 4, label: 'Selesai' },
+                ],
 
                 rental: @json($rentalData),
                 paymentDraft: null,

@@ -329,17 +329,6 @@ class RentalController extends Controller
         return view("rentals.scan-result", ["rental" => null, "error" => "Format QR Code tidak valid. Format yang diterima: INV2026070310014, RCPT-INV2026070310014, atau ID rental numerik (contoh: 93)"]);
     }
 
-    public function downloadQr(Rental $rental)
-    {
-        $path = storage_path("app/public/" . $rental->qr_code);
-        $realPath = realpath($path);
-        $expectedDir = realpath(storage_path('app/public'));
-        if (!$realPath || !str_starts_with($realPath, $expectedDir)) {
-            abort(404);
-        }
-        return response()->download($realPath, $rental->invoice_number . ".svg");
-    }
-
     public function processPayment(Request $request, Rental $rental)
     {
         $this->rentalService->processPayment($rental, $request->validate([
@@ -714,6 +703,8 @@ class RentalController extends Controller
 
         $rental->refresh();
         $rental->load(["customer", "branch", "createdBy", "items.product", "activityLogs.user"]);
+
+        $this->rentalService->checkAndCalculateCommission($rental);
 
         return response()->json(["success" => true, "rental" => [
             "id" => $rental->id,
