@@ -46,8 +46,19 @@ class SettingsController extends Controller
             DB::table('settings')->updateOrInsert(['key' => $field], ['value' => $value, 'updated_at' => now(), 'created_at' => now()]);
         }
 
-        $this->handleFileUpload($request, 'company_logo', 'settings/company-logos');
-        $this->handleFileUpload($request, 'app_logo', 'settings/app-logos');
+        if ($request->hasFile('company_logo')) {
+            $request->validate([
+                'company_logo' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            ]);
+            $this->handleFileUpload($request, 'company_logo', 'settings/company-logos');
+        }
+
+        if ($request->hasFile('app_logo')) {
+            $request->validate([
+                'app_logo' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            ]);
+            $this->handleFileUpload($request, 'app_logo', 'settings/app-logos');
+        }
 
         if ($request->hasFile('qris_image')) {
             $request->validate([
