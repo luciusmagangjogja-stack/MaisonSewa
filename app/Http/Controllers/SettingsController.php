@@ -20,22 +20,19 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'fine_per_day'             => 'required|numeric|min:0',
-            'rental_duration_days'     => 'required|numeric|min:0',
-            'company_name'             => 'nullable|string|max:150',
-            'company_tagline'          => 'nullable|string|max:150',
-            'company_address'          => 'nullable|string|max:255',
-            'company_phone'            => 'nullable|string|max:30',
-            'company_email'            => 'nullable|email|max:100',
-            'company_website'          => 'nullable|string|max:150',
-            'company_logo'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'app_logo'                 => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'app_name'                 => 'nullable|string|max:50',
-            'app_tagline'              => 'nullable|string|max:100',
-            'qris_image'               => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=300,min_height=300',
-            'bank_name'                => 'nullable|string|max:100',
-            'bank_account'             => 'nullable|string|max:50',
-            'bank_holder'              => 'nullable|string|max:100',
+            'fine_per_day'         => 'required|numeric|min:0',
+            'rental_duration_days' => 'required|numeric|min:0',
+            'company_name'         => 'nullable|string|max:150',
+            'company_tagline'      => 'nullable|string|max:150',
+            'company_address'      => 'nullable|string|max:255',
+            'company_phone'        => 'nullable|string|max:30',
+            'company_email'        => 'nullable|email|max:100',
+            'company_website'      => 'nullable|string|max:150',
+            'app_name'             => 'nullable|string|max:50',
+            'app_tagline'          => 'nullable|string|max:100',
+            'bank_name'            => 'nullable|string|max:100',
+            'bank_account'         => 'nullable|string|max:50',
+            'bank_holder'          => 'nullable|string|max:100',
         ]);
 
         $textFields = [
@@ -51,7 +48,13 @@ class SettingsController extends Controller
 
         $this->handleFileUpload($request, 'company_logo', 'settings/company-logos');
         $this->handleFileUpload($request, 'app_logo', 'settings/app-logos');
-        $this->handleFileUpload($request, 'qris_image', 'settings/qris');
+
+        if ($request->hasFile('qris_image')) {
+            $request->validate([
+                'qris_image' => 'image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=300,min_height=300',
+            ]);
+            $this->handleFileUpload($request, 'qris_image', 'settings/qris');
+        }
 
         \App\Services\SettingsService::forget();
 

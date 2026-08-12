@@ -67,7 +67,6 @@
 
                 <input type="file" x-ref="qrisInput" name="qris_image" accept="image/*" class="hidden"
                        @change="handlePhotoSelect($event)">
-                @error('qris_image')<p class="text-xs text-red-500">{{ $message }}</p>@enderror
             </div>
         </div>
 
@@ -86,21 +85,18 @@
                     <input type="text" name="bank_name"
                            value="{{ old('bank_name', optional($settings->firstWhere('key', 'bank_name'))->value) }}"
                            class="form-input" placeholder="Contoh: BCA">
-                    @error('bank_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Nomor Rekening</label>
                     <input type="text" name="bank_account"
                            value="{{ old('bank_account', optional($settings->firstWhere('key', 'bank_account'))->value) }}"
                            class="form-input" placeholder="Contoh: 1234567890">
-                    @error('bank_account')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Atas Nama</label>
                     <input type="text" name="bank_holder"
                            value="{{ old('bank_holder', optional($settings->firstWhere('key', 'bank_holder'))->value) }}"
                            class="form-input" placeholder="Contoh: PT SewaJas Indonesia">
-                    @error('bank_holder')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
             </div>
         </div>
@@ -120,14 +116,12 @@
                     <input type="text" name="company_name"
                            value="{{ old('company_name', optional($settings->firstWhere('key', 'company_name'))->value) }}"
                            class="form-input" placeholder="Contoh: PT SewaJas Indonesia">
-                    @error('company_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Tagline</label>
                     <input type="text" name="company_tagline"
                            value="{{ old('company_tagline', optional($settings->firstWhere('key', 'company_tagline'))->value) }}"
                            class="form-input" placeholder="Contoh: Premium Suit Rental">
-                    @error('company_tagline')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
             </div>
 
@@ -135,7 +129,6 @@
                 <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Alamat</label>
                 <textarea name="company_address" rows="2" class="form-input resize-none"
                           placeholder="Alamat lengkap perusahaan">{{ old('company_address', optional($settings->firstWhere('key', 'company_address'))->value) }}</textarea>
-                @error('company_address')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -144,21 +137,18 @@
                     <input type="text" name="company_phone"
                            value="{{ old('company_phone', optional($settings->firstWhere('key', 'company_phone'))->value) }}"
                            class="form-input" placeholder="Contoh: 021-12345678">
-                    @error('company_phone')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Email</label>
                     <input type="email" name="company_email"
                            value="{{ old('company_email', optional($settings->firstWhere('key', 'company_email'))->value) }}"
                            class="form-input" placeholder="Contoh: info@sewajas.id">
-                    @error('company_email')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Website</label>
                     <input type="text" name="company_website"
                            value="{{ old('company_website', optional($settings->firstWhere('key', 'company_website'))->value) }}"
                            class="form-input" placeholder="Contoh: www.sewajas.id">
-                    @error('company_website')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
             </div>
         </div>
@@ -210,7 +200,6 @@
 
                 <input type="file" x-ref="companyLogoInput" name="company_logo" accept="image/*" class="hidden"
                        @change="handlePhotoSelect($event)">
-                @error('company_logo')<p class="text-xs text-red-500">{{ $message }}</p>@enderror
             </div>
         </div>
 
@@ -261,7 +250,6 @@
 
                 <input type="file" x-ref="appLogoInput" name="app_logo" accept="image/*" class="hidden"
                        @change="handlePhotoSelect($event)">
-                @error('app_logo')<p class="text-xs text-red-500">{{ $message }}</p>@enderror
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -270,14 +258,12 @@
                     <input type="text" name="app_name"
                            value="{{ old('app_name', optional($settings->firstWhere('key', 'app_name'))->value) }}"
                            class="form-input" placeholder="Contoh: SewaJas">
-                    @error('app_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Tagline</label>
                     <input type="text" name="app_tagline"
                            value="{{ old('app_tagline', optional($settings->firstWhere('key', 'app_tagline'))->value) }}"
                            class="form-input" placeholder="Contoh: RENTAL JAS">
-                    @error('app_tagline')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
             </div>
         </div>
@@ -297,14 +283,12 @@
                     <input type="number" name="fine_per_day" min="0" step="1"
                            value="{{ old('fine_per_day', optional($settings->firstWhere('key', 'fine_per_day'))->value ?? 0) }}"
                            class="form-input" required>
-                    @error('fine_per_day')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Durasi Sewa Default (hari)</label>
                     <input type="number" name="rental_duration_days" min="0" step="1"
                            value="{{ old('rental_duration_days', optional($settings->firstWhere('key', 'rental_duration_days'))->value ?? 3) }}"
                            class="form-input" required>
-                    @error('rental_duration_days')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
             </div>
         </div>
