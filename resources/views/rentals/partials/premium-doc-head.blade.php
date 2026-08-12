@@ -468,8 +468,6 @@
             border-color: #E5E7EB;
         }
 
-        .no-print { display: none !important; }
-
         /* Print & PDF */
         @media print {
             @page { size: A4; margin: 8mm; }

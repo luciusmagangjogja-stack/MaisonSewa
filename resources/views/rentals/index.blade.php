@@ -121,14 +121,8 @@
                                 <a href="{{ route('rentals.receipt.show', $rental) }}" class="action-btn" title="Receipt">
                                     <i data-lucide="receipt" class="w-4 h-4"></i>
                                 </a>
-                                <a href="{{ route('rentals.receipt.print', $rental) }}" class="action-btn" title="Print Receipt">
-                                    <i data-lucide="printer" class="w-4 h-4"></i>
-                                </a>
                                 <a href="{{ route('rentals.pdf', $rental) }}" class="action-btn" title="Download PDF">
                                     <i data-lucide="download" class="w-4 h-4"></i>
-                                </a>
-                                <a href="{{ route('rentals.qr.download', $rental) }}" class="action-btn" title="Download QR" aria-label="Download QR">
-                                    <i data-lucide="scan" class="w-4 h-4"></i>
                                 </a>
 
                                 <a href="{{ route('rentals.whatsapp', $rental) }}" class="action-btn" title="Whatsapp">
