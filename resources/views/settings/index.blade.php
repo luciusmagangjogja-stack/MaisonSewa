@@ -13,9 +13,6 @@
         </div>
     </div>
 
-    {{-- FLASH MESSAGES --}}
-    @include('components.flash-messages')
-
     {{-- FORM --}}
     <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data" class="space-y-6">
         @csrf
@@ -39,7 +36,7 @@
                 }
             @endphp
 
-            <div x-data="imageUploadForm('{{ $qrisUrl }}')" class="space-y-3">
+            <div x-data="qrisUploadForm('{{ $qrisUrl }}')" class="space-y-3">
                 <div x-show="photoPreview || hasCurrentPhoto" class="relative" style="max-width: 280px;">
                     <img :src="photoPreview || currentPhotoUrl" class="w-full rounded-xl border" style="border-color:var(--border)" alt="Preview QRIS">
                     <button type="button" @click="clearPhoto()"
@@ -65,8 +62,39 @@
                     <p class="text-xs mt-1" style="color:var(--text-soft)">PNG, JPG, WEBP — Maks. 2MB</p>
                 </div>
 
-                <input type="file" x-ref="qrisInput" name="qris_image" accept="image/*" class="hidden"
+                <input type="file" x-ref="qrisInput" name="qris_image" accept="image/png,image/jpeg,image/webp" class="hidden"
                        @change="handlePhotoSelect($event)">
+
+                {{-- Quality Check Checklist --}}
+                <div x-show="checked" class="mt-3 space-y-1.5">
+                    <div class="flex items-center gap-2 text-xs" :class="resolutionOk ? 'text-green-600' : 'text-red-500'">
+                        <template x-if="resolutionOk">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </template>
+                        <template x-if="!resolutionOk">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                        </template>
+                        <span x-text="resolutionOk ? '✓ Resolusi cukup (min. 200x200)' : '✗ Resolusi terlalu kecil (min. 200x200)'"></span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs" :class="formatOk ? 'text-green-600' : 'text-red-500'">
+                        <template x-if="formatOk">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </template>
+                        <template x-if="!formatOk">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                        </template>
+                        <span x-text="formatOk ? '✓ Format file didukung (PNG/JPG/WEBP)' : '✗ Format file tidak didukung'"></span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs" :class="verified ? 'text-green-600' : 'text-amber-600'">
+                        <template x-if="verified">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </template>
+                        <template x-if="!verified">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 10a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                        </template>
+                        <span x-text="verified ? '✓ Siap diupload' : 'Perbaiki kualitas gambar sebelum upload'"></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -345,6 +373,85 @@ function imageUploadForm(initialUrl) {
             if (refs.length > 0) {
                 this.$refs[refs[0]].value = '';
             }
+        },
+    };
+}
+
+function qrisUploadForm(initialUrl) {
+    return {
+        photoPreview: null,
+        hasCurrentPhoto: initialUrl ? true : false,
+        currentPhotoUrl: initialUrl || '',
+        isDragging: false,
+        checked: false,
+        verified: false,
+        resolutionOk: false,
+        formatOk: false,
+
+        handlePhotoSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+            this.formatOk = allowedTypes.includes(file.type);
+            if (!this.formatOk) {
+                this.checked = true;
+                this.verified = false;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                this.photoPreview = e.target.result;
+                this.hasCurrentPhoto = true;
+                this.runQrisQualityChecks();
+            };
+            reader.readAsDataURL(file);
+        },
+
+        handleDrop(event) {
+            const file = event.dataTransfer.files[0];
+            if (!file) return;
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+            this.formatOk = allowedTypes.includes(file.type);
+            if (!this.formatOk) {
+                this.checked = true;
+                this.verified = false;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                this.photoPreview = e.target.result;
+                this.hasCurrentPhoto = true;
+                this.runQrisQualityChecks();
+            };
+            reader.readAsDataURL(file);
+        },
+
+        runQrisQualityChecks() {
+            const img = new Image();
+            img.onload = () => {
+                this.resolutionOk = img.naturalWidth >= 200 && img.naturalHeight >= 200;
+                this.checked = true;
+                this.verified = this.resolutionOk && this.formatOk;
+            };
+            img.onerror = () => {
+                this.resolutionOk = false;
+                this.checked = true;
+                this.verified = false;
+            };
+            img.src = this.photoPreview;
+        },
+
+        clearPhoto() {
+            this.photoPreview = null;
+            this.hasCurrentPhoto = false;
+            this.currentPhotoUrl = '';
+            this.checked = false;
+            this.verified = false;
+            this.resolutionOk = false;
+            this.formatOk = false;
+            this.$refs.qrisInput.value = '';
         },
     };
 }

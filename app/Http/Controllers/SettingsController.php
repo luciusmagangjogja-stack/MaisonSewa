@@ -62,7 +62,7 @@ class SettingsController extends Controller
 
         if ($request->hasFile('qris_image')) {
             $request->validate([
-                'qris_image' => 'image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=300,min_height=300',
+                'qris_image' => 'image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=200,min_height=200',
             ]);
             $this->handleFileUpload($request, 'qris_image', 'settings/qris');
         }
