@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
     public function index()
     {
-        $settings = DB::table('settings')->orderBy('key')->get();
+        $settings = DB::table('settings')->orderBy('key')->get()->mapWithKeys(function ($item) {
+            return [$item->key => $item->value];
+        });
 
         return view('settings.index', compact('settings'));
     }
@@ -17,17 +20,58 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'fine_per_day'            => 'required|numeric|min:0',
-            'rental_duration_days'   => 'required|numeric|min:0',
+            'fine_per_day'             => 'required|numeric|min:0',
+            'rental_duration_days'     => 'required|numeric|min:0',
+            'company_name'             => 'nullable|string|max:150',
+            'company_tagline'          => 'nullable|string|max:150',
+            'company_address'          => 'nullable|string|max:255',
+            'company_phone'            => 'nullable|string|max:30',
+            'company_email'            => 'nullable|email|max:100',
+            'company_website'          => 'nullable|string|max:150',
+            'company_logo'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'app_logo'                 => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'app_name'                 => 'nullable|string|max:50',
+            'app_tagline'              => 'nullable|string|max:100',
+            'qris_image'               => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=300,min_height=300',
+            'bank_name'                => 'nullable|string|max:100',
+            'bank_account'             => 'nullable|string|max:50',
+            'bank_holder'              => 'nullable|string|max:100',
         ]);
 
-        $finePerDay = (int) $validated['fine_per_day'];
-        $durationDays = (int) $validated['rental_duration_days'];
+        $textFields = [
+            'fine_per_day', 'rental_duration_days', 'company_name', 'company_tagline',
+            'company_address', 'company_phone', 'company_email', 'company_website',
+            'app_name', 'app_tagline', 'bank_name', 'bank_account', 'bank_holder',
+        ];
 
-        DB::table('settings')->updateOrInsert(['key' => 'fine_per_day'], ['value' => $finePerDay]);
-        DB::table('settings')->updateOrInsert(['key' => 'rental_duration_days'], ['value' => $durationDays]);
+        foreach ($textFields as $field) {
+            $value = $validated[$field] ?? null;
+            DB::table('settings')->updateOrInsert(['key' => $field], ['value' => $value, 'updated_at' => now(), 'created_at' => now()]);
+        }
+
+        $this->handleFileUpload($request, 'company_logo', 'settings/company-logos');
+        $this->handleFileUpload($request, 'app_logo', 'settings/app-logos');
+        $this->handleFileUpload($request, 'qris_image', 'settings/qris');
+
+        \App\Services\SettingsService::forget();
 
         return back()->with('success', 'Pengaturan berhasil diperbarui!');
     }
+
+    private function handleFileUpload(Request $request, string $field, string $diskPath): void
+    {
+        if (!$request->hasFile($field)) {
+            return;
+        }
+
+        $oldPath = DB::table('settings')->where('key', $field)->value('value');
+        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        $newPath = $request->file($field)->store($diskPath, 'public');
+        DB::table('settings')->updateOrInsert(['key' => $field], ['value' => $newPath, 'updated_at' => now(), 'created_at' => now()]);
+    }
 }
+
 
