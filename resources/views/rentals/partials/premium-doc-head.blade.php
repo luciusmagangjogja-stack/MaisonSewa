@@ -25,6 +25,8 @@
             line-height: 1.3;
             color: #111827;
             background: #ffffff;
+            overflow-x: hidden;
+            max-width: 100%;
         }
 
         /* Colors */
@@ -51,7 +53,8 @@
         /* Page wrapper */
         .page {
             width: 100%;
-            max-width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
             margin: 0;
             padding: 0;
             background: #ffffff;
@@ -511,6 +514,9 @@
         /* Toolbar */
         .doc-toolbar-wrapper {
             position: relative;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .doc-toolbar-wrapper::after {
@@ -535,6 +541,8 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            width: 100%;
+            max-width: 100%;
         }
 
         /* Toolbar responsive */
@@ -553,6 +561,8 @@
             .doc-toolbar {
                 overflow-x: auto;
                 overflow-y: hidden;
+                width: 100%;
+                max-width: 100%;
                 flex-wrap: nowrap;
                 padding: 12px 16px;
                 gap: 8px;
