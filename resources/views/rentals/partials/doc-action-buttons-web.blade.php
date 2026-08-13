@@ -7,34 +7,36 @@
     $copyLinkLabel = $copyLinkLabel ?? 'Salin Tautan';
 @endphp
 
-<div class="no-print doc-toolbar">
-    @if(!empty($backUrl))
-        <a class="doc-btn doc-btn-ghost" href="{{ $backUrl }}">
-            <i data-lucide="chevron-left" class="w-4 h-4"></i> Kembali
-        </a>
-    @endif
+<div class="no-print doc-toolbar-wrapper">
+    <div class="no-print doc-toolbar">
+        @if(!empty($backUrl))
+            <a class="doc-btn doc-btn-ghost" href="{{ $backUrl }}">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i> <span class="btn-text">Kembali</span>
+            </a>
+        @endif
 
-    @if(!empty($pdfUrl))
-        <a class="doc-btn doc-btn-primary" href="{{ $pdfUrl }}">
-            <i data-lucide="download" class="w-4 h-4"></i> Download PDF
-        </a>
-    @endif
+        @if(!empty($pdfUrl))
+            <a class="doc-btn doc-btn-primary" href="{{ $pdfUrl }}">
+                <i data-lucide="download" class="w-4 h-4"></i> <span class="btn-text">Download PDF</span>
+            </a>
+        @endif
 
-    @if(!empty($printLabel))
-        <button class="doc-btn doc-btn-secondary" type="button" onclick="window.print()">
-            <i data-lucide="printer" class="w-4 h-4"></i> {{ $printLabel }}
-        </button>
-    @endif
+        @if(!empty($printLabel))
+            <button class="doc-btn doc-btn-secondary" type="button" onclick="window.print()">
+                <i data-lucide="printer" class="w-4 h-4"></i> <span class="btn-text">{{ $printLabel }}</span>
+            </button>
+        @endif
 
-    @if(!empty($whatsAppUrl))
-        <a class="doc-btn doc-btn-whatsapp" href="{{ $whatsAppUrl }}">
-            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
-        </a>
-    @endif
+        @if(!empty($whatsAppUrl))
+            <a class="doc-btn doc-btn-whatsapp" href="{{ $whatsAppUrl }}">
+                <i data-lucide="message-circle" class="w-4 h-4"></i> <span class="btn-text">WhatsApp</span>
+            </a>
+        @endif
 
-    @if(!empty($copyLinkAction))
-        <button class="doc-btn doc-btn-secondary" type="button" onclick="{{ $copyLinkAction }}">
-            <i data-lucide="link" class="w-4 h-4"></i> {{ $copyLinkLabel }}
-        </button>
-    @endif
+        @if(!empty($copyLinkAction))
+            <button class="doc-btn doc-btn-secondary" type="button" onclick="{{ $copyLinkAction }}">
+                <i data-lucide="link" class="w-4 h-4"></i> <span class="btn-text">{{ $copyLinkLabel }}</span>
+            </button>
+        @endif
+    </div>
 </div>

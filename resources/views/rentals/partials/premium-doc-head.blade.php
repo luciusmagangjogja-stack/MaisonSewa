@@ -509,6 +509,21 @@
         }
 
         /* Toolbar */
+        .doc-toolbar-wrapper {
+            position: relative;
+        }
+
+        .doc-toolbar-wrapper::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 24px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.9));
+            pointer-events: none;
+        }
+
         .doc-toolbar {
             display: flex;
             align-items: center;
@@ -520,6 +535,63 @@
             position: sticky;
             top: 0;
             z-index: 10;
+        }
+
+        /* Toolbar responsive */
+        @media (max-width: 640px) {
+            .doc-toolbar-wrapper::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 24px;
+                background: linear-gradient(to right, transparent, rgba(255,255,255,0.9));
+                pointer-events: none;
+            }
+
+            .doc-toolbar {
+                overflow-x: auto;
+                overflow-y: hidden;
+                flex-wrap: nowrap;
+                padding: 12px 16px;
+                gap: 8px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .doc-toolbar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .doc-btn-primary,
+            .doc-btn-whatsapp,
+            .doc-btn-secondary,
+            .doc-btn-ghost {
+                flex-shrink: 0;
+                white-space: nowrap;
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .doc-btn-primary .btn-text,
+            .doc-btn-secondary .btn-text,
+            .doc-btn-ghost .btn-text {
+                display: none;
+            }
+
+            .doc-btn-whatsapp .btn-text {
+                display: inline;
+            }
+
+            .doc-btn-primary,
+            .doc-btn-secondary,
+            .doc-btn-ghost,
+            .doc-btn-whatsapp {
+                padding: 8px 10px;
+            }
         }
 
         /* Print & PDF */
@@ -548,6 +620,9 @@
             .doc-toolbar {
                 position: static !important;
                 box-shadow: none !important;
+            }
+            .doc-toolbar-wrapper::after {
+                display: none !important;
             }
         }
 
