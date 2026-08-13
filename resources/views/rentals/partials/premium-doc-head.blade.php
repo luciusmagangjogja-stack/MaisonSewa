@@ -508,6 +508,20 @@
             color: #374151;
         }
 
+        /* Toolbar */
+        .doc-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E5E7EB;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
         /* Print & PDF */
         @media print {
             @page { size: A4; margin: 8mm; }
@@ -524,10 +538,15 @@
             .receipt-compact-wrapper {
                 padding: 0 !important;
                 background: #ffffff !important;
+                min-height: auto !important;
             }
             .receipt-compact-card {
                 max-width: 80mm !important;
                 border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+            .doc-toolbar {
+                position: static !important;
                 box-shadow: none !important;
             }
         }
@@ -542,7 +561,8 @@
         .receipt-compact-wrapper {
             display: flex;
             justify-content: center;
-            padding: 24px 16px;
+            align-items: flex-start;
+            padding: 32px 16px;
             background: #F3F4F6;
             min-height: 100vh;
         }
@@ -550,9 +570,9 @@
         .receipt-compact-card {
             width: 100%;
             max-width: 380px;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
             overflow: hidden;
             font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
         }

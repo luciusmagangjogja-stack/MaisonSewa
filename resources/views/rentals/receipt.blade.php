@@ -7,7 +7,7 @@
     'outputMode' => $outputMode,
 ])
 
-<div class="no-print" style="margin-bottom: 18px; display:flex; flex-wrap:wrap; gap:10px;">
+<div class="no-print doc-toolbar">
     <a class="doc-btn doc-btn-ghost" href="{{ route('rentals.show', $rental) }}">
         <i data-lucide="chevron-left" class="w-4 h-4"></i> Kembali
     </a>

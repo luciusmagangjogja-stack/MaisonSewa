@@ -7,7 +7,7 @@
     $copyLinkLabel = $copyLinkLabel ?? 'Salin Tautan';
 @endphp
 
-<div class="no-print" style="margin-bottom: 18px; display:flex; flex-wrap:wrap; gap:10px;">
+<div class="no-print doc-toolbar">
     @if(!empty($backUrl))
         <a class="doc-btn doc-btn-ghost" href="{{ $backUrl }}">
             <i data-lucide="chevron-left" class="w-4 h-4"></i> Kembali
