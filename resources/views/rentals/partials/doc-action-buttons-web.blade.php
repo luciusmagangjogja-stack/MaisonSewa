@@ -9,22 +9,32 @@
 
 <div class="no-print" style="margin-bottom: 18px; display:flex; flex-wrap:wrap; gap:10px;">
     @if(!empty($backUrl))
-        <a class="doc-btn doc-btn-secondary" href="{{ $backUrl }}">Kembali</a>
+        <a class="doc-btn doc-btn-ghost" href="{{ $backUrl }}">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i> Kembali
+        </a>
     @endif
 
     @if(!empty($pdfUrl))
-        <a class="doc-btn doc-btn-primary" href="{{ $pdfUrl }}">Download PDF</a>
+        <a class="doc-btn doc-btn-primary" href="{{ $pdfUrl }}">
+            <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+        </a>
     @endif
 
     @if(!empty($printLabel))
-        <button class="doc-btn doc-btn-secondary" type="button" onclick="window.print()">{{ $printLabel }}</button>
+        <button class="doc-btn doc-btn-secondary" type="button" onclick="window.print()">
+            <i data-lucide="printer" class="w-4 h-4"></i> {{ $printLabel }}
+        </button>
     @endif
 
     @if(!empty($whatsAppUrl))
-        <a class="doc-btn doc-btn-whatsapp" href="{{ $whatsAppUrl }}">WhatsApp</a>
+        <a class="doc-btn doc-btn-whatsapp" href="{{ $whatsAppUrl }}">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+        </a>
     @endif
 
     @if(!empty($copyLinkAction))
-        <button class="doc-btn doc-btn-secondary" type="button" onclick="{{ $copyLinkAction }}">{{ $copyLinkLabel }}</button>
+        <button class="doc-btn doc-btn-secondary" type="button" onclick="{{ $copyLinkAction }}">
+            <i data-lucide="link" class="w-4 h-4"></i> {{ $copyLinkLabel }}
+        </button>
     @endif
 </div>

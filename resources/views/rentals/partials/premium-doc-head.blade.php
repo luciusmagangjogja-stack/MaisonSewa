@@ -445,33 +445,67 @@
 
         /* Buttons */
         .doc-btn {
-            display: inline-block;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             text-decoration: none;
             border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            line-height: 1;
         }
 
         .doc-btn-primary {
-            background: #1E40AF;
-            color: #ffffff;
-            border-color: #1E40AF;
+            background: #2563EB;
+            color: #FFFFFF;
+            border: none;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
         }
 
-        .doc-btn-secondary {
-            background: #F1F5F9;
-            color: #374151;
-            border-color: #E5E7EB;
+        .doc-btn-primary:hover {
+            background: #1D4ED8;
         }
 
         .doc-btn-whatsapp {
-            border-color: rgba(201,168,76,.35);
-            background: rgba(201,168,76,.18);
-            color: var(--brown-900);
+            background: #25D366;
+            color: #FFFFFF;
+            border: none;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+
+        .doc-btn-whatsapp:hover {
+            background: #1EBE5A;
+        }
+
+        .doc-btn-secondary {
+            background: #FFFFFF;
+            color: #374151;
+            border: 1px solid #D1D5DB;
+            font-weight: 500;
+        }
+
+        .doc-btn-secondary:hover {
+            background: #F9FAFB;
+            border-color: #9CA3AF;
+        }
+
+        .doc-btn-ghost {
+            background: transparent;
+            color: #6B7280;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+
+        .doc-btn-ghost:hover {
+            background: #F3F4F6;
+            color: #374151;
         }
 
         /* Print & PDF */
@@ -542,12 +576,13 @@
             letter-spacing: 0.02em;
         }
 
-        .receipt-label {
+        .receipt-header-label {
             font-size: 10px;
-            font-weight: 800;
+            font-weight: 600;
             letter-spacing: 0.18em;
+            color: #FFFFFF;
             opacity: 1;
-            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.25);
         }
 
         .receipt-header-meta {

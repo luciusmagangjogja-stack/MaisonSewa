@@ -23,9 +23,15 @@
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
                     Kembali ke Invoice
                 </a>
-                <a class="doc-btn doc-btn-secondary" href="{{ route('invoices.print',$invoice) }}">Print</a>
-                <a class="doc-btn doc-btn-primary" href="{{ route('invoices.pdf',$invoice) }}">Download PDF</a>
-                <a class="doc-btn doc-btn-whatsapp" href="{{ route('invoices.whatsapp',$invoice) }}">WhatsApp</a>
+                <a class="doc-btn doc-btn-secondary" href="{{ route('invoices.print',$invoice) }}">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Print
+                </a>
+                <a class="doc-btn doc-btn-primary" href="{{ route('invoices.pdf',$invoice) }}">
+                    <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+                </a>
+                <a class="doc-btn doc-btn-whatsapp" href="{{ route('invoices.whatsapp',$invoice) }}">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+                </a>
                 @if(auth()->user()->isSuperAdmin() && in_array($invoice->rental_status, ['waiting', 'active', 'overdue']))
                 <button type="button" onclick="document.getElementById('cancelModal').classList.remove('hidden')" class="doc-btn" style="border-color: #f59e0b; color: #f59e0b; background: #fffbeb;">
                     <i data-lucide="x-circle" class="w-4 h-4 mr-1"></i> Batalkan

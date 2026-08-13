@@ -52,7 +52,7 @@
         <div class="receipt-header">
             <div class="receipt-header-top">
                 <div class="receipt-app-name">{{ $appName }}</div>
-                <div class="receipt-label">RECEIPT</div>
+                <div class="receipt-header-label">RECEIPT</div>
             </div>
             <div class="receipt-header-meta">
                 <span>{{ $receiptNumber }}</span>
