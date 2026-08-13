@@ -37,6 +37,15 @@
                 </a>
                 @endif
                 @endauth
+
+                @auth
+                @if(in_array(auth()->user()->role, ['super_admin','admin_toko']))
+                <a href="{{ route('customers.export') }}" class="btn-secondary">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Export Excel
+                </a>
+                @endif
+                @endauth
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto" x-data="{}">

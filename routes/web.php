@@ -77,7 +77,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
         Route::middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko,sales')->group(function () {
             Route::get('/create', [CustomerController::class, 'create'])->name('create');
             Route::post('/', [CustomerController::class, 'store'])->name('store');
-            Route::get('/export', [CustomerController::class, 'export'])->name('export');
+            Route::get('/export', [CustomerController::class, 'export'])->name('export')->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko');
             Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
             Route::patch('/{customer}', [CustomerController::class, 'update'])->name('update');
             Route::patch('/{customer}/blacklist', [CustomerController::class, 'toggleBlacklist'])->name('blacklist');

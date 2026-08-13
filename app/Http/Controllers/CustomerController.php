@@ -12,9 +12,11 @@ use App\Models\Guarantee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Excel;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\QueryException;
+use App\Exports\CustomerExport;
 
 class CustomerController extends Controller
 {
@@ -446,21 +448,12 @@ class CustomerController extends Controller
 
     public function export()
     {
-        $customers = Customer::query()->orderByDesc('created_at')->get();
-        $headers = [
-            'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename=customers_export.csv',
-        ];
-        $columns = ['id', 'name', 'phone', 'address', 'is_blacklisted', 'blacklist_reason'];
-        $callback = function () use ($customers, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-            foreach ($customers as $c) {
-                fputcsv($file, [$c->id, $c->name, $c->phone, $c->address, $c->is_blacklisted ? 1 : 0, $c->blacklist_reason]);
-            }
-            fclose($file);
-        };
-        return response()->stream($callback, 200, $headers);
+        $user = Auth::user();
+        abort_if(!$user || ($user->role !== 'super_admin' && $user->role !== 'admin_toko'), 403);
+
+        $fileName = 'Data_Customer_MaisonSewa_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(new CustomerExport, $fileName);
     }
 
     private function normalizePhone(?string $phone): string
