@@ -11,7 +11,7 @@
     <a class="doc-btn doc-btn-secondary" href="{{ route('rentals.show', $rental) }}">Kembali</a>
     <a class="doc-btn doc-btn-primary" href="{{ route('rentals.receipt.pdf', $rental) }}">Download PDF</a>
     <button class="doc-btn doc-btn-secondary" type="button" onclick="window.print()">Print</button>
-    <a class="doc-btn" href="{{ route('rentals.receipt.whatsapp', $rental) }}" style="border-color: rgba(201,168,76,.35); background: rgba(201,168,76,.18); color: var(--brown-900);">WhatsApp</a>
+    <a class="doc-btn doc-btn-whatsapp" href="{{ route('rentals.receipt.whatsapp', $rental) }}">WhatsApp</a>
     <button class="doc-btn doc-btn-secondary" type="button" onclick="navigator.clipboard.writeText('{{ route('rentals.receipt.pdf', $rental) }}'); alert('Link PDF Receipt berhasil disalin!')">Copy Link Receipt</button>
 </div>
 

@@ -58,6 +58,7 @@
                 <span>{{ $receiptNumber }}</span>
                 <span class="receipt-meta-sep">|</span>
                 <span>{{ $receiptDate }}</span>
+                <span class="receipt-brand">MaisonSewa</span>
             </div>
         </div>
 

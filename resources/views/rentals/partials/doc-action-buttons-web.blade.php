@@ -21,7 +21,7 @@
     @endif
 
     @if(!empty($whatsAppUrl))
-        <a class="doc-btn" href="{{ $whatsAppUrl }}" style="border-color: rgba(201,168,76,.35); background: rgba(201,168,76,.18); color: var(--brown-900);">WhatsApp</a>
+        <a class="doc-btn doc-btn-whatsapp" href="{{ $whatsAppUrl }}">WhatsApp</a>
     @endif
 
     @if(!empty($copyLinkAction))

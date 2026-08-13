@@ -468,6 +468,12 @@
             border-color: #E5E7EB;
         }
 
+        .doc-btn-whatsapp {
+            border-color: rgba(201,168,76,.35);
+            background: rgba(201,168,76,.18);
+            color: var(--brown-900);
+        }
+
         /* Print & PDF */
         @media print {
             @page { size: A4; margin: 8mm; }
@@ -502,15 +508,16 @@
         .receipt-compact-wrapper {
             display: flex;
             justify-content: center;
-            padding: 16px;
+            padding: 24px 16px;
             background: #F3F4F6;
+            min-height: 100vh;
         }
 
         .receipt-compact-card {
             width: 100%;
-            max-width: 320px;
+            max-width: 380px;
             background: #ffffff;
-            border-radius: 16px;
+            border-radius: 20px;
             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
             overflow: hidden;
             font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
@@ -539,7 +546,8 @@
             font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.18em;
-            opacity: 0.9;
+            opacity: 1;
+            color: #ffffff;
         }
 
         .receipt-header-meta {
@@ -552,6 +560,13 @@
 
         .receipt-meta-sep {
             opacity: 0.5;
+        }
+
+        .receipt-brand {
+            font-size: 9px;
+            font-weight: 600;
+            opacity: 0.7;
+            letter-spacing: 0.04em;
         }
 
         .receipt-section {
@@ -641,8 +656,10 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 16px 20px;
-            background: #FAFBFC;
+            padding: 18px 20px;
+            background: #ffffff;
+            border-top: 1px dashed #E5E7EB;
+            border-bottom: 1px dashed #E5E7EB;
         }
 
         .receipt-qr-wrapper {
@@ -695,7 +712,7 @@
         }
 
         .receipt-total-value {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 800;
             color: #1E40AF;
         }
