@@ -8,9 +8,16 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class CustomerExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class CustomerExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithCustomValueBinder, WithTitle
 {
     public function query()
     {
@@ -37,7 +44,7 @@ class CustomerExport implements FromQuery, WithHeadings, WithMapping, WithStyles
     {
         return [
             $customer->name,
-            $customer->phone,
+            (string) $customer->phone,
             $customer->email,
             $customer->address,
             $customer->is_blacklisted ? 'Blacklist' : 'Aktif',
@@ -46,16 +53,83 @@ class CustomerExport implements FromQuery, WithHeadings, WithMapping, WithStyles
         ];
     }
 
+    public function bindValue(Cell $cell, $value)
+    {
+        if ($cell->getColumn() === 'B') {
+            $cell->setValueExplicit($value, DataType::TYPE_STRING);
+            return true;
+        }
+        return false;
+    }
+
     public function styles(Worksheet $sheet)
     {
-        return [
-            1 => [
-                'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
-                'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FF2563EB'],
+        $lastRow = $sheet->getHighestRow();
+
+        $sheet->getStyle('A1:G1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+                'size' => 11,
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '2563EB'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_MEDIUM,
+                    'color' => ['rgb' => '1D4ED8'],
                 ],
             ],
-        ];
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+        for ($row = 2; $row <= $lastRow; $row++) {
+            $sheet->getStyle("A{$row}:G{$row}")->applyFromArray([
+                'borders' => [
+                    'bottom' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => ['rgb' => 'E5E7EB'],
+                    ],
+                ],
+            ]);
+
+            if ($row % 2 === 0) {
+                $sheet->getStyle("A{$row}:G{$row}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'F9FAFB'],
+                    ],
+                ]);
+            }
+
+            $statusValue = $sheet->getCell("E{$row}")->getValue();
+            $color = ($statusValue === 'Aktif') ? '16A34A' : 'DC2626';
+            $bgColor = ($statusValue === 'Aktif') ? 'DCFCE7' : 'FEE2E2';
+            $sheet->getStyle("E{$row}")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => $color]],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => $bgColor],
+                ],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            ]);
+        }
+
+        $sheet->getStyle('G2:G' . $lastRow)->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->freezePane('A2');
+        $sheet->setAutoFilter($sheet->calculateWorksheetDimension());
+    }
+
+    public function title(): string
+    {
+        return 'Data Customer';
     }
 }
