@@ -12,12 +12,13 @@ use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class CustomerExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithCustomValueBinder, WithTitle
+class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithCustomValueBinder, WithTitle
 {
     public function query()
     {
@@ -53,13 +54,14 @@ class CustomerExport implements FromQuery, WithHeadings, WithMapping, WithStyles
         ];
     }
 
-    public function bindValue(Cell $cell, $value)
+    public function bindValue(Cell $cell, $value): bool
     {
         if ($cell->getColumn() === 'B') {
-            $cell->setValueExplicit($value, DataType::TYPE_STRING);
+            $cell->setValueExplicit((string) $value, DataType::TYPE_STRING);
             return true;
         }
-        return false;
+
+        return parent::bindValue($cell, $value);
     }
 
     public function styles(Worksheet $sheet)
