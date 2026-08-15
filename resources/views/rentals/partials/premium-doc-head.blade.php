@@ -873,6 +873,19 @@
             font-size: 8px;
             color: #94A3B8;
         }
+
+        .receipt-company-info {
+            text-align: center;
+            padding: 8px 0 4px 0;
+            border-top: 1px dashed #E5E7EB;
+            margin-top: 8px;
+        }
+
+        .receipt-company-line {
+            font-size: 10px;
+            color: #6B7280;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>

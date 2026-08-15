@@ -35,6 +35,11 @@
 
     $appName = \App\Services\SettingsService::get('app_name', 'SewaJas');
 
+    $companyAddress = \App\Services\SettingsService::get('company_address');
+    $companyPhone = \App\Services\SettingsService::get('company_phone');
+    $companyEmail = \App\Services\SettingsService::get('company_email');
+    $companyWebsite = \App\Services\SettingsService::get('company_website');
+
     $qrBase64 = null;
     try {
         $qrRoute = route('rentals.show', $rental);
@@ -139,6 +144,27 @@
 
         {{-- FOOTER --}}
         <div class="receipt-footer">
+            @if($companyAddress || $companyPhone || $companyEmail || $companyWebsite)
+            <div class="receipt-company-info">
+                @if($companyAddress)
+                <div class="receipt-company-line">{{ $companyAddress }}</div>
+                @endif
+                <div class="receipt-company-line">
+                    @if($companyPhone)
+                    {{ $companyPhone }}
+                    @endif
+                    @if(($companyPhone ?? null) && ($companyEmail ?? null))
+                    &nbsp;•&nbsp;
+                    @endif
+                    @if($companyEmail)
+                    {{ $companyEmail }}
+                    @endif
+                </div>
+                @if($companyWebsite)
+                <div class="receipt-company-line">{{ $companyWebsite }}</div>
+                @endif
+            </div>
+            @endif
             <div class="receipt-footer-text">
                 Receipt ini dibuat otomatis oleh {{ $appName }} — {{ $receiptDate }}
             </div>
