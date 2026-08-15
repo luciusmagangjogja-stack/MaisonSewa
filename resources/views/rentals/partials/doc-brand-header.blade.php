@@ -1,15 +1,15 @@
 @php
-    $brandName = $brandName ?? 'SewaJas';
-    $brandTagline = $brandTagline ?? 'Premium Suit Rental';
+    $brandName = $brandName ?? \App\Services\SettingsService::get('app_name', 'SewaJas');
+    $brandTagline = $brandTagline ?? \App\Services\SettingsService::get('company_tagline', 'Premium Suit Rental');
     $docLabel = $docLabel ?? 'INVOICE';
     $docNumberValue = $docNumberValue ?? ($invoice_number ?? ($rental->invoice_number ?? '-'));
     $docDateValue = $docDateValue ?? null;
     $qrRoute = $qrRoute ?? null;
 
-    $companyAddress = $companyAddress ?? ($rental->branch->address ?? '-');
-    $companyPhone = $companyPhone ?? ($rental->branch->phone ?? '-');
-    $companyEmail = $companyEmail ?? ($rental->branch->email ?? 'support@sewajas.id');
-    $companyWebsite = $companyWebsite ?? 'www.sewajas.id';
+    $companyAddress = $companyAddress ?? (\App\Services\SettingsService::get('company_address') ?: ($rental->branch->address ?? '-'));
+    $companyPhone = $companyPhone ?? (\App\Services\SettingsService::get('company_phone') ?: ($rental->branch->phone ?? '-'));
+    $companyEmail = $companyEmail ?? \App\Services\SettingsService::get('company_email', 'support@sewajas.id');
+    $companyWebsite = $companyWebsite ?? \App\Services\SettingsService::get('company_website', 'www.sewajas.id');
 
     $badgeText = $badgeText ?? ($status ?? 'UNPAID');
     $badgeVariant = $variant ?? 'unpaid';
@@ -24,9 +24,13 @@
     }
 
     $logoUrl = null;
-    $logoPath = public_path('assets/branding/logo.png');
-    if (file_exists($logoPath)) {
-        $logoUrl = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+    $logoPath = \App\Services\SettingsService::get('app_logo');
+    if ($logoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($logoPath)) {
+        $fullPath = storage_path('app/public/' . $logoPath);
+        if (file_exists($fullPath)) {
+            $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+            $logoUrl = 'data:image/' . $extension . ';base64,' . base64_encode(file_get_contents($fullPath));
+        }
     }
 
     $qrBase64 = null;

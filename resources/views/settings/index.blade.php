@@ -27,7 +27,7 @@
             </div>
 
             @php
-                $qrisPath = optional($settings->firstWhere('key', 'qris_image'))->value;
+                $qrisPath = $settings['qris_image'] ?? null;
                 $qrisUrl = '';
                 if ($qrisPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($qrisPath)) {
                     $fullPath = storage_path('app/public/' . $qrisPath);
@@ -111,19 +111,19 @@
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Nama Bank</label>
                     <input type="text" name="bank_name"
-                           value="{{ old('bank_name', optional($settings->firstWhere('key', 'bank_name'))->value) }}"
+                           value="{{ old('bank_name', $settings['bank_name'] ?? null) }}"
                            class="form-input" placeholder="Contoh: BCA">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Nomor Rekening</label>
                     <input type="text" name="bank_account"
-                           value="{{ old('bank_account', optional($settings->firstWhere('key', 'bank_account'))->value) }}"
+                           value="{{ old('bank_account', $settings['bank_account'] ?? null) }}"
                            class="form-input" placeholder="Contoh: 1234567890">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Atas Nama</label>
                     <input type="text" name="bank_holder"
-                           value="{{ old('bank_holder', optional($settings->firstWhere('key', 'bank_holder'))->value) }}"
+                           value="{{ old('bank_holder', $settings['bank_holder'] ?? null) }}"
                            class="form-input" placeholder="Contoh: PT SewaJas Indonesia">
                 </div>
             </div>
@@ -140,15 +140,9 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Nama Perusahaan</label>
-                    <input type="text" name="company_name"
-                           value="{{ old('company_name', optional($settings->firstWhere('key', 'company_name'))->value) }}"
-                           class="form-input" placeholder="Contoh: PT SewaJas Indonesia">
-                </div>
-                <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Tagline</label>
                     <input type="text" name="company_tagline"
-                           value="{{ old('company_tagline', optional($settings->firstWhere('key', 'company_tagline'))->value) }}"
+                           value="{{ old('company_tagline', $settings['company_tagline'] ?? null) }}"
                            class="form-input" placeholder="Contoh: Premium Suit Rental">
                 </div>
             </div>
@@ -156,78 +150,28 @@
             <div>
                 <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Alamat</label>
                 <textarea name="company_address" rows="2" class="form-input resize-none"
-                          placeholder="Alamat lengkap perusahaan">{{ old('company_address', optional($settings->firstWhere('key', 'company_address'))->value) }}</textarea>
+                           placeholder="Alamat lengkap perusahaan">{{ old('company_address', $settings['company_address'] ?? null) }}</textarea>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Telepon</label>
                     <input type="text" name="company_phone"
-                           value="{{ old('company_phone', optional($settings->firstWhere('key', 'company_phone'))->value) }}"
+                           value="{{ old('company_phone', $settings['company_phone'] ?? null) }}"
                            class="form-input" placeholder="Contoh: 021-12345678">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Email</label>
                     <input type="email" name="company_email"
-                           value="{{ old('company_email', optional($settings->firstWhere('key', 'company_email'))->value) }}"
+                           value="{{ old('company_email', $settings['company_email'] ?? null) }}"
                            class="form-input" placeholder="Contoh: info@sewajas.id">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Website</label>
                     <input type="text" name="company_website"
-                           value="{{ old('company_website', optional($settings->firstWhere('key', 'company_website'))->value) }}"
+                           value="{{ old('company_website', $settings['company_website'] ?? null) }}"
                            class="form-input" placeholder="Contoh: www.sewajas.id">
                 </div>
-            </div>
-        </div>
-
-        {{-- ─── LOGO PERUSAHAAN (INVOICE) ───────────────────── --}}
-        <div class="card p-6 space-y-4">
-            <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
-                <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
-                    <i data-lucide="file-text" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
-                </div>
-                <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Logo Perusahaan <span class="font-normal" style="color:var(--text-soft)">(untuk invoice)</span></h2>
-            </div>
-
-            @php
-                $companyLogoPath = optional($settings->firstWhere('key', 'company_logo'))->value;
-                $companyLogoUrl = '';
-                if ($companyLogoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($companyLogoPath)) {
-                    $fullPath = storage_path('app/public/' . $companyLogoPath);
-                    $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
-                    $companyLogoUrl = 'data:image/' . $extension . ';base64,' . base64_encode(file_get_contents($fullPath));
-                }
-            @endphp
-
-            <div x-data="imageUploadForm('{{ $companyLogoUrl }}')" class="space-y-3">
-                <div x-show="photoPreview || hasCurrentPhoto" class="relative" style="max-width: 200px;">
-                    <img :src="photoPreview || currentPhotoUrl" class="w-full rounded-xl border" style="border-color:var(--border)" alt="Preview Logo Perusahaan">
-                    <button type="button" @click="clearPhoto()"
-                            class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
-                            style="background: rgba(0,0,0,0.5)">
-                        <i data-lucide="x" class="w-3.5 h-3.5 text-white"></i>
-                    </button>
-                </div>
-
-                <div x-show="!photoPreview && !hasCurrentPhoto"
-                     class="border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors"
-                     style="border-color:var(--border); max-width: 280px;"
-                     @click="$refs.companyLogoInput.click()"
-                     @dragover.prevent="isDragging = true"
-                     @dragenter.prevent="isDragging = true"
-                     @dragleave.prevent="isDragging = false"
-                     @drop.prevent="isDragging = false; handleDrop($event)"
-                     :class="isDragging ? 'border-blue-500 bg-blue-50' : ''">
-                    <div class="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2" style="background:var(--secondary)">
-                        <i data-lucide="upload-cloud" class="w-5 h-5" style="color:var(--primary)"></i>
-                    </div>
-                    <p class="text-sm font-medium" style="color:var(--text-dark)">Klik atau seret logo perusahaan</p>
-                    <p class="text-xs mt-1" style="color:var(--text-soft)">PNG, JPG, WEBP — Maks. 2MB</p>
-                </div>
-
-                <input type="file" x-ref="companyLogoInput" name="company_logo" accept="image/*" class="hidden"
-                       @change="handlePhotoSelect($event)">
             </div>
         </div>
 
@@ -237,11 +181,15 @@
                 <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
                     <i data-lucide="palette" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
                 </div>
-                <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Logo & Nama Aplikasi <span class="font-normal" style="color:var(--text-soft)">(sidebar & login)</span></h2>
+                <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Logo & Nama Aplikasi <span class="font-normal" style="color:var(--text-soft)">(sidebar, login, dan invoice)</span></h2>
             </div>
 
+            <p class="text-xs" style="color:var(--text-soft)">
+                Gunakan gambar rasio 1:1 (persegi), minimal 200×200px, background transparan (PNG) untuk hasil terbaik di semua tampilan (sidebar, invoice, halaman login).
+            </p>
+
             @php
-                $appLogoPath = optional($settings->firstWhere('key', 'app_logo'))->value;
+                $appLogoPath = $settings['app_logo'] ?? null;
                 $appLogoUrl = '';
                 if ($appLogoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogoPath)) {
                     $fullPath = storage_path('app/public/' . $appLogoPath);
@@ -284,13 +232,13 @@
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Nama Aplikasi</label>
                     <input type="text" name="app_name"
-                           value="{{ old('app_name', optional($settings->firstWhere('key', 'app_name'))->value) }}"
+                           value="{{ old('app_name', $settings['app_name'] ?? null) }}"
                            class="form-input" placeholder="Contoh: SewaJas">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Tagline</label>
                     <input type="text" name="app_tagline"
-                           value="{{ old('app_tagline', optional($settings->firstWhere('key', 'app_tagline'))->value) }}"
+                           value="{{ old('app_tagline', $settings['app_tagline'] ?? null) }}"
                            class="form-input" placeholder="Contoh: RENTAL JAS">
                 </div>
             </div>
@@ -309,13 +257,13 @@
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Denda per Hari Telat (Rp)</label>
                     <input type="number" name="fine_per_day" min="0" step="1"
-                           value="{{ old('fine_per_day', optional($settings->firstWhere('key', 'fine_per_day'))->value ?? 0) }}"
+                           value="{{ old('fine_per_day', $settings['fine_per_day'] ?? 0) }}"
                            class="form-input" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Durasi Sewa Default (hari)</label>
                     <input type="number" name="rental_duration_days" min="0" step="1"
-                           value="{{ old('rental_duration_days', optional($settings->firstWhere('key', 'rental_duration_days'))->value ?? 3) }}"
+                           value="{{ old('rental_duration_days', $settings['rental_duration_days'] ?? 3) }}"
                            class="form-input" required>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 @php
     $outputMode = 'pdf';
-    $receiptPrintedBy = auth()->user()?->name ?? ($rental->createdBy?->name ?? \App\Services\SettingsService::get('company_name', 'SewaJas'));
+    $receiptPrintedBy = auth()->user()?->name ?? ($rental->createdBy?->name ?? \App\Services\SettingsService::get('app_name', 'SewaJas'));
     $receiptPrintedAt = now()->format('d M Y');
 @endphp
 

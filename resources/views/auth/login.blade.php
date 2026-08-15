@@ -7,6 +7,12 @@
         $appName = \App\Services\SettingsService::get('app_name', 'SewaJas');
         $appTagline = \App\Services\SettingsService::get('app_tagline', 'RENTAL JAS');
         $appLogo = \App\Services\SettingsService::get('app_logo');
+        $appLogoUrl = '';
+        if ($appLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo)) {
+            $fullPath = storage_path('app/public/' . $appLogo);
+            $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+            $appLogoUrl = 'data:image/' . $extension . ';base64,' . base64_encode(file_get_contents($fullPath));
+        }
     @endphp
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login — {{ $appName }}</title>
@@ -49,16 +55,20 @@
     {{-- Mobile top bar --}}
     <div class="lg:hidden fixed top-0 inset-x-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div class="flex items-center justify-between px-4 py-3">
-            <div class="flex items-center gap-2">
-                <div class="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
-                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 7h18l-1 14H4L3 7z"/>
-                        <path d="M7 7l1-4h8l1 4"/>
-                        <path d="M12 11v10"/>
-                        <path d="M8 21h8"/>
-                    </svg>
-                </div>
-                <div>
+                <div class="flex items-center gap-2">
+                    @if($appLogoUrl)
+                        <img src="{{ $appLogoUrl }}" alt="{{ $appName }} Logo" class="h-10 w-10 rounded-xl object-contain">
+                    @else
+                        <div class="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
+                            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 7h18l-1 14H4L3 7z"/>
+                                <path d="M7 7l1-4h8l1 4"/>
+                                <path d="M12 11v10"/>
+                                <path d="M8 21h8"/>
+                            </svg>
+                        </div>
+                    @endif
+                    <div>
                     <div class="font-extrabold leading-none">{{ $appName }}</div>
                     <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 leading-none mt-1">{{ $appTagline }}</div>
                 </div>
@@ -76,14 +86,18 @@
             <div class="relative z-10 flex flex-col justify-center w-full px-10 py-12 text-white">
                 <div class="max-w-md">
                     <div class="flex items-center gap-3">
-                        <div class="h-12 w-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
-                            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 7h18l-1 14H4L3 7z"/>
-                                <path d="M7 7l1-4h8l1 4"/>
-                                <path d="M12 11v10"/>
-                                <path d="M8 21h8"/>
-                            </svg>
-                        </div>
+                        @if($appLogoUrl)
+                            <img src="{{ $appLogoUrl }}" alt="{{ $appName }} Logo" class="h-12 w-12 rounded-2xl object-contain">
+                        @else
+                            <div class="h-12 w-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
+                                <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 7h18l-1 14H4L3 7z"/>
+                                    <path d="M7 7l1-4h8l1 4"/>
+                                    <path d="M12 11v10"/>
+                                    <path d="M8 21h8"/>
+                                </svg>
+                            </div>
+                        @endif
                         <div>
                             <div class="text-3xl font-extrabold leading-tight">
                                 {{ $appName }}

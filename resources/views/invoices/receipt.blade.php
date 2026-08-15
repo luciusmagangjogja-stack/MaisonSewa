@@ -3,7 +3,7 @@
 @include('rentals.partials.doc-parts-receipt', ['rental'=>$invoice, 'receipt'=>$payload])
 
 @php
-    $receiptPrintedBy = auth()->user()?->name ?? ($invoice->createdBy?->name ?? 'SewaJas System');
+    $receiptPrintedBy = auth()->user()?->name ?? ($invoice->createdBy?->name ?? \App\Services\SettingsService::get('app_name', 'SewaJas'));
     $receiptPrintedAt = now()->format('d M Y');
 @endphp
 @include('rentals.partials.doc-premium-footer', ['printedBy' => $receiptPrintedBy, 'printedAt' => $receiptPrintedAt])

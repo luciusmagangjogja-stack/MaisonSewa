@@ -13,7 +13,7 @@
         'overdue' => 'overdue',
         default => 'unpaid',
     };
-    $deposit = $rental->items->sum(fn($i) => $i->product?->deposit_price ?? 0);
+    $deposit = $rental->guarantees->where('type', 'deposit')->sum('deposit_amount');
     $lateFee = $rental->late_fee ?? 0;
     $damageFee = $rental->items->sum('damage_fee') ?? 0;
 @endphp
@@ -25,8 +25,6 @@
     'qrRoute' => \Illuminate\Support\Facades\URL::temporarySignedRoute('invoice.public', now()->addDays(30), ['rental' => $rental->id]),
     'companyAddress' => $rental->branch->address ?? '-',
     'companyPhone' => $rental->branch->phone ?? '-',
-    'companyEmail' => 'support@sewajas.id',
-    'companyWebsite' => 'www.sewajas.id',
     'companyWhatsApp' => $rental->branch->phone ?? '-',
     'companyInstagram' => '@sewajas',
     'status' => $paymentStatus,
@@ -68,6 +66,7 @@
                 'paidAmount' => $rental->paid_amount ?? 0,
                 'changeAmount' => $rental->change_amount ?? 0,
                 'remainingBalance' => max(0, ($rental->total_amount ?? 0) - ($rental->paid_amount ?? 0)),
+                'guaranteeType' => optional($rental->guarantees->first())->type,
             ])
         </td>
     </tr>
@@ -82,7 +81,7 @@
 </div>
 
 @php
-    $printedBy = auth()->user()?->name ?? ($rental->createdBy?->name ?? 'SewaJas System');
+    $printedBy = auth()->user()?->name ?? ($rental->createdBy?->name ?? \App\Services\SettingsService::get('app_name', 'SewaJas'));
     $printedAt = now()->format('d M Y');
 @endphp
 @include('rentals.partials.doc-premium-footer', ['printedBy' => $printedBy, 'printedAt' => $printedAt])

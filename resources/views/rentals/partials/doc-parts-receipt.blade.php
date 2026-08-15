@@ -30,7 +30,7 @@
 
     $totalAmount = (float) ($rental->total_amount ?? 0);
 
-    $createdByName = optional($rental->createdBy)->name ?? \App\Services\SettingsService::get('company_name', 'SewaJas');
+    $createdByName = optional($rental->createdBy)->name ?? \App\Services\SettingsService::get('app_name', 'SewaJas');
     $processedByName = optional($rental->returnedBy)->name ?? null;
 
     $appName = \App\Services\SettingsService::get('app_name', 'SewaJas');

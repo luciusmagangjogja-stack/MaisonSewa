@@ -14,7 +14,12 @@ class SettingsController extends Controller
             return [$item->key => $item->value];
         });
 
-        return view('settings.index', compact('settings'));
+        $response = response()->view('settings.index', compact('settings'));
+        $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+
+        return $response;
     }
 
     public function update(Request $request)
@@ -22,7 +27,6 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'fine_per_day'         => 'required|numeric|min:0',
             'rental_duration_days' => 'required|numeric|min:0',
-            'company_name'         => 'nullable|string|max:150',
             'company_tagline'      => 'nullable|string|max:150',
             'company_address'      => 'nullable|string|max:255',
             'company_phone'        => 'nullable|string|max:30',
@@ -36,28 +40,38 @@ class SettingsController extends Controller
         ]);
 
         $textFields = [
-            'fine_per_day', 'rental_duration_days', 'company_name', 'company_tagline',
+            'fine_per_day', 'rental_duration_days', 'company_tagline',
             'company_address', 'company_phone', 'company_email', 'company_website',
             'app_name', 'app_tagline', 'bank_name', 'bank_account', 'bank_holder',
         ];
 
         foreach ($textFields as $field) {
+            if (!$request->has($field)) {
+                continue;
+            }
+
             $value = $validated[$field] ?? null;
+
+            if ($value === null && DB::table('settings')->where('key', $field)->exists()) {
+                continue;
+            }
+
             DB::table('settings')->updateOrInsert(['key' => $field], ['value' => $value, 'updated_at' => now(), 'created_at' => now()]);
         }
 
-        if ($request->hasFile('company_logo')) {
-            $request->validate([
-                'company_logo' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
-            ]);
-            $this->handleFileUpload($request, 'company_logo', 'settings/company-logos');
-        }
+        if ($request->hasFile('company_logo') || $request->hasFile('app_logo')) {
+            $sourceField = $request->hasFile('company_logo') ? 'company_logo' : 'app_logo';
 
-        if ($request->hasFile('app_logo')) {
             $request->validate([
-                'app_logo' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+                $sourceField => 'image|mimes:jpeg,png,jpg,webp|max:2048',
             ]);
+
+            $sourceFile = $request->file($sourceField);
+            $request->files->set('app_logo', $sourceFile);
+
             $this->handleFileUpload($request, 'app_logo', 'settings/app-logos');
+
+            $request->files->remove('app_logo');
         }
 
         if ($request->hasFile('qris_image')) {

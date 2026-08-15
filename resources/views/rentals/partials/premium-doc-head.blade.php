@@ -1,5 +1,5 @@
 @php
-    $docTitle = $docTitle ?? \App\Services\SettingsService::get('company_name', 'SewaJas') . ' Document';
+    $docTitle = $docTitle ?? \App\Services\SettingsService::get('app_name', 'SewaJas') . ' Document';
     $outputMode = $outputMode ?? 'web';
 @endphp
 <!DOCTYPE html>
