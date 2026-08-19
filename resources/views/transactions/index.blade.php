@@ -31,7 +31,12 @@
                         <td class="font-bold">{{ $transaction->invoice_number }}</td>
                         <td>{{ optional($transaction->customer)->name }}</td>
                         <td>{{ $transaction->rental_status }}</td>
-                        <td>{{ $transaction->payment_status }}</td>
+                        <td>
+                            {{ $transaction->payment_status }}
+                            @if($transaction->fine_status === 'unpaid' || $transaction->fine_status === 'partial')
+                                <span class="badge badge-yellow text-[10px] ml-1">Denda</span>
+                            @endif
+                        </td>
                         <td>
                             <a class="action-btn" href="{{ route('transactions.show',$transaction) }}" title="Detail">
                                 <i data-lucide="eye" class="w-4 h-4"></i>

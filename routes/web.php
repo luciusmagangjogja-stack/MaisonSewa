@@ -14,7 +14,6 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BroadcastController;
 use App\Http\Controllers\SearchController;
-use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TransactionController;
 
@@ -109,7 +108,6 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
         Route::patch('/{rental}/handover', [RentalController::class, 'handoverRental'])->name('handover');
         Route::patch('/{rental}/update-status', [RentalController::class, 'updateStatus'])->name('update-status');
         Route::patch('/{rental}/confirm-return-ajax', [RentalController::class, 'confirmReturnAjax'])->name('confirm-return-ajax');
-        Route::get('/{rental}/invoice', [RentalController::class, 'invoice'])->name('invoice');
         Route::get('/{rental}/thermal', [RentalController::class, 'thermalPrint'])->name('thermal');
         Route::get('/{rental}/pdf', [RentalController::class, 'exportPdf'])->name('pdf');
         Route::get('/{rental}/whatsapp', [RentalController::class, 'whatsapp'])->name('whatsapp');
@@ -192,24 +190,9 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
     });
 });
 
-// ─── SUPER ADMIN MODULES (Invoice/Payment/Transaction) ────────────────
+    // ─── SUPER ADMIN MODULES (Payment/Transaction) ─────────────────────
 Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->group(function () {
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':super_admin')->group(function () {
-        Route::prefix('invoices')->name('invoices.')->group(function () {
-            Route::get('/', [InvoiceController::class, 'index'])->name('index');
-            Route::get('/{invoice}', [InvoiceController::class, 'show'])->name('show');
-            Route::get('/{invoice}/edit', [InvoiceController::class, 'edit'])->name('edit');
-            Route::patch('/{invoice}', [InvoiceController::class, 'update'])->name('update');
-            Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->name('destroy');
-            Route::patch('/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('cancel');
-            Route::patch('/{invoice}/void', [InvoiceController::class, 'void'])->name('void');
-            Route::get('/{invoice}/print', [InvoiceController::class, 'print'])->name('print');
-            Route::get('/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('pdf');
-            Route::get('/{invoice}/qr', [InvoiceController::class, 'qr'])->name('qr');
-            Route::get('/{invoice}/whatsapp', [InvoiceController::class, 'whatsapp'])->name('whatsapp');
-            Route::get('/{invoice}/receipt', [InvoiceController::class, 'receipt'])->name('receipt');
-        });
-
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::post('/{invoice}/store', [PaymentController::class, 'store'])->name('store');
             Route::patch('/{invoice}/{payment}', [PaymentController::class, 'update'])->name('update');
@@ -232,6 +215,3 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
 Route::middleware(['auth'])->prefix('commissions')->name('commissions.')->group(function () {
     Route::get('/', [\App\Http\Controllers\CommissionController::class, 'index'])->name('index');
 });
-
-// ─── PUBLIC INVOICE VIEW ──────────────────────────────────────
-Route::get('/invoice/{rental}', [\App\Http\Controllers\InvoicePublicController::class, 'show'])->name('invoice.public')->middleware('signed');

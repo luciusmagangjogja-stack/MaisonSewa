@@ -363,11 +363,91 @@
                         <i data-lucide="trash-2" class="w-4 h-4"></i> Hapus Produk
                     </button>
                     @endif
+
+                    @if (auth()->user()->isSales())
+                    <button type="button" onclick="openStockModal()" class="btn-primary w-full justify-center">
+                        <i data-lucide="package" class="w-4 h-4"></i> Update Stok
+                    </button>
+                    @endif
                 </div>
 
             </div>
         </div>
     </div>
+
+    {{-- Modal Update Stok (untuk Sales) --}}
+    @if (auth()->user()->isSales())
+    <div id="stock-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold" style="color: var(--text-dark)">Update Stok Produk</h3>
+                <button type="button" onclick="closeStockModal()" class="rounded-lg p-1 hover:bg-slate-100">
+                    <i data-lucide="x" class="w-5 h-5" style="color: var(--text-soft)"></i>
+                </button>
+            </div>
+
+            <div class="mb-4 p-4 rounded-xl bg-slate-50">
+                <p class="text-sm font-semibold" style="color: var(--text-dark)">{{ $product->name }}</p>
+                <p class="text-xs mt-1" style="color: var(--text-soft)">Stok Total: {{ $product->stock_total }} | Stok Tersedia Saat Ini: {{ $product->stock_available }}</p>
+            </div>
+
+            <form method="POST" action="{{ route('products.update-stock', $product) }}" id="stock-update-form">
+                @csrf
+                @method('PATCH')
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">
+                            Stok Tersedia Baru <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" name="stock_available" id="stock_available_input"
+                               value="{{ $product->stock_available }}"
+                               min="0" max="{{ $product->stock_total }}"
+                               class="form-input @error('stock_available') border-red-400 @enderror"
+                               required>
+                        <p class="text-xs mt-1" style="color: var(--text-soft)">Maksimal: {{ $product->stock_total }}</p>
+                        @error('stock_available')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Catatan Perubahan (opsional)</label>
+                        <textarea name="stock_note" rows="2" class="form-input resize-none text-sm" placeholder="Contoh: Stok bertambah karena retur..."></textarea>
+                        @error('stock_note')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 mt-6">
+                    <button type="button" onclick="closeStockModal()" class="btn-secondary">Batal</button>
+                    <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openStockModal() {
+            const modal = document.getElementById('stock-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeStockModal() {
+            const modal = document.getElementById('stock-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('stock-update-form')?.addEventListener('submit', function(e) {
+            const input = document.getElementById('stock_available_input');
+            const max = parseInt(input.getAttribute('max'), 10);
+            if (parseInt(input.value, 10) > max) {
+                e.preventDefault();
+                alert('Stok tersedia tidak boleh melebihi stok total (' + max + ')');
+                input.focus();
+            }
+        });
+    </script>
+    @endif
 
     @push('scripts')
         <script>

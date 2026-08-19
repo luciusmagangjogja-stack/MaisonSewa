@@ -85,6 +85,21 @@
                         </div>
                         @error('phone')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
+
+                    @if($user->role === 'sales')
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">
+                            Rate Komisi (%) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" name="commission_rate" value="{{ old('commission_rate', $user->commission_rate ?? 5) }}" min="5" step="0.01"
+                                   class="form-input pr-10 @error('commission_rate') border-red-400 @enderror" style="padding-right: 40px !important">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium" style="color:var(--text-soft)">%</span>
+                        </div>
+                        <p class="text-xs mt-1" style="color:var(--text-soft)">Minimal 5%. Komisi dihitung dari (subtotal - diskon) × rate.</p>
+                        @error('commission_rate')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                    </div>
+                    @endif
                 </div>
 
                 {{-- Password --}}

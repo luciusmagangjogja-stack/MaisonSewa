@@ -91,6 +91,7 @@ class UserController extends Controller
             'phone'     => 'nullable|string|max:20',
             'branch_id' => 'nullable|exists:branches,id',
             'role'      => 'required|in:super_admin,admin_toko,sales',
+            'commission_rate' => 'nullable|numeric|min:5',
             'avatar'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
@@ -102,7 +103,7 @@ class UserController extends Controller
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
         }
 
-        $user->update([
+        $updateData = [
             'name'      => $data['name'],
             'email'     => $data['email'],
             'phone'     => $data['phone'] ?? null,
@@ -110,7 +111,13 @@ class UserController extends Controller
             'role'      => $data['role'],
             'avatar'    => $avatarPath,
             'password'  => !empty($data['password']) ? Hash::make($data['password']) : $user->password,
-        ]);
+        ];
+
+        if ($data['role'] === 'sales') {
+            $updateData['commission_rate'] = $data['commission_rate'] ?? 5;
+        }
+
+        $user->update($updateData);
 
         return redirect()->route('users.index')
             ->with('success', "User {$user->name} berhasil diperbarui!");

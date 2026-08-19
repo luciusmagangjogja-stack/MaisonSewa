@@ -11,6 +11,9 @@
                 'invoice_number' => $rental->invoice_number,
                 'rental_status' => $rental->rental_status,
                 'payment_status' => $rental->payment_status,
+                'fine_status' => $rental->fine_status,
+                'fine_amount' => (float) ($rental->fine_amount ?? 0),
+                'fine_paid_amount' => (float) ($rental->fine_paid_amount ?? 0),
                 'returned_at' => $rental->returned_at?->format('d M Y H:i'),
                 'returned_by' => optional($rental->returnedBy)->name ?? optional($rental->createdBy)->name,
                 'created_by' => optional($rental->createdBy)->name,
@@ -118,6 +121,9 @@
                     <div class="flex flex-wrap gap-3 items-center">
                         <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold" :class="badgeClass(rental.rental_status, 'rental')" x-text="statusBadgeText(rental.rental_status, 'rental')"></span>
                         <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold" :class="badgeClass(rental.payment_status, 'payment')" x-text="statusBadgeText(rental.payment_status, 'payment')"></span>
+                        <template x-if="rental.fine_status === 'unpaid' || rental.fine_status === 'partial'">
+                            <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-amber-100 text-amber-700">Ada Denda Belum Dibayar</span>
+                        </template>
                         <a href="{{ route('rentals.scan') }}" class="inline-flex items-center px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 text-sm font-semibold transition-all">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -492,12 +498,20 @@
                                 <span class="font-semibold text-slate-900" x-text="fmt(rental.discount || 0)"></span>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-slate-600">Denda Terlambat</span>
-                                <span class="font-semibold" :class="(rental.late_fee || 0) > 0 ? 'text-red-600' : 'text-slate-900'" x-text="fmt(rental.late_fee || 0)"></span>
+                                <span class="text-slate-600">Sewa (tagihan)</span>
+                                <span class="font-semibold text-slate-900" x-text="fmt(rental.total_amount || 0)"></span>
                             </div>
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-slate-600">Denda Kerusakan</span>
-                                <span class="font-semibold" :class="totalDenda > 0 ? 'text-red-600' : 'text-slate-900'" x-text="fmt(totalDenda)"></span>
+                            <div class="flex items-center justify-between text-sm" x-show="rental.fine_amount > 0">
+                                <span class="text-slate-600">Denda</span>
+                                <span class="font-semibold text-red-600" x-text="fmt(rental.fine_amount || 0)"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm" x-show="rental.total_amount > 0">
+                                <span class="text-slate-600">Status Sewa</span>
+                                <span class="font-semibold" :class="paymentStatusClass(rental.payment_status)" x-text="paymentStatusLabel(rental.payment_status)"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm" x-show="rental.fine_amount > 0">
+                                <span class="text-slate-600">Status Denda</span>
+                                <span class="font-semibold" :class="fineStatusClass(rental.fine_status)" x-text="fineStatusLabel(rental.fine_status)"></span>
                             </div>
                             <div class="border-t border-slate-200 pt-3">
                                 <div class="flex items-center justify-between">
@@ -508,10 +522,11 @@
                                     <span class="text-slate-600">Sudah Dibayar</span>
                                     <span class="font-semibold text-slate-900" x-text="fmt(rental.paid_amount)"></span>
                                 </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-slate-600">Sisa</span>
+                                <div class="mt-2 flex items-center justify-between text-sm">
+                                    <span class="text-slate-600">Sisa Sewa</span>
                                     <span class="font-semibold text-slate-900" x-text="fmt(rental.remaining_amount || 0)"></span>
                                 </div>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -585,11 +600,11 @@
                 },
 
                 get displayFine() {
-                    return Number((this.rental?.late_fee || 0)) + Number(this.totalDenda || 0);
+                    return Number(this.rental?.fine_amount || 0);
                 },
 
                 get displayGrandTotal() {
-                    return Number((this.rental?.total_amount || 0)) + Number(this.totalDenda || 0);
+                    return Number(this.rental?.total_amount || 0) + Number(this.rental?.fine_amount || 0);
                 },
 
                 progressStepClass(step) {
@@ -634,6 +649,32 @@
                         if (status === 'cancelled') return 'Dibatalkan';
                     }
                     return status;
+                },
+
+                paymentStatusLabel(status) {
+                    if (status === 'paid') return 'LUNAS';
+                    if (status === 'partial') return 'SEBAGIAN';
+                    return 'BELUM BAYAR';
+                },
+
+                paymentStatusClass(status) {
+                    if (status === 'paid') return 'text-green-600';
+                    if (status === 'partial') return 'text-amber-600';
+                    return 'text-red-600';
+                },
+
+                fineStatusLabel(status) {
+                    if (status === 'paid') return 'LUNAS';
+                    if (status === 'partial') return 'SEBAGIAN';
+                    if (status === 'unpaid') return 'BELUM DIBAYAR';
+                    return '-';
+                },
+
+                fineStatusClass(status) {
+                    if (status === 'paid') return 'text-green-600';
+                    if (status === 'partial') return 'text-amber-600';
+                    if (status === 'unpaid') return 'text-red-600';
+                    return 'text-slate-500';
                 },
 
                 setItemCondition(itemId, condition) {

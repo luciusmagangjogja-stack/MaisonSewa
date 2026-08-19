@@ -37,7 +37,6 @@
 
     $companyAddress = \App\Services\SettingsService::get('company_address');
     $companyPhone = \App\Services\SettingsService::get('company_phone');
-    $companyEmail = \App\Services\SettingsService::get('company_email');
     $companyWebsite = \App\Services\SettingsService::get('company_website');
 
     $qrBase64 = null;
@@ -144,7 +143,7 @@
 
         {{-- FOOTER --}}
         <div class="receipt-footer">
-            @if($companyAddress || $companyPhone || $companyEmail || $companyWebsite)
+            @if($companyAddress || $companyPhone || $companyWebsite)
             <div class="receipt-company-info">
                 @if($companyAddress)
                 <div class="receipt-company-line">{{ $companyAddress }}</div>
@@ -152,12 +151,6 @@
                 <div class="receipt-company-line">
                     @if($companyPhone)
                     {{ $companyPhone }}
-                    @endif
-                    @if(($companyPhone ?? null) && ($companyEmail ?? null))
-                    &nbsp;•&nbsp;
-                    @endif
-                    @if($companyEmail)
-                    {{ $companyEmail }}
                     @endif
                 </div>
                 @if($companyWebsite)

@@ -130,6 +130,9 @@
     <div class="text-right flex-shrink-0">
         <p class="font-bold text-sm" style="color:var(--text-dark)">Rp {{ number_format($rental->total_amount, 0, ',', '.') }}</p>
         <span class="badge {{ match($rental->payment_status) { 'paid' => 'badge-green', 'partial' => 'badge-yellow', default => 'badge-red' } }} text-[10px] mt-1">{{ $rental->payment_status_label }}</span>
+        @if($rental->fine_status === 'unpaid' || $rental->fine_status === 'partial')
+            <span class="badge badge-yellow text-[10px] mt-1 ml-1">Ada Denda</span>
+        @endif
     </div>
 </div>
 @empty

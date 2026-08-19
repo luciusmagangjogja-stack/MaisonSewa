@@ -30,7 +30,6 @@ class SettingsController extends Controller
             'company_tagline'      => 'nullable|string|max:150',
             'company_address'      => 'nullable|string|max:255',
             'company_phone'        => 'nullable|string|max:30',
-            'company_email'        => 'nullable|email|max:100',
             'company_website'      => 'nullable|string|max:150',
             'app_name'             => 'nullable|string|max:50',
             'app_tagline'          => 'nullable|string|max:100',
@@ -41,7 +40,7 @@ class SettingsController extends Controller
 
         $textFields = [
             'fine_per_day', 'rental_duration_days', 'company_tagline',
-            'company_address', 'company_phone', 'company_email', 'company_website',
+            'company_address', 'company_phone', 'company_website',
             'app_name', 'app_tagline', 'bank_name', 'bank_account', 'bank_holder',
         ];
 

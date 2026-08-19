@@ -17,6 +17,7 @@ class User extends Authenticatable
         'password',
         'role',
         'branch_id',
+        'commission_rate',
         'phone',
         'avatar',
         'is_active',

@@ -14,31 +14,31 @@ class PaymentController extends Controller
     public function store(Request $request, Rental $invoice)
     {
         $this->service->create($invoice, $request->all());
-        return redirect()->route('invoices.show', $invoice)->with('success', 'Pembayaran berhasil ditambahkan!');
+        return redirect()->route('rentals.show', $invoice)->with('success', 'Pembayaran berhasil ditambahkan!');
     }
 
     public function update(Request $request, Rental $invoice, Payment $payment)
     {
         $this->service->update($invoice, $payment, $request->all());
-        return redirect()->route('invoices.show', $invoice)->with('success', 'Pembayaran berhasil diperbarui!');
+        return redirect()->route('rentals.show', $invoice)->with('success', 'Pembayaran berhasil diperbarui!');
     }
 
     public function destroy(Rental $invoice, Payment $payment)
     {
         $this->service->delete($invoice, $payment);
-        return redirect()->route('invoices.show', $invoice)->with('success', 'Pembayaran berhasil dihapus!');
+        return redirect()->route('rentals.show', $invoice)->with('success', 'Pembayaran berhasil dihapus!');
     }
 
     public function void(Rental $invoice, Payment $payment)
     {
         $this->service->voidPayment($invoice, $payment);
-        return redirect()->route('invoices.show', $invoice)->with('success', 'Pembayaran berhasil di-void!');
+        return redirect()->route('rentals.show', $invoice)->with('success', 'Pembayaran berhasil di-void!');
     }
 
     public function refund(Rental $invoice, Payment $payment)
     {
         $this->service->refundPayment($invoice, $payment);
-        return redirect()->route('invoices.show', $invoice)->with('success', 'Pembayaran berhasil di-refund!');
+        return redirect()->route('rentals.show', $invoice)->with('success', 'Pembayaran berhasil di-refund!');
     }
 }
 

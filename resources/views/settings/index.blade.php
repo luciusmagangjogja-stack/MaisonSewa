@@ -160,13 +160,7 @@
                            value="{{ old('company_phone', $settings['company_phone'] ?? null) }}"
                            class="form-input" placeholder="Contoh: 021-12345678">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Email</label>
-                    <input type="email" name="company_email"
-                           value="{{ old('company_email', $settings['company_email'] ?? null) }}"
-                           class="form-input" placeholder="Contoh: info@sewajas.id">
-                </div>
-                <div>
+
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Website</label>
                     <input type="text" name="company_website"
                            value="{{ old('company_website', $settings['company_website'] ?? null) }}"

@@ -174,7 +174,7 @@
                         @endif
                     </div>
 
-                    <div class="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="absolute top-2 right-2 flex flex-col gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <a href="{{ route('products.show', $product) }}"
                            class="w-9 h-9 rounded-full bg-white flex items-center justify-center hover:scale-110 transition-transform"
                            title="Detail">

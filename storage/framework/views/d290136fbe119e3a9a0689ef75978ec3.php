@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title><?php echo $__env->yieldContent('title', 'SewaJas - Rental Jas Management'); ?></title>
+    <link rel="icon" type="image/x-icon" href="<?php echo e(asset('favicon.ico')); ?>">
 
     <!-- SewaJas Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,8 +29,8 @@
             ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'layout-dashboard', 'active' => 'dashboard', 'roles' => ['super_admin','admin_toko','sales']],
         ],
         'Operasional' => [
-['label' => 'Penyewaan', 'route' => 'rentals.index', 'icon' => 'shirt', 'active' => 'rentals.*', 'roles' => ['super_admin','admin_toko','sales']],
-            ['label' => 'Scan QR', 'route' => 'rentals.scan', 'icon' => 'scan-line', 'active' => 'rentals.scan*', 'roles' => ['super_admin','admin_toko','sales']],
+            ['label' => 'Penyewaan', 'route' => 'rentals.index', 'icon' => 'shirt', 'active' => ['rentals.index', 'rentals.create', 'rentals.store', 'rentals.show', 'rentals.edit', 'rentals.update', 'rentals.destroy', 'rentals.payment', 'rentals.payment.update', 'rentals.payment.destroy', 'rentals.payment.refund', 'rentals.payment.void', 'rentals.return', 'rentals.cancel-return', 'rentals.update-status', 'rentals.confirm-return-ajax', 'rentals.invoice', 'rentals.thermal', 'rentals.pdf', 'rentals.whatsapp', 'rentals.reminder', 'rentals.receipt.*', 'rentals.cancel'], 'roles' => ['super_admin','admin_toko','sales']],
+            ['label' => 'Scan QR', 'route' => 'rentals.scan', 'icon' => 'scan-line', 'active' => ['rentals.scan', 'rentals.scan.show'], 'roles' => ['super_admin','admin_toko','sales']],
             ['label' => 'Broadcast', 'route' => 'broadcasts.index', 'icon' => 'send', 'active' => 'broadcasts.*', 'roles' => ['super_admin','admin_toko']],
         ],
         'Master Data' => [
@@ -71,18 +72,32 @@
         <div class="flex h-full flex-col">
             <!-- Brand -->
             <div class="flex items-center gap-3 border-b border-slate-700 px-5 py-4" style="min-height:72px; background:#0f172a;">
-                <div class="h-11 w-11 items-center justify-center rounded-2xl flex" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; box-shadow: 0 10px 35px rgba(37,99,235,0.25);">
-                    <!-- Blazer Icon SVG -->
-                    <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 7h18l-1 14H4L3 7z"/>
-                        <path d="M7 7l1-4h8l1 7"/>
-                        <path d="M12 11v10"/>
-                        <path d="M8 21h8"/>
-                    </svg>
-                </div>
+                <?php
+                    $appLogo = \App\Services\SettingsService::get('app_logo');
+                    $appName = \App\Services\SettingsService::get('app_name', 'SewaJas');
+                    $appTagline = \App\Services\SettingsService::get('app_tagline', 'RENTAL JAS');
+                ?>
+                <?php if($appLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo)): ?>
+                    <?php
+                        $fullPath = storage_path('app/public/' . $appLogo);
+                        $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+                        $appLogoUrl = 'data:image/' . $extension . ';base64,' . base64_encode(file_get_contents($fullPath));
+                    ?>
+                    <img src="<?php echo e($appLogoUrl); ?>" alt="<?php echo e($appName); ?>" class="h-9 w-9 rounded-xl object-contain">
+                <?php else: ?>
+                    <div class="h-11 w-11 items-center justify-center rounded-2xl flex" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; box-shadow: 0 10px 35px rgba(37,99,235,0.25);">
+                        <!-- Blazer Icon SVG -->
+                        <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7h18l-1 14H4L3 7z"/>
+                            <path d="M7 7l1-4h8l1 7"/>
+                            <path d="M12 11v10"/>
+                            <path d="M8 21h8"/>
+                        </svg>
+                    </div>
+                <?php endif; ?>
                 <div class="min-w-0">
-                    <div class="text-base font-bold tracking-tight text-white truncate font-sans">SewaJas</div>
-                    <div class="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300">Rental Jas</div>
+                    <div class="text-base font-bold tracking-tight text-white truncate font-sans"><?php echo e($appName); ?></div>
+                    <div class="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300"><?php echo e($appTagline); ?></div>
                 </div>
                 <button type="button" @click="sidebarMobileOpen = false" class="ml-auto rounded-xl p-2 text-slate-400 hover:bg-white/10 lg:hidden">
                     <i data-lucide="x" class="h-5 w-5"></i>
@@ -269,7 +284,7 @@
                     <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
                     <span class="text-[10px] font-bold">Dashboard</span>
                 </a>
-                <a href="<?php echo e(route('rentals.scan')); ?>" class="ds-hover-lift flex flex-col items-center justify-center gap-1 rounded-[16px] py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white border border-blue-200 hover:shadow-md hover:shadow-blue-200">
+                <a href="<?php echo e(route('rentals.scan')); ?>" class="ds-hover-lift flex flex-col items-center justify-center gap-1 rounded-[16px] py-2 <?php echo e(request()->routeIs('rentals.scan', 'rentals.scan.show') ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-transparent text-slate-500 hover:bg-blue-50 border border-transparent'); ?>" style="border-color: rgba(226,232,240,.95);">
                     <i data-lucide="scan-line" class="h-5 w-5"></i>
                     <span class="text-[10px] font-bold">Scan QR</span>
                 </a>

@@ -105,7 +105,7 @@ class ProductController extends Controller
             'stock_total' => 'required|integer|min:0',
             'stock_available' => 'required|integer|min:0',
             'condition' => 'required|in:excellent,good,fair,poor',
-            'status' => 'required|in:available,maintenance,inactive',
+            'status' => 'sometimes|in:available,maintenance,inactive',
             'notes' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
@@ -133,11 +133,43 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $user = Auth::user();
-        if (!$user || !$user->isSuperAdmin()) {
+        if (!$user || (!$user->isSuperAdmin() && !$user->isAdminToko() && !$user->isSales())) {
             abort(403, 'Unauthorized action.');
         }
+
         $product->load(['category', 'branch', 'rentalItems' => fn($q) => $q->with('rental.customer')->latest()->limit(10)]);
         return view('products.show', compact('product'));
+    }
+
+    public function updateStock(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'stock_available' => ['required', 'integer', 'min:0', 'lte:' . $product->stock_total],
+            'stock_note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $oldStock = $product->stock_available;
+        $product->update([
+            'stock_available' => $validated['stock_available'],
+        ]);
+
+        $newStock = $validated['stock_available'];
+        $note = $validated['stock_note'] ?? null;
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'branch_id' => Auth::user()->branch_id,
+            'action' => 'update_product_stock',
+            'model_type' => Product::class,
+            'model_id' => $product->id,
+            'description' => Auth::user()->name . ' mengubah stok produk ' . $product->name . ' dari ' . $oldStock . ' menjadi ' . $newStock . ($note ? ' (' . $note . ')' : ''),
+            'old_values' => ['stock_available' => $oldStock],
+            'new_values' => ['stock_available' => $newStock, 'stock_note' => $note],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Stok berhasil diperbarui dari ' . $oldStock . ' menjadi ' . $newStock . '!');
     }
 
     public function edit(Product $product)

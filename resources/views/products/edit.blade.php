@@ -185,7 +185,7 @@
             <div class="space-y-6">
 
                 {{-- Foto Produk --}}
-                <div class="card p-6 space-y-4">
+                <div class="card p-6 space-y-4" x-data="productPhotoForm()">
                     <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
                         <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
                             <i data-lucide="image" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
@@ -193,23 +193,39 @@
                         <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Foto Produk</h2>
                     </div>
 
-                    {{-- Existing image --}}
-                  @if($product->photo)
-    <img id="preview-img" src="{{ $product->photo_url }}" alt="{{ $product->name }}"
-         class="w-full h-40 object-cover rounded-xl">
-@endif
+                    <div x-show="photoPreview || hasCurrentPhoto" class="relative" style="aspect-ratio: 3/4; max-height: 320px;">
+                        <img :src="photoPreview || currentPhotoUrl" class="w-full h-full object-cover rounded-xl" alt="Preview foto produk">
 
+                        <button type="button" @click="clearPhoto()"
+                                class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
+                                style="background: rgba(0,0,0,0.5)">
+                            <i data-lucide="x" class="w-3.5 h-3.5 text-white"></i>
+                        </button>
 
-                    <div id="drop-zone"
-                         class="border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors"
-                         style="border-color:var(--border)"
-                         onclick="document.getElementById('image-input').click()">
-                        <p class="text-sm" style="color:var(--text-soft)">
-                            <span class="font-medium" style="color:var(--primary)">Klik</span> atau seret foto baru
-                        </p>
-                        <p class="text-xs mt-0.5" style="color:var(--text-soft)">PNG, JPG, WEBP — Maks. 2MB</p>
-                        <input type="file" id="image-input" name="image" accept="image/*" class="hidden">
+                        <button type="button" @click="$refs.photoInput.click()"
+                                class="absolute bottom-2 right-2 btn-secondary text-xs px-2 py-1">
+                            Ganti Foto
+                        </button>
                     </div>
+
+                    <div x-show="!photoPreview && !hasCurrentPhoto"
+                         class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors"
+                         style="border-color:var(--border)"
+                         @click="$refs.photoInput.click()"
+                         @dragover.prevent="isDragging = true"
+                         @dragenter.prevent="isDragging = true"
+                         @dragleave.prevent="isDragging = false"
+                         @drop.prevent="isDragging = false; handleDrop($event)"
+                         :class="isDragging ? 'border-blue-500 bg-blue-50' : ''">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style="background:var(--secondary)">
+                            <i data-lucide="upload-cloud" class="w-6 h-6" style="color:var(--primary)"></i>
+                        </div>
+                        <p class="text-sm font-medium" style="color:var(--text-dark)">Klik atau seret foto ke sini</p>
+                        <p class="text-xs mt-1" style="color:var(--text-soft)">PNG, JPG, WEBP — Maks. 2MB</p>
+                    </div>
+
+                    <input type="file" x-ref="photoInput" name="image" accept="image/*" class="hidden"
+                           @change="handlePhotoSelect($event)">
                     @error('image')<p class="text-xs text-red-500">{{ $message }}</p>@enderror
                 </div>
 
@@ -223,12 +239,20 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Status</label>
-                        <select name="status" class="form-input @error('status') border-red-400 @enderror">
-                            <option value="available"   {{ old('status', $product->status) === 'available'   ? 'selected' : '' }}>Tersedia</option>
-                            <option value="rented"      {{ old('status', $product->status) === 'rented'      ? 'selected' : '' }}>Disewa</option>
-                            <option value="maintenance" {{ old('status', $product->status) === 'maintenance' ? 'selected' : '' }}>Maintenance</option>
-                        </select>
-                        @error('status')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        @if($product->status === 'rented')
+                            <div class="form-input bg-slate-100 text-slate-500 cursor-not-allowed flex items-center justify-between">
+                                <span>Disewa</span>
+                                <span class="text-xs font-medium" style="color:var(--text-soft)">Otomatis — sedang dalam transaksi aktif</span>
+                            </div>
+                            <p class="text-xs mt-1" style="color:var(--text-soft)">Status otomatis berdasarkan rental aktif dan tidak dapat diubah manual.</p>
+                        @else
+                            <select name="status" class="form-input @error('status') border-red-400 @enderror">
+                                <option value="available"   {{ old('status', $product->status) === 'available'   ? 'selected' : '' }}>Tersedia</option>
+                                <option value="maintenance" {{ old('status', $product->status) === 'maintenance' ? 'selected' : '' }}>Maintenance</option>
+                                <option value="inactive"    {{ old('status', $product->status) === 'inactive'    ? 'selected' : '' }}>Tidak Aktif</option>
+                            </select>
+                            @error('status')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        @endif
                     </div>
                 </div>
 
@@ -274,40 +298,42 @@
 
 @push('scripts')
 <script>
-    lucide.createIcons();
+function productPhotoForm() {
+    return {
+        photoPreview: null,
+        hasCurrentPhoto: {{ $product->photo ? 'true' : 'false' }},
+        currentPhotoUrl: '{{ $product->photo ? asset("storage/".$product->photo) : "" }}',
+        isDragging: false,
 
-    const input    = document.getElementById('image-input');
-    const prevImg  = document.getElementById('preview-img');
-    const prevWrap = document.getElementById('preview-wrap');
-    const dropZone = document.getElementById('drop-zone');
+        handlePhotoSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                this.photoPreview = e.target.result;
+                this.hasCurrentPhoto = true;
+            };
+            reader.readAsDataURL(file);
+        },
 
-    input.addEventListener('change', function () {
-        showPreview(this.files[0]);
-    });
+        handleDrop(event) {
+            const file = event.dataTransfer.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                this.photoPreview = e.target.result;
+                this.hasCurrentPhoto = true;
+            };
+            reader.readAsDataURL(file);
+        },
 
-    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--primary)'; });
-    dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--border)'; });
-    dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropZone.style.borderColor = 'var(--border)';
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            input.files = dt.files;
-            showPreview(file);
-        }
-    });
-
-    function showPreview(file) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            prevImg.src = e.target.result;
-            if (prevWrap) prevWrap.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
+        clearPhoto() {
+            this.photoPreview = null;
+            this.hasCurrentPhoto = false;
+            this.$refs.photoInput.value = '';
+        },
+    };
+}
 </script>
 @endpush
 @endsection

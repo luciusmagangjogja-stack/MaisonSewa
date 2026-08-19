@@ -20,6 +20,7 @@ class Rental extends Model
         'payment_status', 'payment_method', 'rental_status', 'qr_code', 'notes',
         'cancellation_reason', 'cancelled_at', 'returned_at',
         'return_condition', 'return_notes', 'overdue_days',
+        'fine_status', 'fine_amount', 'fine_paid_amount',
     ];
 
     protected $casts = [
@@ -34,6 +35,8 @@ class Rental extends Model
         'total_amount'       => 'decimal:2',
         'paid_amount'        => 'decimal:2',
         'change_amount'      => 'decimal:2',
+        'fine_amount'        => 'decimal:2',
+        'fine_paid_amount'   => 'decimal:2',
     ];
 
     const STATUS_WAITING   = 'waiting';
@@ -45,6 +48,11 @@ class Rental extends Model
     const PAYMENT_UNPAID  = 'unpaid';
     const PAYMENT_PARTIAL = 'partial';
     const PAYMENT_PAID    = 'paid';
+
+    const FINE_NONE    = 'none';
+    const FINE_UNPAID  = 'unpaid';
+    const FINE_PARTIAL = 'partial';
+    const FINE_PAID    = 'paid';
 
     // ─── RELATIONSHIPS ────────────────────────────────────────────────────
 
