@@ -158,12 +158,6 @@
                 @endif
             </div>
             @endif
-            <div class="receipt-footer-text">
-                Receipt ini dibuat otomatis oleh {{ $appName }} — {{ $receiptDate }}
-            </div>
-            <div class="receipt-footer-note">
-                Scan QR untuk melihat detail rental di sistem
-            </div>
         </div>
 
     </div>
