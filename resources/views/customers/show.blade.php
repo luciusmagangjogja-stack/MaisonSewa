@@ -90,8 +90,6 @@
             <div class="space-y-4">
                 <div><p class="text-xs text-stone-500 mb-1">Nama Lengkap</p><p class="text-sm font-semibold text-bark-dark">{{ $customer->name }}</p></div>
                 <div><p class="text-xs text-stone-500 mb-1">Nomor WhatsApp</p><p class="text-sm font-semibold text-bark-dark">{{ $customer->phone }}</p></div>
-                @if($customer->email) <div><p class="text-xs text-stone-500 mb-1">Email</p><p class="text-sm font-semibold text-bark-dark">{{ $customer->email }}</p></div> @endif
-                @if($customer->address) <div><p class="text-xs text-stone-500 mb-1">Alamat</p><p class="text-sm font-semibold text-bark-dark">{{ $customer->address }}</p></div> @endif
                 <hr class="border-cream-sand/50 my-3">
                 <div class="flex items-center justify-between gap-3">
                     <div><p class="text-xs text-stone-500 mb-1">Total Sewa</p><p class="text-lg font-bold text-bark-dark">{{ $customer->rentals->count() }}</p></div>

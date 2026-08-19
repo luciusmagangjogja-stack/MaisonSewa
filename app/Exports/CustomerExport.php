@@ -23,7 +23,7 @@ class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadin
     public function query()
     {
         return Customer::query()
-            ->select('id', 'name', 'phone', 'email', 'address', 'is_blacklisted', 'branch_id', 'created_at')
+            ->select('id', 'name', 'phone', 'is_blacklisted', 'branch_id', 'created_at')
             ->with('branch:id,name')
             ->orderByDesc('created_at');
     }
@@ -33,8 +33,6 @@ class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadin
         return [
             'Nama',
             'No. HP',
-            'Email',
-            'Alamat',
             'Status',
             'Cabang',
             'Tanggal Daftar',
@@ -46,14 +44,11 @@ class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadin
         return [
             $customer->name,
             (string) $customer->phone,
-            $customer->email,
-            $customer->address,
             $customer->is_blacklisted ? 'Blacklist' : 'Aktif',
             optional($customer->branch)->name,
             $customer->created_at?->format('d M Y'),
         ];
     }
-
     public function bindValue(Cell $cell, $value): bool
     {
         if ($cell->getColumn() === 'B') {
@@ -68,7 +63,7 @@ class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadin
     {
         $lastRow = $sheet->getHighestRow();
 
-        $sheet->getStyle('A1:G1')->applyFromArray([
+        $sheet->getStyle('A1:E1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -92,7 +87,7 @@ class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadin
         $sheet->getRowDimension(1)->setRowHeight(28);
 
         for ($row = 2; $row <= $lastRow; $row++) {
-            $sheet->getStyle("A{$row}:G{$row}")->applyFromArray([
+            $sheet->getStyle("A{$row}:E{$row}")->applyFromArray([
                 'borders' => [
                     'bottom' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -102,7 +97,7 @@ class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadin
             ]);
 
             if ($row % 2 === 0) {
-                $sheet->getStyle("A{$row}:G{$row}")->applyFromArray([
+                $sheet->getStyle("A{$row}:E{$row}")->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'F9FAFB'],
@@ -110,7 +105,7 @@ class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadin
                 ]);
             }
 
-            $statusValue = $sheet->getCell("E{$row}")->getValue();
+            $statusValue = $sheet->getCell("C{$row}")->getValue();
             $color = ($statusValue === 'Aktif') ? '16A34A' : 'DC2626';
             $bgColor = ($statusValue === 'Aktif') ? 'DCFCE7' : 'FEE2E2';
             $sheet->getStyle("E{$row}")->applyFromArray([
@@ -123,7 +118,7 @@ class CustomerExport extends DefaultValueBinder implements FromQuery, WithHeadin
             ]);
         }
 
-        $sheet->getStyle('G2:G' . $lastRow)->getAlignment()
+        $sheet->getStyle('E2:E' . $lastRow)->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->freezePane('A2');

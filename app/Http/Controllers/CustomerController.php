@@ -202,12 +202,10 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20', Rule::unique('customers', 'phone')->whereNull('deleted_at')],
-            'address' => ['nullable', 'string', 'max:500'],
             'notes' => ['nullable', 'string'],
         ], ['phone.unique' => "Nomor HP ini sudah terdaftar"]);
 
         $data = $validated;
-        $data['email'] = null;
         $data['is_blacklisted'] = false;
 
         if (Auth::check()) {
@@ -290,12 +288,10 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20', Rule::unique('customers', 'phone')->ignore($customer->id)->whereNull('deleted_at')],
-            'address' => ['nullable', 'string', 'max:500'],
             'notes' => ['nullable', 'string'],
         ]);
 
         $data = $validated;
-        $data['email'] = null;
 
         if (Auth::check()) {
             $user = Auth::user();
