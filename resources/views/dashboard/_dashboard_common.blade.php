@@ -62,7 +62,7 @@
                         <select id="filter-sales" class="px-3.5 py-2 rounded-2xl border border-slate-200 text-sm bg-white ds-transition">
                             <option value="">Semua Sales</option>
                             @foreach($sales ?? [] as $salesUser)
-                                <option value="{{ $salesUser->id }}">{{ $salesUser->name }}</option>
+                                <option value="{{ $salesUser->id }}" data-branch-id="{{ $salesUser->branch_id }}">{{ $salesUser->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -982,12 +982,33 @@
 
     function handleError() { showErrorState(); }
 
+    function filterSalesDropdownByBranch() {
+        const branchFilter = document.getElementById('filter-branch');
+        const salesFilter = document.getElementById('filter-sales');
+        if (!branchFilter || !salesFilter) return;
+
+        const selectedBranch = branchFilter.value;
+        const options = salesFilter.querySelectorAll('option[data-branch-id]');
+
+        options.forEach(option => {
+            const branchId = option.getAttribute('data-branch-id');
+            if (!selectedBranch || branchId === selectedBranch) {
+                option.hidden = false;
+            } else {
+                option.hidden = true;
+            }
+        });
+
+        salesFilter.value = '';
+    }
+
     function initDashboard() {
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
         }
 
         const tick = async () => {
+            filterSalesDropdownByBranch();
             try {
                 if (!firstLoadDone) {
                     showLoadingFirstTime();
@@ -1008,6 +1029,7 @@
         if (branchFilter) branchFilter.addEventListener('change', tick);
         if (salesFilter) salesFilter.addEventListener('change', tick);
 
+        filterSalesDropdownByBranch();
         tick();
         setInterval(tick, DASHBOARD_POLL_INTERVAL_MS);
     }
