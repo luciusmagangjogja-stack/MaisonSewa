@@ -1015,7 +1015,6 @@
         }
 
         const tick = async () => {
-            filterSalesDropdownByBranch();
             try {
                 if (!firstLoadDone) {
                     showLoadingFirstTime();
@@ -1033,7 +1032,10 @@
 
         const branchFilter = document.getElementById('filter-branch');
         const salesFilter = document.getElementById('filter-sales');
-        if (branchFilter) branchFilter.addEventListener('change', tick);
+        if (branchFilter) branchFilter.addEventListener('change', () => {
+            filterSalesDropdownByBranch();
+            tick();
+        });
         if (salesFilter) salesFilter.addEventListener('change', tick);
 
         filterSalesDropdownByBranch();
