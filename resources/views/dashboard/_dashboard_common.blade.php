@@ -62,7 +62,7 @@
                         <select id="filter-sales" class="px-3.5 py-2 rounded-2xl border border-slate-200 text-sm bg-white ds-transition">
                             <option value="">Semua Sales</option>
                             @foreach($sales ?? [] as $salesUser)
-                                <option value="{{ $salesUser->id }}" data-branch-id="{{ $salesUser->branch_id }}">{{ $salesUser->name }}</option>
+                                <option value="{{ $salesUser->id }}">{{ $salesUser->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -333,6 +333,10 @@
         </div>
     </div>
 </div>
+
+<script>
+    const DASHBOARD_SALES_DATA = @json($sales ?? []);
+</script>
 
 <script>
     const DASHBOARD_POLL_INTERVAL_MS = 10000;
@@ -988,15 +992,18 @@
         if (!branchFilter || !salesFilter) return;
 
         const selectedBranch = branchFilter.value;
-        const options = salesFilter.querySelectorAll('option[data-branch-id]');
+        const firstOption = salesFilter.querySelector('option[value=""]');
+        if (!firstOption) return;
 
-        options.forEach(option => {
-            const branchId = option.getAttribute('data-branch-id');
-            if (!selectedBranch || branchId === selectedBranch) {
-                option.hidden = false;
-            } else {
-                option.hidden = true;
-            }
+        salesFilter.innerHTML = '';
+        salesFilter.appendChild(firstOption);
+
+        const matches = DASHBOARD_SALES_DATA.filter(s => !selectedBranch || String(s.branch_id) === String(selectedBranch));
+        matches.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name;
+            salesFilter.appendChild(opt);
         });
 
         salesFilter.value = '';
