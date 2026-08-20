@@ -14,7 +14,7 @@ class Rental extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'invoice_number', 'branch_id', 'customer_id', 'created_by',
+        'invoice_number', 'branch_id', 'customer_id', 'created_by', 'returned_by',
         'rental_date', 'return_due_date', 'actual_return_date', 'duration_days',
         'subtotal', 'discount', 'late_fee', 'total_amount', 'paid_amount', 'change_amount',
         'payment_status', 'payment_method', 'rental_status', 'qr_code', 'notes',
