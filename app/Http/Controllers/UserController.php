@@ -91,7 +91,8 @@ class UserController extends Controller
             'phone'     => 'nullable|string|max:20',
             'branch_id' => 'nullable|exists:branches,id',
             'role'      => 'required|in:super_admin,admin_toko,sales',
-            'commission_rate' => 'nullable|numeric|min:5',
+            'commission_rate_serah'   => 'nullable|numeric|min:0',
+            'commission_rate_kembali' => 'nullable|numeric|min:0',
             'avatar'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
@@ -114,7 +115,8 @@ class UserController extends Controller
         ];
 
         if ($data['role'] === 'sales') {
-            $updateData['commission_rate'] = $data['commission_rate'] ?? 5;
+            $updateData['commission_rate_serah'] = $data['commission_rate_serah'] ?? 5;
+            $updateData['commission_rate_kembali'] = $data['commission_rate_kembali'] ?? 5;
         }
 
         $user->update($updateData);
