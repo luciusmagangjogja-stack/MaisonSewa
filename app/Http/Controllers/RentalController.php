@@ -66,7 +66,7 @@ class RentalController extends Controller
         })->get();
 
         $products = Product::when(!$user->isSuperAdmin(), function($q) use ($user) {
-            $q->where("branch_id", $user->branch_id);
+            $q->whereHas('branches', fn($bq) => $bq->where('branches.id', $user->branch_id));
         })->where("status", "available")->where("stock_available", ">", 0)->get();
 
         return view("rentals.create", compact("customers", "products"));

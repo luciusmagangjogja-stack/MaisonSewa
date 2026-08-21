@@ -96,6 +96,18 @@
                 <option value="{{ $sz }}" {{ request('size') === $sz ? 'selected' : '' }}>{{ $sz }}</option>
                 @endforeach
             </select>
+            @auth
+            @if(auth()->user()->isSuperAdmin())
+            <select name="branch_id" class="form-input sm:w-44">
+                <option value="">Semua Cabang</option>
+                @foreach($branches as $branch)
+                <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
+                    {{ $branch->name }}
+                </option>
+                @endforeach
+            </select>
+            @endif
+            @endauth
             <button type="submit" class="btn-primary whitespace-nowrap">
                 <i data-lucide="filter" class="w-4 h-4"></i> Filter
             </button>
@@ -245,6 +257,11 @@
                         <th class="text-left">Kategori</th>
                         <th class="text-center">Ukuran</th>
                         <th class="text-center">Warna</th>
+                        @auth
+                        @if(auth()->user()->isSuperAdmin())
+                        <th class="text-left">Cabang</th>
+                        @endif
+                        @endauth
                         <th class="text-center">Stok</th>
                         <th class="text-right">Harga Sewa</th>
                         <th class="text-center">Status</th>
@@ -284,6 +301,18 @@
                         <td class="text-center">
                             <span class="text-sm" style="color:var(--text-soft)">{{ $product->color ?? '-' }}</span>
                         </td>
+                        @auth
+                        @if(auth()->user()->isSuperAdmin())
+                        <td class="text-left">
+                            @foreach($product->branches as $branch)
+                                <span class="inline-block rounded-full bg-blue-50 text-blue-700 text-xs px-2 py-0.5 mb-1">{{ $branch->name }}</span>
+                            @endforeach
+                            @if($product->branches->isEmpty())
+                                <span class="text-xs text-slate-400">-</span>
+                            @endif
+                        </td>
+                        @endif
+                        @endauth
                         <td class="text-center">
                             <div class="text-sm font-medium" style="color:var(--text-dark)">
                                 {{ $product->stock_available }}/{{ $product->stock_total }}
