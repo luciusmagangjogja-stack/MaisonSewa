@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,27 +13,31 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-   public function index(Request $request)
- {
-     $user = Auth::user();
-     $query = Product::with(['category', 'branch'])
-         ->when(!$user->isSuperAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
-         ->when($request->category, fn($q) => $q->where('category_id', $request->category))
-         ->when($request->status, fn($q) => $q->where('status', $request->status))
-         ->when($request->size, fn($q) => $q->where('size', $request->size))
-         ->when(
-             $request->search,
-             fn($q) => $q->where(function ($q2) use ($request) {
-                 $q2->where('name', 'like', "%{$request->search}%")
-                     ->orWhere('code', 'like', "%{$request->search}%")
-                     ->orWhere('color', 'like', "%{$request->search}%");
-             }),
-         )
-         ->latest();
+  public function index(Request $request)
+  {
+      $user = Auth::user();
+      $query = Product::with(['category', 'branches'])
+          ->when(!$user->isSuperAdmin(), function($q) use ($user) {
+              $q->whereHas('branches', fn($bq) => $bq->where('branches.id', $user->branch_id));
+          })
+          ->when($request->category, fn($q) => $q->where('category_id', $request->category))
+          ->when($request->status, fn($q) => $q->where('status', $request->status))
+          ->when($request->size, fn($q) => $q->where('size', $request->size))
+          ->when($request->branch_id, fn($q) => $q->whereHas('branches', fn($bq) => $bq->where('branches.id', $request->branch_id)))
+          ->when(
+              $request->search,
+              fn($q) => $q->where(function ($q2) use ($request) {
+                  $q2->where('name', 'like', "%{$request->search}%")
+                      ->orWhere('code', 'like', "%{$request->search}%")
+                      ->orWhere('color', 'like', "%{$request->search}%");
+              }),
+          )
+          ->latest();
 
-     $products   = $query->paginate(16)->withQueryString();
-     $categories = Category::where('is_active', true)->get();
-     $stats = [
+      $products   = $query->paginate(16)->withQueryString();
+      $categories = Category::where('is_active', true)->get();
+      $branches = Branch::where('is_active', true)->get();
+      $stats = [
          'total' => (clone $query)->count(),
          'available' => (clone $query)->where('status', 'available')->count(),
          'maintenance' => (clone $query)->where('status', 'maintenance')->count(),
@@ -45,7 +50,8 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::where('is_active', true)->get();
-        return view('products.create', compact('categories'));
+        $branches = Branch::where('is_active', true)->get();
+        return view('products.create', compact('categories', 'branches'));
     }
 
     public function store(Request $request)
@@ -64,22 +70,33 @@ class ProductController extends Controller
         'status'        => 'required|in:available,maintenance,inactive',
         'notes'         => 'nullable|string',
         'image'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        'branch_ids'    => 'nullable|array',
+        'branch_ids.*'  => 'exists:branches,id',
     ]);
 
-    $user     = Auth::user();
-    $branchId = $user->branch_id ?? 1;
+    $user = Auth::user();
 
-    $data['branch_id']       = $branchId; // ✅ bukan $user->branch_id
+    // Tentukan branch_id legacy untuk kompatibilitas (prefix kode, dll)
+    if ($user->isSuperAdmin()) {
+        $branchIds = $request->filled('branch_ids') ? $request->input('branch_ids') : [$user->branch_id ?? 1];
+        $legacyBranchId = $branchIds[0];
+    } else {
+        $branchIds = [$user->branch_id];
+        $legacyBranchId = $user->branch_id;
+    }
+
+    $data['branch_id']       = $legacyBranchId;
     $data['stock_available'] = $data['stock_total'];
-    $data['code']            = $this->generateCode($branchId);
+    $data['code']            = $this->generateCode($legacyBranchId);
 
     if ($request->hasFile('image')) {
         $data['photo'] = $request->file('image')->store('products', 'public');
     }
 
-    unset($data['image']);
+    unset($data['image'], $data['branch_ids']);
 
     $product = Product::create($data);
+    $product->branches()->sync($branchIds);
     $this->generateQrCode($product);
 
     return redirect()->route('products.show', $product)
@@ -108,24 +125,26 @@ class ProductController extends Controller
             'status' => 'sometimes|in:available,maintenance,inactive',
             'notes' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'branch_ids' => 'nullable|array',
+            'branch_ids.*' => 'exists:branches,id',
         ]);
 
         if ($request->hasFile('image')) {
-            // Hapus foto lama jika ada
             if ($product->photo && Storage::disk('public')->exists($product->photo)) {
                 Storage::disk('public')->delete($product->photo);
             }
-            // Simpan foto baru ke kolom 'photo'
             $data['photo'] = $request->file('image')->store('products', 'public');
         } else {
-            // Tidak ada upload baru, jangan overwrite foto lama
             unset($data['photo']);
         }
 
-        // Hapus key 'image' dari $data agar tidak masuk ke kolom DB
         unset($data['image']);
 
         $product->update($data);
+
+        if ($request->filled('branch_ids')) {
+            $product->branches()->sync($request->input('branch_ids'));
+        }
 
         return redirect()->route('products.show', $product)->with('success', 'Produk berhasil diperbarui!');
     }
@@ -179,7 +198,9 @@ class ProductController extends Controller
             abort(403, 'Unauthorized action.');
         }
         $categories = Category::where('is_active', true)->get();
-        return view('products.edit', compact('product', 'categories'));
+        $branches = Branch::where('is_active', true)->get();
+        $selectedBranches = $product->branches->pluck('id')->toArray();
+        return view('products.edit', compact('product', 'categories', 'branches', 'selectedBranches'));
     }
 
     public function regenerateQr(Product $product)

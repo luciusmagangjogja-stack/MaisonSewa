@@ -92,6 +92,33 @@
                     </div>
                 </div>
 
+                @if(auth()->user()->isSuperAdmin())
+                {{-- Cabang --}}
+                <div class="card p-6 space-y-5">
+                    <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
+                        <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
+                        </div>
+                        <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Cabang Tersedia</h2>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <label class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 cursor-pointer hover:bg-slate-50">
+                            <input type="checkbox" id="select-all-branches" class="rounded text-blue-600 focus:ring-blue-500" checked>
+                            <span class="text-sm font-medium" style="color:var(--text-dark)">Pilih Semua Cabang</span>
+                        </label>
+                        @foreach($branches as $branch)
+                        <label class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 cursor-pointer hover:bg-slate-50">
+                            <input type="checkbox" name="branch_ids[]" value="{{ $branch->id }}" class="branch-checkbox rounded text-blue-600 focus:ring-blue-500" checked>
+                            <span class="text-sm" style="color:var(--text-dark)">{{ $branch->name }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                    @error('branch_ids')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                @endif
+
                 {{-- Detail Fisik --}}
                 <div class="card p-6 space-y-5">
                     <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
@@ -320,6 +347,20 @@
             placeholder.classList.add('hidden');
         };
         reader.readAsDataURL(file);
+    }
+
+    // Select all branches toggle
+    const selectAll = document.getElementById('select-all-branches');
+    const branchCheckboxes = document.querySelectorAll('.branch-checkbox');
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            branchCheckboxes.forEach(cb => cb.checked = this.checked);
+        });
+        branchCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                selectAll.checked = Array.from(branchCheckboxes).every(c => c.checked);
+            });
+        });
     }
 </script>
 @endpush
