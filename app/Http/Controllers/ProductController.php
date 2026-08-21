@@ -87,7 +87,7 @@ class ProductController extends Controller
 
     $data['branch_id']       = $legacyBranchId;
     $data['stock_available'] = $data['stock_total'];
-    $data['code']            = $this->generateCode($legacyBranchId);
+    $data['code']            = $this->generateCode();
 
     if ($request->hasFile('image')) {
         $data['photo'] = $request->file('image')->store('products', 'public');
@@ -213,15 +213,12 @@ class ProductController extends Controller
         return back()->with('success', 'QR Code berhasil digenerate ulang!');
     }
 
-    private function generateCode(int $branchId): string
+    private function generateCode(): string
     {
-        $branchId = $branchId ?? 1; // fallback jika null
-        $prefix = 'PRD' . str_pad($branchId, 2, '0', STR_PAD_LEFT);
-        $last = Product::where('code', 'like', "{$prefix}%")
-            ->orderBy('id', 'desc')
-            ->first();
-        $seq = $last ? (int) substr($last->code, -4) + 1 : 1;
-        return $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
+        $last = Product::where('code', 'like', 'PRD-%')->orderBy('code', 'desc')->first();
+        $seq = $last ? (int) preg_replace('/[^0-9]/', '', $last->code) + 1 : 1;
+
+        return 'PRD-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
     }
 
     public function destroy(Product $product)
