@@ -160,36 +160,51 @@
                         <th class="text-left">Invoice</th>
                         <th class="text-center">Tanggal</th>
                         @if (!auth()->user()->isSales())
-                        <th class="text-left">Sales</th>
+                        <th class="text-left">Sales Serah</th>
+                        <th class="text-center">Rate Serah</th>
+                        <th class="text-right">Komisi Serah</th>
+                        <th class="text-left">Sales Kembali</th>
+                        <th class="text-center">Rate Kembali</th>
+                        <th class="text-right">Komisi Kembali</th>
+                        @else
+                        <th class="text-center">Rate Serah</th>
+                        <th class="text-right">Komisi Serah</th>
+                        <th class="text-center">Rate Kembali</th>
+                        <th class="text-right">Komisi Kembali</th>
                         @endif
-                        <th class="text-left">Customer</th>
-                        <th class="text-right">Nilai Sewa</th>
-                        <th class="text-right">Diskon</th>
-                        <th class="text-center">Rate</th>
-                        <th class="text-right">Komisi</th>
+                        <th class="text-right">Total Komisi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($rentals as $rental)
                         @php
-                            $commissionable = max(0, $rental->subtotal - $rental->discount);
-                            $rate = $rental->createdBy && $rental->createdBy->isSales() ? $rental->createdBy->commission_rate : 0;
+                            $rateSerah = $rental->createdBy && $rental->createdBy->isSales() ? $rental->createdBy->commission_rate_serah : 0;
+                            $rateKembali = $rental->returnedBy && $rental->returnedBy->isSales() ? $rental->returnedBy->commission_rate_kembali : 0;
+                            $komisiSerah = (float) ($rental->commission_amount_serah ?? 0);
+                            $komisiKembali = (float) ($rental->commission_amount_kembali ?? 0);
+                            $totalKomisi = $komisiSerah + $komisiKembali;
                         @endphp
                         <tr>
                             <td class="font-semibold" style="color: var(--text-dark)">{{ $rental->invoice_number }}</td>
                             <td class="text-center text-sm" style="color: var(--text-soft)">{{ $rental->rental_date?->format('d M Y') ?? '-' }}</td>
                             @if (!auth()->user()->isSales())
                             <td class="text-sm" style="color: var(--text-dark)">{{ $rental->createdBy->name ?? '-' }}</td>
+                            <td class="text-center text-sm" style="color: var(--text-dark)">{{ $rateSerah }}%</td>
+                            <td class="text-right text-sm" style="color: #059669">Rp {{ number_format($komisiSerah, 0, ',', '.') }}</td>
+                            <td class="text-sm" style="color: var(--text-dark)">{{ $rental->returnedBy->name ?? '-' }}</td>
+                            <td class="text-center text-sm" style="color: var(--text-dark)">{{ $rateKembali }}%</td>
+                            <td class="text-right text-sm" style="color: #059669">Rp {{ number_format($komisiKembali, 0, ',', '.') }}</td>
+                            @else
+                            <td class="text-center text-sm" style="color: var(--text-dark)">{{ $rateSerah }}%</td>
+                            <td class="text-right text-sm" style="color: #059669">Rp {{ number_format($komisiSerah, 0, ',', '.') }}</td>
+                            <td class="text-center text-sm" style="color: var(--text-dark)">{{ $rateKembali }}%</td>
+                            <td class="text-right text-sm" style="color: #059669">Rp {{ number_format($komisiKembali, 0, ',', '.') }}</td>
                             @endif
-                            <td class="text-sm" style="color: var(--text-dark)">{{ $rental->customer->name ?? '-' }}</td>
-                            <td class="text-right text-sm" style="color: var(--text-dark)">Rp {{ number_format($rental->subtotal, 0, ',', '.') }}</td>
-                            <td class="text-right text-sm" style="color: var(--text-soft)">Rp {{ number_format($rental->discount, 0, ',', '.') }}</td>
-                            <td class="text-center text-sm" style="color: var(--text-dark)">{{ $rate }}%</td>
-                            <td class="text-right text-sm font-semibold" style="color: #059669">Rp {{ number_format($rental->commission_amount, 0, ',', '.') }}</td>
+                            <td class="text-right text-sm font-semibold" style="color: #059669">Rp {{ number_format($totalKomisi, 0, ',', '.') }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ auth()->user()->isSales() ? 7 : 8 }}" class="text-center py-12">
+                            <td colspan="{{ auth()->user()->isSales() ? 6 : 9 }}" class="text-center py-12">
                                 <div class="flex flex-col items-center gap-3">
                                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background: var(--secondary)">
                                         <i data-lucide="wallet" class="w-5 h-5" style="color: var(--text-soft)"></i>
