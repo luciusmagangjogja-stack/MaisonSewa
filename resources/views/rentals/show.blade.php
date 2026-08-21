@@ -139,8 +139,12 @@
                             <p class="mt-2 text-sm font-semibold text-slate-900" x-text="rental.branch.name || '-'"></p>
                         </div>
                         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Petugas</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Diserahkan oleh</p>
                             <p class="mt-2 text-sm font-semibold text-slate-900" x-text="rental.created_by || '-'"></p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Diproses Pengembalian oleh</p>
+                            <p class="mt-2 text-sm font-semibold text-slate-900" x-text="rental.returned_by || '-'"></p>
                         </div>
                         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal Sewa</p>
