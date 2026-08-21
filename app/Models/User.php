@@ -18,6 +18,8 @@ class User extends Authenticatable
         'role',
         'branch_id',
         'commission_rate',
+        'commission_rate_serah',
+        'commission_rate_kembali',
         'phone',
         'avatar',
         'is_active',
