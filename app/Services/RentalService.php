@@ -119,7 +119,7 @@ class RentalService
 
         $this->logActivity('recalculate_payment_status', $rental, "Recalculate payment status untuk {$rental->invoice_number}");
 
-        $this->checkAndCalculateCommission($rental);
+        $this->checkAndCalculateSerahCommission($rental);
     }
 
     public function checkAndCalculateCommission(Rental $rental): void
@@ -156,6 +156,80 @@ class RentalService
         $rental->update([
             'commission_amount' => $commissionAmount,
             'commission_status' => 'earned',
+        ]);
+    }
+
+    public function checkAndCalculateSerahCommission(Rental $rental): void
+    {
+        if ($rental->rental_status === Rental::STATUS_CANCELLED) {
+            return;
+        }
+
+        if ($rental->commission_status_serah === 'earned') {
+            return;
+        }
+
+        if ($rental->payment_status !== Rental::PAYMENT_PAID) {
+            return;
+        }
+
+        $sales = $rental->createdBy;
+
+        if (!$sales || !$sales->isSales()) {
+            return;
+        }
+
+        if (empty($sales->commission_rate_serah)) {
+            return;
+        }
+
+        $commissionable = max(0, (float) $rental->subtotal - (float) $rental->discount);
+        $commissionAmount = $commissionable * ((float) $sales->commission_rate_serah / 100);
+
+        $rental->update([
+            'commission_amount_serah' => $commissionAmount,
+            'commission_status_serah' => 'earned',
+        ]);
+    }
+
+    public function checkAndCalculateKembaliCommission(Rental $rental): void
+    {
+        if ($rental->rental_status === Rental::STATUS_CANCELLED) {
+            return;
+        }
+
+        if ($rental->commission_status_kembali === 'earned') {
+            return;
+        }
+
+        if ($rental->rental_status !== Rental::STATUS_RETURNED) {
+            return;
+        }
+
+        if ($rental->payment_status !== Rental::PAYMENT_PAID) {
+            return;
+        }
+
+        if (!in_array($rental->fine_status, [Rental::FINE_PAID, Rental::FINE_NONE], true)) {
+            return;
+        }
+
+        $sales = $rental->returnedBy;
+
+        if (!$sales || !$sales->isSales()) {
+            return;
+        }
+
+        if (empty($sales->commission_rate_kembali)) {
+            return;
+        }
+
+        $commissionable = max(0, (float) $rental->subtotal - (float) $rental->discount);
+        $commissionAmount = $commissionable * ((float) $sales->commission_rate_kembali / 100);
+
+        $rental->update([
+            'commission_amount_kembali' => $commissionAmount,
+            'commission_status_kembali' => 'earned',
         ]);
     }
 
@@ -502,7 +576,7 @@ class RentalService
 
             $this->logActivity('process_payment', $rental, "Pembayaran {$payment->payment_number} sebesar Rp " . number_format($data['amount'], 0, ',', '.'));
 
-            $this->checkAndCalculateCommission($rental);
+            $this->checkAndCalculateSerahCommission($rental);
 
             return $payment;
         });
@@ -561,7 +635,7 @@ class RentalService
 
             $this->logActivity('return_rental', $rental, "Pengembalian {$rental->invoice_number}");
 
-            $this->checkAndCalculateCommission($rental);
+            $this->checkAndCalculateKembaliCommission($rental);
 
             return $rental->fresh();
         });
