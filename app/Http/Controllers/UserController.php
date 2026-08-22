@@ -91,8 +91,6 @@ class UserController extends Controller
             'phone'     => 'nullable|regex:/^[0-9]+$/|max:20',
             'branch_id' => 'nullable|exists:branches,id',
             'role'      => 'required|in:super_admin,admin_toko,sales',
-            'commission_rate_serah'   => 'nullable|numeric|min:0',
-            'commission_rate_kembali' => 'nullable|numeric|min:0',
             'avatar'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
@@ -113,11 +111,6 @@ class UserController extends Controller
             'avatar'    => $avatarPath,
             'password'  => !empty($data['password']) ? Hash::make($data['password']) : $user->password,
         ];
-
-        if ($data['role'] === 'sales') {
-            $updateData['commission_rate_serah'] = $data['commission_rate_serah'] ?? 5;
-            $updateData['commission_rate_kembali'] = $data['commission_rate_kembali'] ?? 5;
-        }
 
         $user->update($updateData);
 

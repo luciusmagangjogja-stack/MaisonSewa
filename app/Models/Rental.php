@@ -21,6 +21,7 @@ class Rental extends Model
         'returned_at',
         'return_condition', 'return_notes', 'overdue_days',
         'fine_status', 'fine_amount', 'fine_paid_amount',
+        'points_awarded_serah', 'points_awarded_kembali',
     ];
 
     protected $casts = [

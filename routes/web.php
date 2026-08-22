@@ -210,7 +210,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
     });
 });
 
-// ─── COMMISSIONS ──────────────────────────────────────────────
-Route::middleware(['auth'])->prefix('commissions')->name('commissions.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\CommissionController::class, 'index'])->name('index');
+// ─── POINTS ──────────────────────────────────────────────
+Route::middleware(['auth'])->prefix('points')->name('points.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PointsController::class, 'index'])->name('index');
 });

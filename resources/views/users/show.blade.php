@@ -130,6 +130,15 @@
             </div>
             @endif
 
+            @if($user->role === 'sales')
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div class="stat-card">
+                    <p class="text-xs font-medium uppercase tracking-wide" style="color:var(--text-soft)">Total Poin</p>
+                    <p class="text-2xl font-bold mt-1" style="color:var(--text-dark)">{{ number_format($user->total_points, 0, ',', '.') }}</p>
+                </div>
+            </div>
+            @endif
+
             {{-- Riwayat Transaksi --}}
             @if(isset($rentals) && $rentals->isNotEmpty())
             <div class="card overflow-hidden">

@@ -693,7 +693,7 @@ class RentalController extends Controller
         $rental->refresh();
         $rental->load(["customer", "branch", "createdBy", "items.product", "activityLogs.user"]);
 
-        $this->rentalService->checkAndCalculateKembaliCommission($rental);
+        $this->rentalService->addSalesPoints($rental, 'kembali', 5);
 
         return response()->json(["success" => true, "rental" => [
             "id" => $rental->id,

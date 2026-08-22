@@ -86,35 +86,6 @@
                         </div>
                         @error('phone')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
-
-                    @if($user->role === 'sales')
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">
-                                Rate Komisi Serah Jas (%) <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <input type="number" name="commission_rate_serah" value="{{ old('commission_rate_serah', $user->commission_rate_serah ?? 5) }}" min="0" step="0.01"
-                                       class="form-input pr-10 @error('commission_rate_serah') border-red-400 @enderror" style="padding-right: 40px !important">
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium" style="color:var(--text-soft)">%</span>
-                            </div>
-                            <p class="text-xs mt-1" style="color:var(--text-soft)">Komisi saat serah jas ke customer.</p>
-                            @error('commission_rate_serah')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">
-                                Rate Komisi Pengembalian (%) <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <input type="number" name="commission_rate_kembali" value="{{ old('commission_rate_kembali', $user->commission_rate_kembali ?? 5) }}" min="0" step="0.01"
-                                       class="form-input pr-10 @error('commission_rate_kembali') border-red-400 @enderror" style="padding-right: 40px !important">
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium" style="color:var(--text-soft)">%</span>
-                            </div>
-                            <p class="text-xs mt-1" style="color:var(--text-soft)">Komisi saat customer mengembalikan jas.</p>
-                            @error('commission_rate_kembali')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                        </div>
-                    </div>
-                    @endif
                 </div>
 
                 {{-- Password --}}

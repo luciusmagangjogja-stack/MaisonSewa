@@ -218,13 +218,13 @@
         @endif
 
         @if(!auth()->user()->isSales())
-        <a href="{{ route('commissions.index') }}"
+        <a href="{{ route('points.index') }}"
            class="sidebar-item group relative flex items-center gap-3 px-3 py-2.5 text-sm
-                  {{ request()->routeIs('commissions.*') ? 'active' : 'text-white/70' }}"
+                  {{ request()->routeIs('points.*') ? 'active' : 'text-white/70' }}"
            @click="sidebarMobileOpen = false">
             <i data-lucide="wallet" class="w-4 h-4 flex-shrink-0"></i>
-            <span x-show="sidebarOpen || sidebarMobileOpen" class="whitespace-nowrap">Laporan Komisi</span>
-            <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Laporan Komisi</span>
+            <span x-show="sidebarOpen || sidebarMobileOpen" class="whitespace-nowrap">Laporan Poin</span>
+            <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Laporan Poin</span>
         </a>
         @endif
     </div>
@@ -238,13 +238,13 @@
     <div x-show="!sidebarOpen && !sidebarMobileOpen" class="mx-3 my-1.5 border-t border-white/10 hidden lg:block"></div>
 
     <div class="space-y-0.5">
-        <a href="{{ route('commissions.index') }}"
+        <a href="{{ route('points.index') }}"
            class="sidebar-item group relative flex items-center gap-3 px-3 py-2.5 text-sm
-                  {{ request()->routeIs('commissions.*') ? 'active' : 'text-white/70' }}"
+                  {{ request()->routeIs('points.*') ? 'active' : 'text-white/70' }}"
            @click="sidebarMobileOpen = false">
             <i data-lucide="wallet" class="w-4 h-4 flex-shrink-0"></i>
-            <span x-show="sidebarOpen || sidebarMobileOpen" class="whitespace-nowrap">Komisi Saya</span>
-            <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Komisi Saya</span>
+            <span x-show="sidebarOpen || sidebarMobileOpen" class="whitespace-nowrap">Poin Saya</span>
+            <span x-show="!sidebarOpen && !sidebarMobileOpen" class="sidebar-tooltip">Poin Saya</span>
         </a>
     </div>
     @endif

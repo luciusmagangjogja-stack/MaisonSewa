@@ -119,81 +119,32 @@ class RentalService
 
         $this->logActivity('recalculate_payment_status', $rental, "Recalculate payment status untuk {$rental->invoice_number}");
 
-        $this->checkAndCalculateSerahCommission($rental);
+        $this->addSalesPoints($rental, 'serah', 3);
     }
 
-    public function checkAndCalculateSerahCommission(Rental $rental): void
+    public function addSalesPoints(Rental $rental, string $type, int $points): void
     {
-        if ($rental->rental_status === Rental::STATUS_CANCELLED) {
+        $guardColumn = match ($type) {
+            'serah' => 'points_awarded_serah',
+            'kembali' => 'points_awarded_kembali',
+            default => throw new \InvalidArgumentException('Invalid point type: ' . $type),
+        };
+
+        if ($rental->{$guardColumn}) {
             return;
         }
 
-        if ($rental->commission_status_serah === 'earned') {
-            return;
-        }
-
-        if ($rental->payment_status !== Rental::PAYMENT_PAID) {
-            return;
-        }
-
-        $sales = $rental->createdBy;
+        $sales = match ($type) {
+            'serah' => $rental->createdBy,
+            'kembali' => $rental->returnedBy,
+        };
 
         if (!$sales || !$sales->isSales()) {
             return;
         }
 
-        if (empty($sales->commission_rate_serah)) {
-            return;
-        }
-
-        $commissionable = max(0, (float) $rental->subtotal - (float) $rental->discount);
-        $commissionAmount = $commissionable * ((float) $sales->commission_rate_serah / 100);
-
-        $rental->update([
-            'commission_amount_serah' => $commissionAmount,
-            'commission_status_serah' => 'earned',
-        ]);
-    }
-
-    public function checkAndCalculateKembaliCommission(Rental $rental): void
-    {
-        if ($rental->rental_status === Rental::STATUS_CANCELLED) {
-            return;
-        }
-
-        if ($rental->commission_status_kembali === 'earned') {
-            return;
-        }
-
-        if ($rental->rental_status !== Rental::STATUS_RETURNED) {
-            return;
-        }
-
-        if ($rental->payment_status !== Rental::PAYMENT_PAID) {
-            return;
-        }
-
-        if (!in_array($rental->fine_status, [Rental::FINE_PAID, Rental::FINE_NONE], true)) {
-            return;
-        }
-
-        $sales = $rental->returnedBy;
-
-        if (!$sales || !$sales->isSales()) {
-            return;
-        }
-
-        if (empty($sales->commission_rate_kembali)) {
-            return;
-        }
-
-        $commissionable = max(0, (float) $rental->subtotal - (float) $rental->discount);
-        $commissionAmount = $commissionable * ((float) $sales->commission_rate_kembali / 100);
-
-        $rental->update([
-            'commission_amount_kembali' => $commissionAmount,
-            'commission_status_kembali' => 'earned',
-        ]);
+        $sales->increment('total_points', $points);
+        $rental->update([$guardColumn => true]);
     }
 
     public function buildDetailPayload(Rental $rental): array
@@ -219,9 +170,6 @@ class RentalService
             'payment_method' => $rental->payment_method ?? null,
             'notes' => $rental->notes ?? null,
             'change_amount' => (float) ($rental->change_amount ?? 0),
-            'commission_amount' => (float) ($rental->commission_amount ?? 0),
-            'commission_status' => $rental->commission_status ?? 'pending',
-            'sales_rate' => $rental->createdBy && $rental->createdBy->isSales() ? (float) $rental->createdBy->commission_rate : null,
             'total_owed' => max(0, (float) ($rental->total_amount ?? 0) + (float) ($rental->fine_amount ?? 0)),
             'overpayment' => max(0, (float) $rental->payments()->where('type', '!=', 'refund')->sum('amount') - max(0, (float) ($rental->total_amount ?? 0) + (float) ($rental->fine_amount ?? 0))),
             'refund_given' => (float) abs($rental->payments()->where('type', 'refund')->sum('amount')),
@@ -539,7 +487,7 @@ class RentalService
 
             $this->logActivity('process_payment', $rental, "Pembayaran {$payment->payment_number} sebesar Rp " . number_format($data['amount'], 0, ',', '.'));
 
-            $this->checkAndCalculateSerahCommission($rental);
+            $this->addSalesPoints($rental, 'serah', 3);
 
             return $payment;
         });
@@ -598,7 +546,7 @@ class RentalService
 
             $this->logActivity('return_rental', $rental, "Pengembalian {$rental->invoice_number}");
 
-            $this->checkAndCalculateKembaliCommission($rental);
+            $this->addSalesPoints($rental, 'kembali', 5);
 
             return $rental->fresh();
         });
