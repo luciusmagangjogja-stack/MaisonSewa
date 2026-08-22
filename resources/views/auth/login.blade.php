@@ -48,10 +48,99 @@
         }
     </script>
 
+    <style>
+        .login-page body {
+            min-height: 100vh;
+            background: #f8fafc;
+            color: #0f172a;
+            font-family: "DM Sans", system-ui, sans-serif;
+            margin: 0;
+        }
+        .login-page .login-hero {
+            display: none;
+        }
+        .login-page .login-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+        .login-page .login-card {
+            width: 100%;
+            max-width: 28rem;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, .08);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        .login-page .login-card-header {
+            padding: 1.75rem 1.75rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .login-page .login-card-body {
+            padding: 1.75rem;
+        }
+        .login-page .login-card-footer {
+            padding: 1.25rem 1.75rem 1.75rem;
+        }
+        .login-page .login-input {
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            outline: none;
+        }
+        .login-page .login-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
+        }
+        .login-page .login-btn {
+            width: 100%;
+            border-radius: 1rem;
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.875rem 1rem;
+            font-size: 0.875rem;
+            border: 1px solid rgba(37, 99, 235, .2);
+            cursor: pointer;
+        }
+        .login-page .login-btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+        .login-page .login-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+        @media (min-width: 1024px) {
+            .login-page .login-hero {
+                display: flex;
+                width: 40%;
+                position: relative;
+                overflow: hidden;
+                background: linear-gradient(to bottom, #2563eb, #1d4ed8);
+                color: #ffffff;
+            }
+            .login-page .login-main {
+                padding: 0;
+            }
+        }
+    </style>
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden" x-data="loginPage()" :class="{ 'opacity-60 pointer-events-none': loading }">
+<body class="login-page min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden" x-data="loginPage()" :class="{ 'opacity-60 pointer-events-none': loading }">
     {{-- Mobile top bar --}}
     <div class="lg:hidden fixed top-0 inset-x-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div class="flex items-center justify-between px-4 py-3">
@@ -76,9 +165,9 @@
         </div>
     </div>
 
-    <div class="min-h-screen flex items-stretch">
+    <div class="min-h-screen flex items-stretch login-main">
         {{-- Desktop hero + form --}}
-        <div class="hidden lg:flex w-5/12 relative overflow-hidden">
+        <div class="hidden lg:flex w-5/12 relative overflow-hidden login-hero">
             <div class="absolute inset-0 bg-gradient-to-b from-blue-600 to-blue-700"></div>
             <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle, rgba(255,255,255,.8) 1px, transparent 1px); background-size: 18px 18px;"></div>
             <div class="absolute inset-0 opacity-25" style="background-image: linear-gradient(135deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,0) 60%);"></div>
@@ -168,7 +257,7 @@
         <div class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-10 py-16 lg:py-10">
             <div class="w-full max-w-md">
                 {{-- Login card --}}
-                <div class="bg-white rounded-3xl shadow-card border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-3xl shadow-card border border-slate-200 overflow-hidden login-card">
                     <div class="px-6 sm:px-7 pt-7 pb-6 border-b border-slate-100">
                         <div class="flex items-center gap-3">
                             @if($appLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo))
