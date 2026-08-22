@@ -34,6 +34,13 @@
     $processedByName = optional($rental->returnedBy)->name ?? null;
 
     $appName = \App\Services\SettingsService::get('app_name', 'SewaJas');
+    $appLogo = \App\Services\SettingsService::get('app_logo');
+    $appLogoUrl = '';
+    if ($appLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo)) {
+        $fullPath = storage_path('app/public/' . $appLogo);
+        $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        $appLogoUrl = 'data:image/' . $extension . ';base64,' . base64_encode(file_get_contents($fullPath));
+    }
 
     $companyAddress = \App\Services\SettingsService::get('company_address');
     $companyPhone = \App\Services\SettingsService::get('company_phone');
@@ -54,10 +61,25 @@
 
         {{-- HEADER --}}
         <div class="receipt-header">
-            <div class="receipt-header-top">
-                <div class="receipt-app-name">{{ $appName }}</div>
-                <div class="receipt-header-label">RECEIPT</div>
-            </div>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr>
+                    <td style="width:54px; vertical-align:middle; padding:0;">
+                        @if($appLogoUrl)
+                            <img src="{{ $appLogoUrl }}" alt="{{ $appName }} Logo" style="width:42px; height:42px; border-radius:10px; object-fit:contain; background:rgba(255,255,255,0.15); padding:3px;">
+                        @else
+                            <div style="width:42px; height:42px; border-radius:10px; background:rgba(255,255,255,0.15); color:#ffffff; font-weight:800; font-size:16px; text-align:center; line-height:42px; border:1px solid rgba(255,255,255,0.3);">
+                                {{ mb_substr($appName, 0, 2) }}
+                            </div>
+                        @endif
+                    </td>
+                    <td style="vertical-align:middle; padding-left:10px;">
+                        <div class="receipt-app-name">{{ $appName }}</div>
+                    </td>
+                    <td style="vertical-align:middle; text-align:right;">
+                        <div class="receipt-header-label">RECEIPT</div>
+                    </td>
+                </tr>
+            </table>
             <div class="receipt-header-meta">
                 <span>{{ $receiptNumber }}</span>
                 <span class="receipt-meta-sep">|</span>

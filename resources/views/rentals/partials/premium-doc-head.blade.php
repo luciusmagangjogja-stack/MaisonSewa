@@ -149,7 +149,7 @@
         .status-badge {
             display: inline-block;
             vertical-align: middle;
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 999px;
             font-size: 10px;
             font-weight: 700;
