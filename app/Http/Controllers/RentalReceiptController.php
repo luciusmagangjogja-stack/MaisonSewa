@@ -31,11 +31,5 @@ class RentalReceiptController extends Controller
     {
         return $this->service->sendWhatsapp($rental);
     }
-
-    public function print(Rental $rental)
-    {
-        $receipt = $this->service->getReceiptPayload($rental);
-        return view('rentals.receipt_print', compact('rental', 'receipt'));
-    }
 }
 

@@ -390,11 +390,6 @@ class RentalController extends Controller
         return back()->with("success", "Pengembalian berhasil dibatalkan!");
     }
 
-    public function thermalPrint(Rental $rental)
-    {
-        return view("rentals.thermal", compact("rental"));
-    }
-
     public function exportPdf(Rental $rental)
     {
         $rental->loadMissing(['customer', 'branch', 'items.product.category', 'createdBy']);

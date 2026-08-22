@@ -113,7 +113,6 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
         Route::get('/{rental}/whatsapp', [RentalController::class, 'whatsapp'])->name('whatsapp');
         Route::get('/{rental}/reminder', [RentalController::class, 'sendReminder'])->name('reminder');
         Route::get('/{rental}/receipt', [\App\Http\Controllers\RentalReceiptController::class, 'show'])->name('receipt.show');
-        Route::get('/{rental}/receipt/print', [\App\Http\Controllers\RentalReceiptController::class, 'print'])->name('receipt.print');
         Route::get('/{rental}/receipt/pdf', [\App\Http\Controllers\RentalReceiptController::class, 'pdf'])->name('receipt.pdf');
         Route::get('/{rental}/receipt/qr', [\App\Http\Controllers\RentalReceiptController::class, 'qr'])->name('receipt.qr');
         Route::get('/{rental}/receipt/whatsapp', [\App\Http\Controllers\RentalReceiptController::class, 'whatsapp'])->name('receipt.whatsapp');
