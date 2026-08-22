@@ -57,6 +57,7 @@
                     <th class="text-left">Customer</th>
                     <th class="text-left">Tgl Kembali</th>
                     <th class="text-center">Terlambat</th>
+                    <th class="text-right">Total Denda</th>
                     <th class="text-center">Aksi</th>
                 </tr>
             </thead>
@@ -78,6 +79,9 @@
                         <span class="badge badge-red">
                             {{ $t->return_due_date ? \Carbon\Carbon::parse($t->return_due_date)->diffForHumans() : '-' }}
                         </span>
+                    </td>
+                    <td class="text-right text-sm font-semibold" style="color:var(--text-dark)">
+                        {{ $t->fine_amount ? 'Rp ' . number_format($t->fine_amount, 0, ',', '.') : '-' }}
                     </td>
                     <td class="text-center">
                         <a href="{{ route('rentals.show', $t) }}"

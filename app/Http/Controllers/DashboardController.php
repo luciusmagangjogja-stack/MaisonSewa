@@ -18,6 +18,8 @@ class DashboardController extends Controller
             'scope_type' => $user->role,
             'branch_id' => $request->input('branch_id'),
             'sales_user_id' => $request->input('sales_user_id'),
+            'date_from' => $request->input('date_from'),
+            'date_to' => $request->input('date_to'),
         ];
 
         // For sales, force to their own id

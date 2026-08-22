@@ -70,11 +70,17 @@ class DashboardService
         $startOfWeek = $now->copy()->startOfWeek();
         $startOfMonth = $now->copy()->startOfMonth();
 
-        $start30 = $now->copy()->subDays(29)->startOfDay();
-        $end30 = $now->copy()->endOfDay();
-
         $branchId = Arr::get($filters, 'branch_id');
         $salesUserId = Arr::get($filters, 'sales_user_id');
+        $dateFrom = Arr::get($filters, 'date_from');
+        $dateTo = Arr::get($filters, 'date_to');
+
+        $start30 = $dateFrom ? Carbon::parse($dateFrom, $tz)->startOfDay() : $now->copy()->subDays(29)->startOfDay();
+        $end30 = $dateTo ? Carbon::parse($dateTo, $tz)->endOfDay() : $now->copy()->endOfDay();
+
+        $chartLabel = $dateFrom && $dateTo
+            ? Carbon::parse($dateFrom, $tz)->format('d M') . ' - ' . Carbon::parse($dateTo, $tz)->format('d M Y')
+            : '30 Hari';
 
         $customerQuery = Customer::query();
         $productQuery = Product::query();
@@ -199,7 +205,7 @@ class DashboardService
         $rentals30Raw = Rental::query()
             ->when(!is_null($branchId), fn($q) => $q->where('branch_id', $branchId))
             ->when(!is_null($salesUserId), fn($q) => $q->where('created_by', $salesUserId))
-            ->whereBetween('rental_date', [$start30->toDateString(), $now->toDateString()])
+            ->whereBetween('rental_date', [$start30->toDateString(), $end30->toDateString()])
             ->selectRaw('DATE(rental_date) as d, COUNT(*) as c')
             ->groupByRaw('DATE(rental_date)')
             ->orderByRaw('DATE(rental_date)')
@@ -214,7 +220,7 @@ class DashboardService
 
         // Omzet 30 days
         $omzet30 = Payment::query()
-            ->whereBetween('paid_at', [$start30->copy()->startOfDay(), $now->copy()->endOfDay()])
+            ->whereBetween('paid_at', [$start30->copy()->startOfDay(), $end30->copy()->endOfDay()])
             ->when(!is_null($branchId), fn($q) => $q->whereHas('rental', fn($r) => $r->where('branch_id', $branchId)))
             ->when(!is_null($salesUserId), fn($q) => $q->whereHas('rental', fn($r) => $r->where('created_by', $salesUserId)))
             ->selectRaw('DATE(paid_at) as d, SUM(amount) as s')
@@ -409,6 +415,7 @@ class DashboardService
                 'omzet_30_days' => $omzet30,
                 'status_rental' => $statusRentalPayload,
                 'top_products' => $topProducts,
+                'chart_label' => $chartLabel,
             ],
             'widgets' => [
                 'activity_terbaru' => $latestActivity,

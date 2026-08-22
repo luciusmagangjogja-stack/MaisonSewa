@@ -68,6 +68,15 @@
                     </div>
                 @endif
 
+                <div class="flex items-center gap-2">
+                    <label for="filter-date-from" class="text-xs font-semibold text-slate-600">Dari Tanggal</label>
+                    <input type="date" id="filter-date-from" class="px-3.5 py-2 rounded-2xl border border-slate-200 text-sm bg-white ds-transition">
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="filter-date-to" class="text-xs font-semibold text-slate-600">Sampai Tanggal</label>
+                    <input type="date" id="filter-date-to" class="px-3.5 py-2 rounded-2xl border border-slate-200 text-sm bg-white ds-transition">
+                </div>
+
                 <span class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-extrabold tracking-wide bg-blue-50 border border-blue-100 text-blue-700">
                     <span class="h-2 w-2 rounded-full bg-blue-500"></span>
                     Aktif
@@ -209,7 +218,7 @@
         <div class="ds-card p-6 lg:col-span-2">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-base font-extrabold text-slate-900">Grafik Rental (30 Hari)</h3>
+                    <h3 class="text-base font-extrabold text-slate-900">Grafik Rental <span id="chart-rental-label">(30 Hari)</span></h3>
                     <p class="text-xs font-semibold text-slate-500">Tren aktivitas penyewaan</p>
                 </div>
                 <span class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">Live</span>
@@ -222,7 +231,7 @@
         <div class="ds-card p-6">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-base font-extrabold text-slate-900">Pemasukan (30 Hari)</h3>
+                    <h3 class="text-base font-extrabold text-slate-900">Pemasukan <span id="chart-revenue-label">(30 Hari)</span></h3>
                     <p class="text-xs font-semibold text-slate-500">Omzet & performa</p>
                 </div>
             </div>
@@ -833,14 +842,7 @@
 
         const renderGroup = (arr, style, title) => {
             if (!Array.isArray(arr) || arr.length === 0) {
-                return `
-                    <div class="border border-slate-100 rounded-2xl p-3 bg-white">
-                        <div class="flex items-center justify-center gap-2 text-slate-400">
-                            <i data-lucide="inbox" class="h-4 w-4"></i>
-                            <span class="text-[12px] font-semibold">Tidak ada</span>
-                        </div>
-                    </div>
-                `;
+                return '';
             }
 
             return `
@@ -872,13 +874,27 @@
 
         const widget = $('widgetReminders');
         if (widget) {
-            widget.innerHTML = `
-                <div class="space-y-3">
-                    ${renderGroup(groups.today, styleToday, 'Hari Ini')}
-                    ${renderGroup(groups.tomorrow, styleTomorrow, 'Besok')}
-                    ${renderGroup(groups.overdue, styleOverdue, 'Terlambat')}
-                </div>
-            `;
+            const allEmpty = groups.today.length === 0 && groups.tomorrow.length === 0 && groups.overdue.length === 0;
+
+            if (allEmpty) {
+                widget.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-6 text-center gap-2">
+                        <div class="h-10 w-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                            <i data-lucide="inbox" class="h-5 w-5 text-emerald-500"></i>
+                        </div>
+                        <p class="text-xs font-extrabold text-slate-900">Belum ada pesanan yang mau dikembalikan</p>
+                        <p class="text-[11px] font-semibold text-slate-500">Semua jas sudah dikembalikan tepat waktu</p>
+                    </div>
+                `;
+            } else {
+                widget.innerHTML = `
+                    <div class="space-y-3">
+                        ${renderGroup(groups.today, styleToday, 'Hari Ini')}
+                        ${renderGroup(groups.tomorrow, styleTomorrow, 'Besok')}
+                        ${renderGroup(groups.overdue, styleOverdue, 'Terlambat')}
+                    </div>
+                `;
+            }
         }
 
         // Almost empty: keep lightweight mapping
@@ -916,8 +932,12 @@
         const params = new URLSearchParams();
         const branchFilter = document.getElementById('filter-branch');
         const salesFilter = document.getElementById('filter-sales');
+        const dateFromFilter = document.getElementById('filter-date-from');
+        const dateToFilter = document.getElementById('filter-date-to');
         if (branchFilter && branchFilter.value) params.append('branch_id', branchFilter.value);
         if (salesFilter && salesFilter.value) params.append('sales_user_id', salesFilter.value);
+        if (dateFromFilter && dateFromFilter.value) params.append('date_from', dateFromFilter.value);
+        if (dateToFilter && dateToFilter.value) params.append('date_to', dateToFilter.value);
 
         const url = '{{ route('dashboard.data') }}' + (params.toString() ? '?' + params.toString() : '');
 
@@ -931,7 +951,15 @@
         });
 
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        return await res.json();
+        const data = await res.json();
+
+        const chartLabel = data?.charts?.chart_label ?? '30 Hari';
+        const rentalLabel = document.getElementById('chart-rental-label');
+        const revenueLabel = document.getElementById('chart-revenue-label');
+        if (rentalLabel) rentalLabel.textContent = '(' + chartLabel + ')';
+        if (revenueLabel) revenueLabel.textContent = '(' + chartLabel + ')';
+
+        return data;
     }
 
     function hasAnyData(stats, charts, widgets) {
