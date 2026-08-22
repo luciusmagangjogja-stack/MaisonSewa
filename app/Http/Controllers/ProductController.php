@@ -44,7 +44,7 @@ class ProductController extends Controller
          'rented_units' => (clone $query)->where('status', 'rented')->sum(\DB::raw('stock_total - stock_available')),
      ];
 
-     return view('products.index', compact('products', 'categories', 'stats'));
+      return view('products.index', compact('products', 'categories', 'branches', 'stats'));
  }
 
     public function create()

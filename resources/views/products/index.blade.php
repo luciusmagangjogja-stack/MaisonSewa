@@ -100,7 +100,7 @@
             @if(auth()->user()->isSuperAdmin())
             <select name="branch_id" class="form-input sm:w-44">
                 <option value="">Semua Cabang</option>
-                @foreach($branches as $branch)
+                @foreach($branches ?? [] as $branch)
                 <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
                     {{ $branch->name }}
                 </option>
