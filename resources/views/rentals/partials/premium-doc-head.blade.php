@@ -158,6 +158,11 @@
             line-height: 1.4;
         }
 
+        .receipt-row-status .receipt-value {
+            padding-right: 6px;
+            text-align: right;
+        }
+
         .status-paid { background: #DCFCE7; color: #15803D; }
         .status-unpaid { background: #FEE2E2; color: #B91C1C; }
         .status-partial { background: #FEF3C7; color: #A16207; }
