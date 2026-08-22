@@ -151,6 +151,23 @@ tailwind.config = {
                         </div>
                     </div>
                 </div>
+
+                @if($user->role === 'sales')
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#FDF4EC;">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 2l1.5 4.5H14l-3.7 2.7 1.4 4.3L8 11.2l-3.7 2.3 1.4-4.3L2 6.5h4.5z" stroke="#C27B3E" stroke-width="1.3" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Total Poin</div>
+                        <div class="text-[13px] font-semibold text-stone-700 mt-0.5">
+                            {{ number_format($user->total_points, 0, ',', '.') }}
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#FDF4EC;">
                         <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
