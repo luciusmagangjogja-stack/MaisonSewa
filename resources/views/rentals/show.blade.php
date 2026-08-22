@@ -55,7 +55,10 @@
                 <a href="{{ route('rentals.receipt.show', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Receipt</a>
                 <a href="{{ route('rentals.thermal', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Cetak Thermal</a>
                 <a href="{{ route('rentals.receipt.pdf', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Receipt PDF</a>
-                <a href="{{ route('rentals.receipt.whatsapp', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">WA Receipt</a>
+                <a href="javascript:void(0)" 
+                   title="PDF akan otomatis terdownload — lampirkan manual di chat WhatsApp yang terbuka"
+                   onclick="downloadPdfAndOpenWa('{{ route('rentals.receipt.pdf', $rental) }}', '{{ addslashes($rental->customer->name ?? 'Customer') }}', '{{ $rental->invoice_number }}', '{{ preg_replace('/[^0-9]/', '', str_starts_with($rental->customer->phone ?? '', '0') ? '62'.substr($rental->customer->phone, 1) : ($rental->customer->phone ?? '')) }}')"
+                   class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">WA Receipt</a>
                 <a href="{{ route('rentals.reminder', $rental) }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">Reminder</a>
                 @if(auth()->user()->isSuperAdmin())
                 <button type="button" onclick="confirmDeleteRental('{{ $rental->invoice_number }}')" class="btn-secondary text-red-500 hover:bg-red-50">
@@ -88,6 +91,31 @@
                         document.getElementById('deleteRentalForm').submit();
                     }
                 });
+            }
+
+            function downloadPdfAndOpenWa(pdfUrl, customerName, invoiceNumber, customerPhone) {
+                if (!customerPhone) {
+                    alert('Nomor WhatsApp customer tidak tersedia.');
+                    return;
+                }
+
+                var link = document.createElement('a');
+                link.href = pdfUrl;
+                link.download = '';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                var message = encodeURIComponent(
+                    "Halo " + customerName + ",\\n\\n" +
+                    "Berikut receipt sewa Anda " + invoiceNumber + ". " +
+                    "Mohon cek file PDF yang baru saja di-download, lalu lampirkan di sini ya.\\n\\n" +
+                    "Terima kasih."
+                );
+
+                setTimeout(function() {
+                    window.open("https://wa.me/" + customerPhone + "?text=" + message, '_blank');
+                }, 500);
             }
             </script>
             @endpush
