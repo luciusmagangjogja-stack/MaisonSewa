@@ -114,7 +114,7 @@
             @endif
             <div class="receipt-row receipt-row-status">
                 <span class="receipt-label">Status</span>
-                <span class="status-badge {{ $statusBadgeClass }}">{{ $statusBadge }}</span>
+                <span class="receipt-value"><span class="status-badge {{ $statusBadgeClass }}">{{ $statusBadge }}</span></span>
             </div>
         </div>
 

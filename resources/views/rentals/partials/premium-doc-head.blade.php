@@ -158,11 +158,6 @@
             line-height: 1.4;
         }
 
-        .receipt-row-status .receipt-value {
-            padding-right: 6px;
-            text-align: right;
-        }
-
         .status-paid { background: #DCFCE7; color: #15803D; }
         .status-unpaid { background: #FEE2E2; color: #B91C1C; }
         .status-partial { background: #FEF3C7; color: #A16207; }
@@ -735,7 +730,7 @@
             color: #64748B;
             font-weight: 500;
             display: table-cell;
-            width: 40%;
+            width: 35%;
             text-align: left;
             vertical-align: middle;
         }
@@ -746,8 +741,8 @@
             font-weight: 600;
             text-align: right;
             display: table-cell;
-            width: 55%;
-            max-width: 60%;
+            width: 65%;
+            max-width: 65%;
             word-break: break-word;
             vertical-align: middle;
         }
@@ -849,7 +844,7 @@
             text-transform: uppercase;
             letter-spacing: 0.06em;
             display: table-cell;
-            width: 40%;
+            width: 35%;
             vertical-align: middle;
         }
 
@@ -858,7 +853,7 @@
             font-weight: 800;
             color: #1E40AF;
             display: table-cell;
-            width: 55%;
+            width: 65%;
             text-align: right;
             vertical-align: middle;
         }
