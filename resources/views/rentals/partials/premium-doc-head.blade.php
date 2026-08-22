@@ -106,7 +106,7 @@
         .brand-logo {
             width: 54px;
             height: 54px;
-            background: linear-gradient(135deg, #1E40AF, #3B82F6);
+            background: #1E40AF;
             color: #ffffff;
             font-weight: 800;
             font-size: 20px;
@@ -632,17 +632,15 @@
            COMPACT RECEIPT (Boarding Pass / Thermal Style)
            ========================================================= */
         .receipt-compact-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 32px 16px;
+            text-align: center;
+            padding: 16px 12px;
             background: #F3F4F6;
-            min-height: 100vh;
         }
 
         .receipt-compact-card {
             width: 100%;
             max-width: 380px;
+            margin: 0 auto;
             background: #FFFFFF;
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
@@ -651,16 +649,34 @@
         }
 
         .receipt-header {
-            background: linear-gradient(135deg, #1E40AF, #3B82F6);
+            background: #2563EB;
             color: #ffffff;
             padding: 18px 20px 14px;
         }
 
         .receipt-header-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            overflow: hidden;
             margin-bottom: 6px;
+        }
+
+        .receipt-header-top .receipt-app-name {
+            float: left;
+        }
+
+        .receipt-header-top .receipt-header-label {
+            float: right;
+        }
+
+        .receipt-header-meta {
+            font-size: 11px;
+            opacity: 0.9;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .receipt-meta-sep {
+            opacity: 0.6;
+            margin: 0 6px;
         }
 
         .receipt-app-name {
@@ -676,18 +692,6 @@
             color: #FFFFFF;
             opacity: 1;
             text-shadow: 0 1px 2px rgba(0,0,0,0.25);
-        }
-
-        .receipt-header-meta {
-            font-size: 11px;
-            opacity: 0.85;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .receipt-meta-sep {
-            opacity: 0.5;
         }
 
         .receipt-brand {
@@ -716,9 +720,8 @@
         }
 
         .receipt-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: table;
+            width: 100%;
             padding: 3px 0;
         }
 
@@ -726,6 +729,10 @@
             font-size: 11px;
             color: #64748B;
             font-weight: 500;
+            display: table-cell;
+            width: 40%;
+            text-align: left;
+            vertical-align: middle;
         }
 
         .receipt-value {
@@ -733,8 +740,11 @@
             color: #111827;
             font-weight: 600;
             text-align: right;
+            display: table-cell;
+            width: 55%;
             max-width: 60%;
             word-break: break-word;
+            vertical-align: middle;
         }
 
         .receipt-row-status {
@@ -744,29 +754,28 @@
         }
 
         .receipt-items {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 300px;
-            overflow-y: auto;
+            display: block;
+            overflow: hidden;
+            margin-top: 6px;
         }
 
         .receipt-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: table;
+            width: 100%;
             padding: 6px 10px;
             background: #F8FAFC;
             border-radius: 8px;
             border: 1px solid #F1F5F9;
+            margin-bottom: 6px;
         }
 
         .receipt-item-name {
             font-size: 11px;
             font-weight: 600;
             color: #111827;
-            flex: 1;
-            margin-right: 8px;
+            display: table-cell;
+            width: 70%;
+            vertical-align: middle;
         }
 
         .receipt-item-qty {
@@ -776,13 +785,14 @@
             background: #E5E7EB;
             padding: 2px 8px;
             border-radius: 999px;
+            display: table-cell;
+            width: 20%;
+            text-align: center;
             white-space: nowrap;
+            vertical-align: middle;
         }
 
         .receipt-qr-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             text-align: center;
             padding: 18px 20px;
             background: #ffffff;
@@ -797,10 +807,7 @@
             overflow: hidden;
             border: 1px solid #E5E7EB;
             background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 8px;
+            margin: 0 auto 8px;
         }
 
         .receipt-qr-image {
@@ -826,9 +833,8 @@
         }
 
         .receipt-total-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: table;
+            width: 100%;
         }
 
         .receipt-total-label {
@@ -837,12 +843,19 @@
             color: #1E40AF;
             text-transform: uppercase;
             letter-spacing: 0.06em;
+            display: table-cell;
+            width: 40%;
+            vertical-align: middle;
         }
 
         .receipt-total-value {
             font-size: 22px;
             font-weight: 800;
             color: #1E40AF;
+            display: table-cell;
+            width: 55%;
+            text-align: right;
+            vertical-align: middle;
         }
 
         .receipt-footer {
