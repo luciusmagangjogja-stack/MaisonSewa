@@ -18,7 +18,7 @@ class Rental extends Model
         'rental_date', 'return_due_date', 'actual_return_date', 'duration_days',
         'subtotal', 'discount', 'late_fee', 'total_amount', 'paid_amount', 'change_amount',
         'payment_status', 'payment_method', 'rental_status', 'qr_code', 'notes',
-        'cancellation_reason', 'cancelled_at', 'returned_at',
+        'returned_at',
         'return_condition', 'return_notes', 'overdue_days',
         'fine_status', 'fine_amount', 'fine_paid_amount',
     ];

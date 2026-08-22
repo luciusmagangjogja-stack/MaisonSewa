@@ -6,85 +6,17 @@ use App\Models\Customer;
 use App\Models\Rental;
 use App\Models\Payment;
 use App\Models\ActivityLog;
-use App\Models\Category;
 use App\Models\Branch;
 use App\Models\Guarantee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\QueryException;
 use App\Exports\CustomerExport;
 
 class CustomerController extends Controller
 {
-    public function dashboard()
-    {
-        $user = Auth::user();
-        if (!$user || !method_exists($user, 'isCustomer') || !$user->isCustomer()) {
-            return redirect()->route('dashboard');
-        }
-        $rentals = Rental::where('customer_id', $user->id)
-            ->with('items.product')
-            ->latest()
-            ->paginate(10);
-        return view('customer.dashboard', compact('user', 'rentals'));
-    }
-
-    public function categories()
-    {
-        $user = Auth::user();
-        if (!$user || !method_exists($user, 'isCustomer') || !$user->isCustomer()) {
-            return redirect()->route('dashboard');
-        }
-        $categories = Category::where('is_active', true)->withCount('products')->get();
-        return view('customer.categories', compact('user', 'categories'));
-    }
-
-    public function chat()
-    {
-        return redirect()->route('customer.chat');
-    }
-
-    public function profile()
-    {
-        $user = Auth::user();
-        if (!$user || !method_exists($user, 'isCustomer') || !$user->isCustomer()) {
-            return redirect()->route('dashboard');
-        }
-        return view('customer.profile', compact('user'));
-    }
-
-    public function updateProfile(Request $request)
-    {
-        $user = Auth::user();
-        if (!$user || !method_exists($user, 'isCustomer') || !$user->isCustomer()) {
-            return redirect()->route('dashboard');
-        }
-        $request->validate([
-            'name'  => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
-        ]);
-        $user->update($request->only('name', 'email'));
-        return redirect()->route('customer.profile')->with('status', 'Profile updated.');
-    }
-
-    public function updatePassword(Request $request)
-    {
-        $user = Auth::user();
-        if (!$user || !method_exists($user, 'isCustomer') || !$user->isCustomer()) {
-            return redirect()->route('dashboard');
-        }
-        $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password'         => ['required', Password::defaults(), 'confirmed'],
-        ]);
-        $user->update(['password' => Hash::make($request->password)]);
-        return redirect()->route('customer.profile')->with('status', 'Password updated.');
-    }
-
     public function index(Request $request)
     {
         $user = Auth::user();

@@ -15,9 +15,8 @@ class Customer extends Model
     protected $fillable = [
         'branch_id', 'user_id', 'name', 'phone', 'email', 'address',
         'id_number', 'photo',
-        'chest', 'waist', 'hip', 'height', 'weight',
-        'suit_size', 'shirt_size', 'trouser_size', 'shoe_size',
-        'body_notes', 'notes', 'is_blacklisted', 'blacklist_reason',
+        'height', 'weight',
+        'notes', 'is_blacklisted', 'blacklist_reason',
     ];
 
     protected $casts = [

@@ -122,43 +122,6 @@ class RentalService
         $this->checkAndCalculateSerahCommission($rental);
     }
 
-    public function checkAndCalculateCommission(Rental $rental): void
-    {
-        if ($rental->rental_status === Rental::STATUS_CANCELLED) {
-            return;
-        }
-
-        if ($rental->commission_status === 'earned') {
-            return;
-        }
-
-        if ($rental->rental_status !== Rental::STATUS_RETURNED) {
-            return;
-        }
-
-        if ($rental->payment_status !== Rental::PAYMENT_PAID) {
-            return;
-        }
-
-        if (!in_array($rental->fine_status, [Rental::FINE_PAID, Rental::FINE_NONE], true)) {
-            return;
-        }
-
-        $sales = $rental->createdBy;
-
-        if (!$sales || !$sales->isSales()) {
-            return;
-        }
-
-        $commissionable = max(0, (float) $rental->subtotal - (float) $rental->discount);
-        $commissionAmount = $commissionable * ((float) $sales->commission_rate / 100);
-
-        $rental->update([
-            'commission_amount' => $commissionAmount,
-            'commission_status' => 'earned',
-        ]);
-    }
-
     public function checkAndCalculateSerahCommission(Rental $rental): void
     {
         if ($rental->rental_status === Rental::STATUS_CANCELLED) {
