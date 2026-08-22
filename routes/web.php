@@ -126,17 +126,20 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
     });
 
     // ─── PRODUK ──────────────────────────────────────────────────────
-    Route::prefix('products')->name('products.')->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko,sales')->group(function () {
-        Route::get('/', [ProductController::class, 'index'])->name('index');
-        Route::get('/{product}', [ProductController::class, 'show'])->name('show');
-        Route::patch('/{product}/update-stock', [ProductController::class, 'updateStock'])->name('update-stock');
-    });
-    Route::prefix('products')->name('products.')->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko')->group(function () {
-        Route::get('/create', [ProductController::class, 'create'])->name('create');
-        Route::post('/', [ProductController::class, 'store'])->name('store');
-        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
-        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
-        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+    Route::prefix('products')->name('products.')->group(function () {
+        Route::middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko')->group(function () {
+            Route::get('/create', [ProductController::class, 'create'])->name('create');
+            Route::post('/', [ProductController::class, 'store'])->name('store');
+            Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+            Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+            Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko,sales')->group(function () {
+            Route::get('/', [ProductController::class, 'index'])->name('index');
+            Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+            Route::patch('/{product}/update-stock', [ProductController::class, 'updateStock'])->name('update-stock');
+        });
     });
 
     // ─── KATEGORI (super_admin) ───────────────────────────────────────
