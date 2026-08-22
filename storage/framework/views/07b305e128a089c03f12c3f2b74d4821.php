@@ -131,18 +131,6 @@
             line-height: 1.6;
         }
 
-        .invoice-title {
-            font-size: 36px;
-            font-weight: 800;
-            color: #1E40AF;
-            margin: 0;
-            letter-spacing: -0.02em;
-        }
-
-        .invoice-meta {
-            margin-top: 10px;
-        }
-
         .doc-meta-label {
             font-size: 10px;
             font-weight: 700;

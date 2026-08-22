@@ -137,8 +137,12 @@
                             <p class="mt-2 text-sm font-semibold text-slate-900" x-text="rental.branch.name || '-'"></p>
                         </div>
                         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Petugas</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Diserahkan oleh</p>
                             <p class="mt-2 text-sm font-semibold text-slate-900" x-text="rental.created_by || '-'"></p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Diproses Pengembalian oleh</p>
+                            <p class="mt-2 text-sm font-semibold text-slate-900" x-text="rental.returned_by || '-'"></p>
                         </div>
                         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal Sewa</p>
@@ -653,7 +657,7 @@
     <script>
         function returnOperationalDashboard() {
             return {
-                defaultImage: '<?php echo e(asset('images/default-product.png')); ?>',
+                defaultImage: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f1f5f9" rx="16"/><g transform="translate(20, 18)" fill="none" stroke="%2394a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4h10l10 10h4l-8 8v6h-24v-6z"/><path d="M10 14h24"/><path d="M14 14v6"/><path d="M34 14v6"/><circle cx="20" cy="28" r="2"/><circle cx="28" cy="28" r="2"/></g></svg>',
                 controlsDisabled: false,
                 showHandoverModal: false,
                 handoverLoading: false,

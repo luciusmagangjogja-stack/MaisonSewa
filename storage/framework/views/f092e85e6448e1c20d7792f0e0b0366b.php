@@ -336,6 +336,10 @@
 </div>
 
 <script>
+    const DASHBOARD_SALES_DATA = <?php echo json_encode($sales ?? [], 15, 512) ?>;
+</script>
+
+<script>
     const DASHBOARD_POLL_INTERVAL_MS = 10000;
 
     const dashboardCharts = {
@@ -983,6 +987,29 @@
 
     function handleError() { showErrorState(); }
 
+    function filterSalesDropdownByBranch() {
+        const branchFilter = document.getElementById('filter-branch');
+        const salesFilter = document.getElementById('filter-sales');
+        if (!branchFilter || !salesFilter) return;
+
+        const selectedBranch = branchFilter.value;
+        const firstOption = salesFilter.querySelector('option[value=""]');
+        if (!firstOption) return;
+
+        salesFilter.innerHTML = '';
+        salesFilter.appendChild(firstOption);
+
+        const matches = DASHBOARD_SALES_DATA.filter(s => !selectedBranch || String(s.branch_id) === String(selectedBranch));
+        matches.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name;
+            salesFilter.appendChild(opt);
+        });
+
+        salesFilter.value = '';
+    }
+
     function initDashboard() {
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
@@ -1006,9 +1033,13 @@
 
         const branchFilter = document.getElementById('filter-branch');
         const salesFilter = document.getElementById('filter-sales');
-        if (branchFilter) branchFilter.addEventListener('change', tick);
+        if (branchFilter) branchFilter.addEventListener('change', () => {
+            filterSalesDropdownByBranch();
+            tick();
+        });
         if (salesFilter) salesFilter.addEventListener('change', tick);
 
+        filterSalesDropdownByBranch();
         tick();
         setInterval(tick, DASHBOARD_POLL_INTERVAL_MS);
     }

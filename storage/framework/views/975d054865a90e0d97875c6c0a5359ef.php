@@ -37,7 +37,6 @@
 
     $companyAddress = \App\Services\SettingsService::get('company_address');
     $companyPhone = \App\Services\SettingsService::get('company_phone');
-    $companyEmail = \App\Services\SettingsService::get('company_email');
     $companyWebsite = \App\Services\SettingsService::get('company_website');
 
     $qrBase64 = null;
@@ -144,7 +143,7 @@
 
         
         <div class="receipt-footer">
-            <?php if($companyAddress || $companyPhone || $companyEmail || $companyWebsite): ?>
+            <?php if($companyAddress || $companyPhone || $companyWebsite): ?>
             <div class="receipt-company-info">
                 <?php if($companyAddress): ?>
                 <div class="receipt-company-line"><?php echo e($companyAddress); ?></div>
@@ -154,26 +153,12 @@
                     <?php echo e($companyPhone); ?>
 
                     <?php endif; ?>
-                    <?php if(($companyPhone ?? null) && ($companyEmail ?? null)): ?>
-                    &nbsp;•&nbsp;
-                    <?php endif; ?>
-                    <?php if($companyEmail): ?>
-                    <?php echo e($companyEmail); ?>
-
-                    <?php endif; ?>
                 </div>
                 <?php if($companyWebsite): ?>
                 <div class="receipt-company-line"><?php echo e($companyWebsite); ?></div>
                 <?php endif; ?>
             </div>
             <?php endif; ?>
-            <div class="receipt-footer-text">
-                Receipt ini dibuat otomatis oleh <?php echo e($appName); ?> — <?php echo e($receiptDate); ?>
-
-            </div>
-            <div class="receipt-footer-note">
-                Scan QR untuk melihat detail rental di sistem
-            </div>
         </div>
 
     </div>

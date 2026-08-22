@@ -155,6 +155,7 @@
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Telepon</label>
                     <input type="text" name="company_phone"
+                           inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                            value="<?php echo e(old('company_phone', $settings['company_phone'] ?? null)); ?>"
                            class="form-input" placeholder="Contoh: 021-12345678">
                 </div>
