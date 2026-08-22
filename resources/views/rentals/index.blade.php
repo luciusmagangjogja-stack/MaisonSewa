@@ -87,6 +87,7 @@
                                     'active' => 'badge-active',
                                     'overdue' => 'badge-terlambat',
                                     'returned' => 'badge-selesai',
+                                    'cancelled' => 'badge-dibatalkan',
                                 ];
                                 $statusLabels = [
                                     'waiting' => 'Menunggu',
@@ -94,6 +95,7 @@
                                     'active' => 'Aktif',
                                     'overdue' => 'Terlambat',
                                     'returned' => 'Selesai',
+                                    'cancelled' => 'Dibatalkan',
                                 ];
                             @endphp
                             <span class="badge {{ $statusClasses[$rental->rental_status] ?? 'badge-gray' }} text-xs">
@@ -103,7 +105,7 @@
                         <td class="px-6 py-4 text-right">
                             <div class="font-serif font-bold text-bark-dark text-sm">Rp{{ number_format($rental->total_amount, 0, ',', '.') }}</div>
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-6 py-4 text-center min-w-[180px]">
                             <div class="flex items-center justify-center gap-1.5">
                                 <a href="{{ route('rentals.show', $rental) }}" class="action-btn" title="View">
                                     <i data-lucide="eye" class="w-4 h-4"></i>
@@ -113,8 +115,13 @@
                                 <a href="{{ route('rentals.edit', $rental) }}" class="action-btn" title="Edit">
                                     <i data-lucide="edit-3" class="w-4 h-4"></i>
                                 </a>
+                                @else
+                                <span class="inline-block w-4 h-4"></span>
                                 @endif
                                 @endauth
+                                @guest
+                                <span class="inline-block w-4 h-4"></span>
+                                @endguest
                                 <a href="{{ route('rentals.receipt.show', $rental) }}" class="action-btn" title="Receipt">
                                     <i data-lucide="receipt" class="w-4 h-4"></i>
                                 </a>
@@ -126,7 +133,7 @@
                                     <i data-lucide="message-circle" class="w-4 h-4"></i>
                                 </a>
 
-@auth
+                                @auth
                                 @if(auth()->user()->isSuperAdmin())
                                 <form method="POST" action="{{ route('rentals.destroy', $rental) }}" id="deleteRentalForm_{{ $rental->id }}" class="hidden">
                                     @csrf
@@ -135,19 +142,28 @@
                                 <button type="button" onclick="confirmDelete('deleteRentalForm_{{ $rental->id }}', 'penyewaan {{ $rental->invoice_number }}')" class="action-btn" style="border-color: #ef4444; color: #ef4444;" title="Hapus Penyewaan">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
+                                @else
+                                <span class="inline-block w-4 h-4"></span>
                                 @endif
                                 @endauth
+                                @guest
+                                <span class="inline-block w-4 h-4"></span>
+                                @endguest
 
                                 @if($rental->rental_status == 'active' || $rental->rental_status == 'overdue')
                                     <a href="{{ route('rentals.show', $rental) }}" class="action-btn" title="Process Payment">
                                         <i data-lucide="wallet" class="w-4 h-4"></i>
                                     </a>
+                                @else
+                                    <span class="inline-block w-4 h-4"></span>
                                 @endif
 
                                 @if($rental->rental_status == 'returned')
                                     <a href="{{ route('rentals.show', $rental) }}" class="action-btn" title="Payment History">
                                         <i data-lucide="history" class="w-4 h-4"></i>
                                     </a>
+                                @else
+                                    <span class="inline-block w-4 h-4"></span>
                                 @endif
                             </div>
                         </td>
