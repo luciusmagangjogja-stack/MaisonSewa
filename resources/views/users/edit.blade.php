@@ -81,6 +81,7 @@
                         <div class="relative">
                             <i data-lucide="phone" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--text-soft)"></i>
                             <input type="text" name="phone" value="{{ old('phone', $user->phone) }}"
+                                   inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                    class="form-input @error('phone') border-red-400 @enderror" style="padding-left: 40px !important">
                         </div>
                         @error('phone')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror

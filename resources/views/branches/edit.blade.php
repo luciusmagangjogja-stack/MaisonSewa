@@ -37,7 +37,7 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">No. Telepon</label>
-                    <input type="text" name="phone" value="{{ old('phone', $branch->phone) }}" class="form-input">
+                    <input type="text" name="phone" value="{{ old('phone', $branch->phone) }}" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-input">
                 </div>
 
                 <div>

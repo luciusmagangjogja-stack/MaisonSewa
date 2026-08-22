@@ -29,7 +29,7 @@ class SettingsController extends Controller
             'rental_duration_days' => 'required|numeric|min:0',
             'company_tagline'      => 'nullable|string|max:150',
             'company_address'      => 'nullable|string|max:255',
-            'company_phone'        => 'nullable|string|max:30',
+            'company_phone'        => 'nullable|regex:/^[0-9]+$/|max:30',
             'company_website'      => 'nullable|string|max:150',
             'app_name'             => 'nullable|string|max:50',
             'app_tagline'          => 'nullable|string|max:100',

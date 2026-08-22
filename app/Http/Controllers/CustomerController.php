@@ -201,7 +201,7 @@ class CustomerController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', Rule::unique('customers', 'phone')->whereNull('deleted_at')],
+            'phone' => ['required', 'string', 'regex:/^[0-9]+$/', 'max:20', Rule::unique('customers', 'phone')->whereNull('deleted_at')],
             'notes' => ['nullable', 'string'],
         ], ['phone.unique' => "Nomor HP ini sudah terdaftar"]);
 
@@ -287,7 +287,7 @@ class CustomerController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', Rule::unique('customers', 'phone')->ignore($customer->id)->whereNull('deleted_at')],
+            'phone' => ['required', 'string', 'regex:/^[0-9]+$/', 'max:20', Rule::unique('customers', 'phone')->ignore($customer->id)->whereNull('deleted_at')],
             'notes' => ['nullable', 'string'],
         ]);
 
