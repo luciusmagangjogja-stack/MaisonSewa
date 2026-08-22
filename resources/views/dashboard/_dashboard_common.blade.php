@@ -20,7 +20,7 @@
 
                 <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
                     <span class="inline-flex items-center gap-2">
-                        <i data-lucide="sparkles" class="h-4 w-4 text-primary"></i>
+                        <i data-lucide="layout-dashboard" class="h-4 w-4 text-primary"></i>
                         Utama
                     </span>
                     <i data-lucide="chevron-right" class="h-4 w-4 text-slate-300"></i>
@@ -268,9 +268,9 @@
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <div class="ds-card p-6">
             <div class="flex items-center gap-2 mb-4">
-                <span class="h-10 w-10 rounded-2xl flex items-center justify-center bg-blue-50 border border-blue-100">
-                    <i data-lucide="sparkles" class="h-5 w-5 text-primary"></i>
-                </span>
+                    <span class="h-10 w-10 rounded-2xl flex items-center justify-center bg-blue-50 border border-blue-100">
+                        <i data-lucide="activity" class="h-5 w-5 text-primary"></i>
+                    </span>
                 <h3 class="text-sm font-extrabold text-slate-900">Aktivitas Terbaru</h3>
             </div>
             <div id="widgetActivity" class="text-xs space-y-1"></div>
@@ -782,7 +782,7 @@
             const rawType = (it?.type ?? '').toLowerCase();
             const token = rawType || rawDesc;
 
-            let icon = 'sparkles';
+            let icon = 'activity';
             if (token.includes('payment')) icon = 'wallet';
             else if (token.includes('return') || token.includes('kembal')) icon = 'reply';
             else if (token.includes('broadcast')) icon = 'send';
