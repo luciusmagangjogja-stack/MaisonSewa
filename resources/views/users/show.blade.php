@@ -96,7 +96,7 @@
                             {{-- Cabang --}}
                             @if($user->branch)
                             <span class="badge badge-gray text-xs">
-                                <i data-lucide="map-pin" class="w-3 h-3 inline-block mr-1"></i>
+                                <i data-lucide="navigation" class="w-3 h-3 inline-block mr-1"></i>
                                 {{ $user->branch->name }}
                             </span>
                             @elseif($user->role === 'super_admin')

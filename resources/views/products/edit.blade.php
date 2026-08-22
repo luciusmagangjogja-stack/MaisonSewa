@@ -93,7 +93,7 @@
                 <div class="card p-6 space-y-5">
                     <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
                         <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
-                            <i data-lucide="map-pin" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
+                            <i data-lucide="navigation" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
                         </div>
                         <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Cabang Tersedia</h2>
                     </div>
