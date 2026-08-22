@@ -72,7 +72,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
-                        <form @submit.prevent="addCustomer()" class="p-6 space-y-4">
+                        <div class="p-6 space-y-4">
                             <div>
                                 <label class="block text-sm font-medium mb-1.5 text-slate-700">Nama Lengkap <span class="text-red-400">*</span></label>
                                 <input type="text" x-model="newCustomer.name" class="form-input" @input="newCustomerNameError = false">
@@ -104,7 +104,7 @@
                             </div>
                             <div class="flex items-center justify-end gap-3 pt-2">
                                 <button type="button" @click="showAddModal = false" class="btn-secondary px-5 py-2.5" :disabled="addingCustomer">Batal</button>
-                                <button type="submit" class="btn-primary px-5 py-2.5" :disabled="addingCustomer">
+                                <button type="button" @click="addCustomer()" class="btn-primary px-5 py-2.5" :disabled="addingCustomer">
                                     <span x-show="!addingCustomer">Simpan Pelanggan</span>
                                     <span x-show="addingCustomer" class="flex items-center gap-2">
                                         <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -112,7 +112,7 @@
                                     </span>
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
 
