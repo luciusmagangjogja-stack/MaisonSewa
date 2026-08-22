@@ -93,6 +93,7 @@
                         <th class="text-left">Pengguna</th>
                         <th class="text-left">Role</th>
                         <th class="text-left">Cabang</th>
+                        <th class="text-right">Total Poin</th>
                         <th class="text-left">Kontak</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Aksi</th>
@@ -140,6 +141,14 @@
                                 <span class="text-xs" style="color:var(--primary)">Semua Cabang</span>
                             @else
                                 <span class="text-xs text-red-400">Belum dikaitkan</span>
+                            @endif
+                        </td>
+
+                        <td class="text-right">
+                            @if($user->role === 'sales')
+                                <span class="font-semibold" style="color:var(--text-dark)">{{ number_format($user->total_points, 0, ',', '.') }}</span>
+                            @else
+                                <span style="color:var(--text-soft)">-</span>
                             @endif
                         </td>
 
@@ -227,6 +236,11 @@
                             <span class="text-red-400">Belum dikaitkan</span>
                         @endif
                     </span>
+                    @if($user->role === 'sales')
+                    <span class="font-semibold" style="color:var(--text-dark)">
+                        {{ number_format($user->total_points, 0, ',', '.') }} poin
+                    </span>
+                    @endif
                     <span>{{ $user->phone ?? '-' }}</span>
                     <span class="badge {{ $user->is_active ? 'badge-green' : 'badge-red' }} text-[11px]">
                         {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
