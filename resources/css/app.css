@@ -408,6 +408,7 @@ textarea:focus {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    table-layout: fixed;
 }
 
 .elegant-table,
@@ -848,6 +849,7 @@ textarea.form-input { min-height: 96px !important; resize: vertical; }
     border-spacing: 0;
     font-size: .875rem;
     font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    table-layout: fixed;
 }
 .elegant-table thead th {
     background: #f8fafc;
