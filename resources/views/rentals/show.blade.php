@@ -659,7 +659,7 @@
     <script>
         function returnOperationalDashboard() {
             return {
-                defaultImage: '{{ asset('images/default-product.png') }}',
+                defaultImage: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f1f5f9" rx="16"/><g transform="translate(20, 18)" fill="none" stroke="%2394a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4h10l10 10h4l-8 8v6h-24v-6z"/><path d="M10 14h24"/><path d="M14 14v6"/><path d="M34 14v6"/><circle cx="20" cy="28" r="2"/><circle cx="28" cy="28" r="2"/></g></svg>',
                 controlsDisabled: false,
                 showHandoverModal: false,
                 handoverLoading: false,

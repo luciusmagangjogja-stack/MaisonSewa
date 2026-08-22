@@ -276,7 +276,7 @@
                             <template x-for="item in rental.items" :key="'item-card-' + item.id">
                                 <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all hover:border-blue-300 hover:bg-white">
                                     <div class="flex gap-4">
-                                        <img :src="item.photo || '{{ asset('images/default-product.png') }}'" x-on:error="() => { $event.target.src = '{{ asset('images/default-product.png') }}' }" class="h-20 w-20 rounded-2xl border border-slate-200 object-cover" alt="Produk">
+                                        <img :src="item.photo || defaultImage" x-on:error="$event.target.src = defaultImage" class="h-20 w-20 rounded-2xl border border-slate-200 object-cover" alt="Produk">
                                         <div class="min-w-0 flex-1">
                                             <h3 class="truncate text-base font-semibold text-slate-900" x-text="item.product_name"></h3>
                                             <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
@@ -540,6 +540,7 @@
             return {
                 controlsDisabled: false,
                 totalDenda: 0,
+                defaultImage: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f1f5f9" rx="16"/><g transform="translate(20, 18)" fill="none" stroke="%2394a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4h10l10 10h4l-8 8v6h-24v-6z"/><path d="M10 14h24"/><path d="M14 14v6"/><path d="M34 14v6"/><circle cx="20" cy="28" r="2"/><circle cx="28" cy="28" r="2"/></g></svg>',
                 progressSteps: [
                     { id: 1, label: 'Booking' },
                     { id: 2, label: 'Sedang Disewa' },
