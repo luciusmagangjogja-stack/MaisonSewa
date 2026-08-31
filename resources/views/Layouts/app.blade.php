@@ -31,10 +31,10 @@
         'Operasional' => [
             ['label' => 'Penyewaan', 'route' => 'rentals.index', 'icon' => 'shirt', 'active' => ['rentals.index', 'rentals.create', 'rentals.store', 'rentals.show', 'rentals.edit', 'rentals.update', 'rentals.destroy', 'rentals.payment', 'rentals.payment.update', 'rentals.payment.destroy', 'rentals.payment.refund', 'rentals.payment.void', 'rentals.return', 'rentals.cancel-return', 'rentals.update-status', 'rentals.confirm-return-ajax', 'rentals.invoice', 'rentals.pdf', 'rentals.whatsapp', 'rentals.reminder', 'rentals.receipt.*', 'rentals.cancel'], 'roles' => ['super_admin','admin_toko','sales']],
             ['label' => 'Scan QR', 'route' => 'rentals.scan', 'icon' => 'scan-line', 'active' => ['rentals.scan', 'rentals.scan.show'], 'roles' => ['super_admin','admin_toko','sales']],
-            ['label' => 'Broadcast', 'route' => 'broadcasts.index', 'icon' => 'send', 'active' => 'broadcasts.*', 'roles' => ['super_admin','admin_toko']],
+            ['label' => 'Broadcast', 'route' => 'broadcast-campaigns.index', 'icon' => 'send', 'active' => 'broadcast-campaigns.*', 'roles' => ['super_admin','admin_toko']],
         ],
         'Master Data' => [
-            ['label' => 'Customer', 'route' => 'customers.index', 'icon' => 'phone', 'active' => 'customers.*', 'roles' => ['super_admin','admin_toko','sales']],
+            ['label' => 'Pelanggan', 'route' => 'customers.index', 'icon' => 'phone', 'active' => 'customers.*', 'roles' => ['super_admin','admin_toko','sales']],
             ['label' => 'Produk', 'route' => 'products.index', 'icon' => 'package', 'active' => 'products.*', 'roles' => ['super_admin','admin_toko','sales']],
             ['label' => 'Kategori', 'route' => 'categories.index', 'icon' => 'tags', 'active' => 'categories.*', 'roles' => ['super_admin']],
         ],
@@ -287,7 +287,7 @@
                 </a>
                 <a href="{{ route('customers.index') }}" class="ds-hover-lift flex flex-col items-center justify-center gap-1 rounded-[16px] py-2 {{ request()->routeIs('customers.*') ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-transparent text-slate-500 hover:bg-blue-50 border border-transparent' }}" style="border-color: rgba(226,232,240,.95);">
                     <i data-lucide="users" class="h-5 w-5"></i>
-                    <span class="text-[10px] font-bold">Customers</span>
+                    <span class="text-[10px] font-bold">Pelanggan</span>
                 </a>
                 <a href="{{ route('notifications.index') }}" class="ds-hover-lift flex flex-col items-center justify-center gap-1 rounded-[16px] py-2 bg-transparent text-slate-500 hover:bg-blue-50 border border-slate-200 relative">
                     <i data-lucide="bell" class="h-5 w-5"></i>

@@ -1,14 +1,25 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Notification extends Model
 {
     protected $fillable = [
-        'user_id','branch_id','type','title',
-        'message','icon','color','action_url',
-        'meta','is_read','read_at',
+        'notifiable_type',
+        'notifiable_id',
+        'branch_id',
+        'type',
+        'title',
+        'message',
+        'icon',
+        'color',
+        'action_url',
+        'meta',
+        'is_read',
+        'read_at',
     ];
 
     protected $casts = [
@@ -17,8 +28,13 @@ class Notification extends Model
         'read_at' => 'datetime',
     ];
 
+    public function notifiable(): MorphMany
+    {
+        return $this->morphTo();
+    }
+
     public function scopeUnread($q)        { return $q->where('is_read', false); }
-    public function scopeForUser($q, $uid) { return $q->where('user_id', $uid); }
+    public function scopeForUser($q, $uid) { return $q->where('notifiable_type', User::class)->where('notifiable_id', $uid); }
     public function scopeByType($q, $type) { return $q->where('type', $type); }
 
     public function markAsRead(): void

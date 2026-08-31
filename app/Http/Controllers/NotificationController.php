@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
@@ -11,8 +13,13 @@ class NotificationController extends Controller
     public function index(Request $request): View
     {
         $type = $request->query('type', 'all');
+        $user = $request->user();
 
-        $query = Notification::forUser(auth()->id())->latest();
+        $query = Notification::query()
+            ->where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
+            ->latest();
+
         if ($type !== 'all') {
             $query->byType($type);
         }
@@ -25,8 +32,16 @@ class NotificationController extends Controller
     public function data(Request $request): JsonResponse
     {
         $type  = $request->input('type', 'all');
-        $query = Notification::forUser(auth()->id())->latest();
-        if ($type !== 'all') $query->byType($type);
+        $user  = $request->user();
+
+        $query = Notification::query()
+            ->where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
+            ->latest();
+
+        if ($type !== 'all') {
+            $query->byType($type);
+        }
 
         $notifications = $query->limit(20)->get()->map(fn($n) => [
             'id'         => $n->id,
@@ -54,23 +69,39 @@ class NotificationController extends Controller
 
     public function markRead(int $id): JsonResponse
     {
-        Notification::forUser(auth()->id())->findOrFail($id)->markAsRead();
+        $user = auth()->user();
+        $notification = Notification::where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
+            ->findOrFail($id);
+        $notification->markAsRead();
+
         return response()->json(['counts' => $this->getCounts()]);
     }
 
     public function markAllRead(Request $request): JsonResponse
     {
-        $q = Notification::forUser(auth()->id())->unread();
-        if ($request->input('type') && $request->input('type') !== 'all') {
+        $user = $request->user();
+        $q = Notification::where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
+            ->unread();
+
+        if ($request->input('type')) {
             $q->byType($request->input('type'));
         }
+
         $q->update(['is_read' => true, 'read_at' => now()]);
+
         return response()->json(['counts' => $this->getCounts()]);
     }
 
     public function destroy(int $id): JsonResponse
     {
-        Notification::forUser(auth()->id())->findOrFail($id)->delete();
+        $user = auth()->user();
+        $notification = Notification::where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
+            ->findOrFail($id);
+        $notification->delete();
+
         return response()->json(['counts' => $this->getCounts()]);
     }
 
@@ -79,7 +110,10 @@ class NotificationController extends Controller
      */
     private function getCounts(): array
     {
-        $rows = Notification::forUser(auth()->id())
+        $user = auth()->user();
+
+        $rows = Notification::where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
             ->unread()
             ->selectRaw('type, COUNT(*) as total')
             ->groupBy('type')
@@ -99,11 +133,15 @@ class NotificationController extends Controller
 
     public function show(int $id): View
     {
-        /** @var \App\Models\User $user */
         $user = auth()->user();
-        $notification = $user->notifications()->findOrFail($id);
-        if (!$notification->is_read) $notification->update(['is_read' => true]);
+        $notification = Notification::where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
+            ->findOrFail($id);
+
+        if (!$notification->is_read) {
+            $notification->update(['is_read' => true, 'read_at' => now()]);
+        }
+
         return view('components.show', compact('notification'));
     }
-
 }

@@ -452,10 +452,12 @@
                                             <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold" :class="guarantee.status === 'returned' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'" x-text="guarantee.status === 'returned' ? 'Sudah Dikembalikan' : 'Masih Ditahan'"></span>
                                         </div>
                                         <div class="mt-3 space-y-2 text-sm">
-                                            <div class="flex items-center justify-between gap-3">
-                                                <span class="text-slate-500">Nomor</span>
-                                                <span class="font-semibold text-slate-800" x-text="guarantee.id_number || '-'"></span>
-                                            </div>
+                                            <template x-if="guarantee.id_number">
+                                                <div class="flex items-center justify-between gap-3">
+                                                    <span class="text-slate-500">Nomor</span>
+                                                    <span class="font-semibold text-slate-800" x-text="guarantee.id_number"></span>
+                                                </div>
+                                            </template>
                                             <template x-if="guarantee.deposit_amount > 0">
                                                 <div class="flex items-center justify-between gap-3">
                                                     <span class="text-slate-500">Deposit</span>

@@ -18,7 +18,7 @@
         @csrf
 
         {{-- ─── QRIS PEMBAYARAN ─────────────────────────────── --}}
-        <div class="card p-6 space-y-4">
+        <div class="ds-card p-6 space-y-4">
             <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
                 <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
                     <i data-lucide="qr-code" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
@@ -99,7 +99,7 @@
         </div>
 
         {{-- ─── INFORMASI REKENING TRANSFER ─────────────────── --}}
-        <div class="card p-6 space-y-4">
+        <div class="ds-card p-6 space-y-4">
             <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
                 <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
                     <i data-lucide="landmark" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
@@ -130,7 +130,7 @@
         </div>
 
         {{-- ─── INFORMASI PERUSAHAAN ─────────────────────────── --}}
-        <div class="card p-6 space-y-4">
+        <div class="ds-card p-6 space-y-4">
             <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
                 <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
                     <i data-lucide="building" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
@@ -162,6 +162,7 @@
                            class="form-input" placeholder="Contoh: 021-12345678">
                 </div>
 
+                <div>
                     <label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Website</label>
                     <input type="text" name="company_website"
                            value="{{ old('company_website', $settings['company_website'] ?? null) }}"
@@ -171,12 +172,13 @@
         </div>
 
         {{-- ─── LOGO & NAMA APLIKASI ─────────────────────────── --}}
-        <div class="card p-6 space-y-4">
+        <div class="ds-card p-6 space-y-4">
             <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
                 <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
                     <i data-lucide="palette" class="w-3.5 h-3.5" style="color:var(--primary)"></i>
                 </div>
-                <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Logo & Nama Aplikasi <span class="font-normal" style="color:var(--text-soft)">(sidebar, login, dan invoice)</span></h2>
+                <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Logo & Nama Aplikasi</h2>
+                <p class="text-xs" style="color:var(--text-soft)">(sidebar, login, dan invoice)</p>
             </div>
 
             <p class="text-xs" style="color:var(--text-soft)">
@@ -240,7 +242,7 @@
         </div>
 
         {{-- ─── PENGATURAN SEWA ──────────────────────────────── --}}
-        <div class="card p-6 space-y-4">
+        <div class="ds-card p-6 space-y-4">
             <div class="flex items-center gap-2 pb-3 border-b" style="border-color:var(--border)">
                 <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--secondary)">
                     <i data-lucide="settings" class="w-3.5 h-3.5" style="color:var(--primary)"></i>

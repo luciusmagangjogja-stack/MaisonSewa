@@ -12,7 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\BroadcastController;
+use App\Http\Controllers\BroadcastCampaignController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TransactionController;
@@ -60,12 +60,15 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureBranchScope::class])->grou
         Route::get('/{id}', [NotificationController::class, 'show'])->name('notifications.show');
     });
 
-    Route::prefix('broadcasts')
-        ->name('broadcasts.')
+    Route::prefix('broadcast-campaigns')
+        ->name('broadcast-campaigns.')
         ->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin,admin_toko')
         ->group(function () {
-            Route::get('/', [BroadcastController::class, 'index'])->name('index');
-            Route::post('/', [BroadcastController::class, 'store'])->name('store');
+            Route::get('/', [BroadcastCampaignController::class, 'index'])->name('index');
+            Route::get('/create', [BroadcastCampaignController::class, 'create'])->name('create');
+            Route::post('/', [BroadcastCampaignController::class, 'store'])->name('store');
+            Route::get('/{broadcastCampaign}', [BroadcastCampaignController::class, 'show'])->name('show');
+            Route::delete('/{broadcastCampaign}', [BroadcastCampaignController::class, 'destroy'])->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin')->name('destroy');
         });
 
     // ─── CUSTOMER (MASTER DATA) ──────────────────────────────────────

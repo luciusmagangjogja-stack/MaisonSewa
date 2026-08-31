@@ -1,7 +1,7 @@
 @extends('Layouts.app')
 
 @section('title', $customer->name)
-@section('page-title', 'Detail Customer')
+@section('page-title', 'Detail Pelanggan')
 @section('subtitle', $customer->name)
 
 @push('styles')
@@ -28,13 +28,13 @@
 <div class="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
 <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 text-amber-600"></i>
 <div class="flex-1">
-<p class="font-semibold text-amber-800">Customer ini dalam status Dinonaktifkan</p>
+<p class="font-semibold text-amber-800">Pelanggan ini dalam status Dinonaktifkan</p>
 @if($customer->deleted_at)<p class="text-sm text-amber-600">Dinonaktifkan pada: {{ $customer->deleted_at->format('d M Y H:i') }}</p>@endif
 </div>
 @auth @if(auth()->user()->isSuperAdmin())
 <form method="POST" action="{{ route('customers.restore', $customer->id) }}" class="inline">
 @csrf
-<button type="submit" class="btn-secondary bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Pulihkan Customer</button>
+<button type="submit" class="btn-secondary bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Pulihkan Pelanggan</button>
 </form>
 @endif @endauth
 </div>
@@ -68,7 +68,7 @@
 @if($customer->is_blacklisted)
 <div class="flex items-center gap-3 p-4 rounded-xl" style="background:#FFF1F0;border:1px solid #FECACA">
 <i data-lucide="shield-off" class="w-5 h-5 flex-shrink-0" style="color:#C0392B"></i>
-<div><p class="font-semibold" style="color:#C0392B">Customer ini di-Blacklist</p>
+<div><p class="font-semibold" style="color:#C0392B">Pelanggan ini diblokir</p>
 @if($customer->blacklist_reason)<p class="text-sm" style="color:#E74C3C">Alasan: {{ $customer->blacklist_reason }}</p>@endif
 </div>
 </div>
@@ -78,7 +78,7 @@
     <div class="lg:col-span-1">
         <div class="ds-card p-6">
             <h3 class="font-semibold text-base mb-4" style="color:var(--text-dark)">
-                <i data-lucide="user" class="w-4 h-4 inline mr-2" style="color:var(--primary)"></i> Informasi Customer
+                <i data-lucide="user" class="w-4 h-4 inline mr-2" style="color:var(--primary)"></i> Informasi Pelanggan
             </h3>
 
             <div class="flex flex-col items-center mb-5">
@@ -144,18 +144,18 @@
 
 <div x-show="showBlacklist" x-cloak class="modal-overlay" @click.self="showBlacklist = false">
 <div class="modal-box">
-<h3 class="font-semibold text-base mb-4" style="color:var(--text-dark)">{{ $customer->is_blacklisted ? 'Hapus dari Blacklist' : 'Blacklist Customer' }}</h3>
+<h3 class="font-semibold text-base mb-4" style="color:var(--text-dark)">{{ $customer->is_blacklisted ? 'Hapus dari Daftar Blokir' : 'Daftar Blokir Pelanggan' }}</h3>
 <form method="POST" action="{{ route('customers.blacklist', $customer) }}">
 @csrf @method('PATCH')
 @if(!$customer->is_blacklisted)
 <div class="mb-4">
-<label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Alasan Blacklist</label>
-<textarea name="reason" rows="3" class="form-input" placeholder="Tulis alasan blacklist..." required></textarea>
+<label class="block text-sm font-medium mb-1.5" style="color:var(--text-dark)">Alasan Daftar Blokir</label>
+<textarea name="reason" rows="3" class="form-input" placeholder="Tulis alasan daftar blokir..." required></textarea>
 </div>
 @endif
 <div class="flex gap-3">
 <button type="button" @click="showBlacklist = false" class="btn-secondary flex-1 justify-center">Batal</button>
-<button type="submit" class="btn-primary flex-1 justify-center {{ $customer->is_blacklisted ? '' : 'btn-blacklist' }}"><i data-lucide="{{ $customer->is_blacklisted ? 'user-check' : 'user-x' }}" class="w-4 h-4"></i> {{ $customer->is_blacklisted ? 'Hapus Blacklist' : 'Blacklist Customer' }}</button>
+<button type="submit" class="btn-primary flex-1 justify-center {{ $customer->is_blacklisted ? '' : 'btn-blacklist' }}"><i data-lucide="{{ $customer->is_blacklisted ? 'user-check' : 'user-x' }}" class="w-4 h-4"></i> {{ $customer->is_blacklisted ? 'Hapus Daftar Blokir' : 'Daftar Blokir Pelanggan' }}</button>
 </div>
 </form>
 </div>

@@ -21,6 +21,7 @@ class BroadcastTemplate extends Model
         'name',
         'category',
         'content',
+        'variables',
         'is_active',
         'branch_id',
         'created_by',
@@ -28,6 +29,7 @@ class BroadcastTemplate extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'variables' => 'array',
     ];
 
     public function branch(): BelongsTo

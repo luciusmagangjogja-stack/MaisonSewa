@@ -182,13 +182,26 @@ function notificationBell() {
 
         init() {
             this.fetchCount();
-            setInterval(() => this.fetchCount(), 30000);
+            this._pollInterval = setInterval(() => this.fetchCount(), 30000);
         },
 
         toggle() {
             this.open = !this.open;
             if (this.open && this.notifications.length === 0) {
                 this.fetchNotifications();
+            }
+        },
+
+        stopPoll() {
+            if (this._pollInterval) {
+                clearInterval(this._pollInterval);
+                this._pollInterval = null;
+            }
+        },
+
+        resumePoll() {
+            if (!this._pollInterval) {
+                this._pollInterval = setInterval(() => this.fetchCount(), 30000);
             }
         },
 
@@ -305,6 +318,35 @@ function notificationBell() {
             };
             return map[type] ?? 'notif-dot-default';
         },
+
+        stopPoll() {
+            if (this._pollInterval) {
+                clearInterval(this._pollInterval);
+                this._pollInterval = null;
+            }
+        },
+
+        resumePoll() {
+            if (!this._pollInterval) {
+                this._pollInterval = setInterval(() => this.fetchCount(), 30000);
+            }
+        },
+    };
+}
+
+if (typeof window !== 'undefined') {
+    window.stopNotificationPoll = function () {
+        const bellEl = document.querySelector('[x-data*="notificationBell"]');
+        if (bellEl && bellEl._x_dataStack && bellEl._x_dataStack[0]) {
+            bellEl._x_dataStack[0].stopPoll();
+        }
+    };
+
+    window.resumeNotificationPoll = function () {
+        const bellEl = document.querySelector('[x-data*="notificationBell"]');
+        if (bellEl && bellEl._x_dataStack && bellEl._x_dataStack[0]) {
+            bellEl._x_dataStack[0].resumePoll();
+        }
     };
 }
 </script>

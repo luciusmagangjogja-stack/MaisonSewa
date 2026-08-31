@@ -23,7 +23,7 @@
     </div>
 
     {{-- ── TABEL ────────────────────────────────────────────── --}}
-    <div class="card overflow-hidden">
+    <div class="ds-card overflow-hidden">
         @if($categories->isEmpty())
         <div class="flex flex-col items-center justify-center py-20 text-center">
             <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
@@ -39,30 +39,40 @@
         @else
         {{-- Desktop table --}}
         <div class="hidden md:block">
-            <table class="elegant-table w-full">
+            <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <colgroup>
+                    <col style="width: 20%">
+                    <col style="width: 15%">
+                    <col style="width: 8%">
+                    <col style="width: 10%">
+                    <col style="width: 15%">
+                    <col style="width: 12%">
+                    <col style="width: 20%">
+                </colgroup>
                 <thead>
                     <tr>
-                        <th class="text-left">Kategori</th>
-                        <th class="text-left">Slug</th>
-                        <th class="text-center" style="text-align:center">Icon</th>
-                        <th class="text-center" style="text-align:center">Urutan</th>
-                        <th class="text-center" style="text-align:center">Jumlah Produk</th>
-                        <th class="text-center" style="text-align:center">Status</th>
-                        <th class="text-center" style="text-align:center">Aksi</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Kategori</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Slug</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Icon</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Urutan</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Jumlah Produk</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Status</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-cream-sand/30">
                     @foreach($categories as $category)
-                    <tr>
-                        <td>
+                    <tr class="transition-colors">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                             <p class="font-semibold text-sm" style="color:var(--text-dark)">{{ $category->name }}</p>
                         </td>
-                        <td>
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                             <span class="text-xs font-mono px-2 py-1 rounded-lg" style="background:var(--secondary); color:var(--text-soft)">
                                 {{ $category->slug }}
                             </span>
                         </td>
-                        <td class="text-center" style="text-align:center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
                             @if($category->icon)
                             <div class="flex justify-center w-full">
                                 <i data-lucide="{{ $category->icon }}" class="w-5 h-5" style="color:var(--primary)"></i>
@@ -71,21 +81,25 @@
                             <span class="text-xs" style="color:var(--text-soft)">-</span>
                             @endif
                         </td>
-                        <td class="text-center" style="text-align:center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
                             <span class="text-sm font-medium" style="color:var(--text-soft)">{{ $category->sort_order }}</span>
                         </td>
-                        <td class="text-center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex justify-center">
                             <span class="badge badge-gold">{{ $category->products_count }} produk</span>
+                            </div>
                         </td>
-                        <td class="text-center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex justify-center">
                             @if($category->is_active)
                                 <span class="badge badge-green">Aktif</span>
                             @else
                                 <span class="badge badge-gray">Nonaktif</span>
                             @endif
+                            </div>
                         </td>
-                        <td class="text-center">
-                            <div class="flex items-center justify-center gap-1">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex items-center justify-center gap-2">
                                 @auth
                                     @if(auth()->user()->isSuperAdmin())
                                     <a href="{{ route('categories.edit', $category) }}"
@@ -107,12 +121,13 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
 
         {{-- Mobile cards --}}
         <div class="md:hidden space-y-3">
             @foreach($categories as $category)
-            <div class="card border rounded-xl p-4 space-y-3">
+            <div class="ds-card border rounded-xl p-4 space-y-3">
                 {{-- Top: icon + name + status --}}
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"

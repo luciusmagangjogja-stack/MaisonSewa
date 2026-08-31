@@ -29,7 +29,7 @@
         $rentedUnits = $stats['rented_units'] ?? 0;
     @endphp
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="stat-card flex items-center gap-3">
+        <div class="stat-ds-card flex items-center gap-3">
             <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: rgba(99, 102, 241, 0.12); color: #4f46e5;">
                 <i data-lucide="package" class="w-5 h-5"></i>
             </div>
@@ -38,7 +38,7 @@
                 <p class="text-2xl font-bold mt-0.5 leading-tight" style="color:var(--text-dark)">{{ $totalProducts }}</p>
             </div>
         </div>
-        <div class="stat-card flex items-center gap-3">
+        <div class="stat-ds-card flex items-center gap-3">
             <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: rgba(16, 185, 129, 0.12); color: #059669;">
                 <i data-lucide="check-circle-2" class="w-5 h-5"></i>
             </div>
@@ -47,7 +47,7 @@
                 <p class="text-2xl font-bold mt-0.5 leading-tight text-green-600">{{ $availableProducts }}</p>
             </div>
         </div>
-        <div class="stat-card flex items-center gap-3">
+        <div class="stat-ds-card flex items-center gap-3">
             <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: rgba(37, 99, 235, 0.12); color: #1d4ed8;">
                 <i data-lucide="shirt" class="w-5 h-5"></i>
             </div>
@@ -56,7 +56,7 @@
                 <p class="text-2xl font-bold mt-0.5 leading-tight text-blue-600">{{ $rentedUnits }}</p>
             </div>
         </div>
-        <div class="stat-card flex items-center gap-3">
+        <div class="stat-ds-card flex items-center gap-3">
             <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: rgba(220, 38, 38, 0.10); color: #dc2626;">
                 <i data-lucide="wrench" class="w-5 h-5"></i>
             </div>
@@ -68,13 +68,13 @@
     </div>
 
     {{-- ── FILTER & SEARCH ──────────────────────────────────── --}}
-    <div class="card p-4">
+    <div class="ds-card p-4">
         <form method="GET" action="{{ route('products.index') }}" class="flex flex-col sm:flex-row gap-3">
             <div class="relative flex-1">
                 <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
                 <input type="text" name="search" value="{{ request('search') }}"
                     placeholder="Cari nama, kode produk..."
-                    class="form-input" style="padding-left: 44px !important">
+                    class="form-input ds-input-icon">
             </div>
             <select name="category" class="form-input sm:w-44">
                 <option value="">Semua Kategori</option>
@@ -125,10 +125,10 @@
             {{ $products->total() }} produk ditemukan
         </p>
         <div class="flex items-center gap-1 p-1 rounded-xl" style="background:var(--secondary)">
-            <button id="btn-card"
-                onclick="setView('card')"
+            <button id="btn-ds-card"
+                onclick="setView('ds-card')"
                 class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
-                style="background:var(--card-bg); color:var(--text-dark); box-shadow:0 1px 3px rgba(0,0,0,.08)">
+                style="background:var(--ds-card-bg); color:var(--text-dark); box-shadow:0 1px 3px rgba(0,0,0,.08)">
                 <i data-lucide="layout-grid" class="w-4 h-4"></i> Kartu
             </button>
             <button id="btn-table"
@@ -141,7 +141,7 @@
     </div>
 
     @if($products->isEmpty())
-    <div class="card p-12 text-center">
+    <div class="ds-card p-12 text-center">
         <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:var(--secondary)">
             <i data-lucide="shirt" class="w-8 h-8" style="color:var(--primary)"></i>
         </div>
@@ -153,10 +153,10 @@
     </div>
     @else
 
-    <div id="view-card">
+    <div id="view-ds-card">
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             @foreach($products as $product)
-            <div class="card overflow-hidden group flex flex-col">
+            <div class="ds-card overflow-hidden group flex flex-col">
 
                 <div class="relative overflow-hidden" style="aspect-ratio: 3/4; background:var(--secondary)">
                     @if($product->photo)
@@ -248,31 +248,39 @@
         </div>
     </div>
 
-    <div id="view-table" class="card overflow-hidden hidden">
+    <div id="view-table" class="ds-card overflow-hidden hidden">
         <div class="overflow-x-auto">
-            <table class="elegant-table w-full">
+            <table class="w-full text-left text-sm">
+                <colgroup>
+                    <col style="width: 18%">
+                    <col style="width: 10%">
+                    <col style="width: 7%">
+                    <col style="width: 8%">
+                    <col style="width: 14%">
+                    <col style="width: 10%">
+                    <col style="width: 13%">
+                    <col style="width: 10%">
+                    <col style="width: 10%">
+                    <col style="width: 10%">
+                </colgroup>
                 <thead>
                     <tr>
-                        <th class="text-left">Produk</th>
-                        <th class="text-left">Kategori</th>
-                        <th class="text-center">Ukuran</th>
-                        <th class="text-center">Warna</th>
-                        @auth
-                        @if(auth()->user()->isSuperAdmin())
-                        <th class="text-left">Cabang</th>
-                        @endif
-                        @endauth
-                        <th class="text-center">Stok</th>
-                        <th class="text-right">Harga Sewa</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Kondisi</th>
-                        <th class="text-center">Aksi</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Produk</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Kategori</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Ukuran</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Warna</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left hidden sm:table-cell">Cabang</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Stok</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-right">Harga Sewa</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Status</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Kondisi</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-cream-sand/30">
                     @foreach($products as $product)
-                    <tr>
-                        <td>
+                    <tr class="transition-colors">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden"
                                      style="background:var(--secondary)">
@@ -292,18 +300,18 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                             <span class="text-sm" style="color:var(--text-soft)">{{ $product->category?->name ?? '-' }}</span>
                         </td>
-                        <td class="text-center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex justify-center">
                             <span class="badge badge-gray">{{ $product->size ?? '-' }}</span>
+                            </div>
                         </td>
-                        <td class="text-center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
                             <span class="text-sm" style="color:var(--text-soft)">{{ $product->color ?? '-' }}</span>
                         </td>
-                        @auth
-                        @if(auth()->user()->isSuperAdmin())
-                        <td class="text-left">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center hidden sm:table-cell">
                             @foreach($product->branches as $branch)
                                 <span class="inline-block rounded-full bg-blue-50 text-blue-700 text-xs px-2 py-0.5 mb-1">{{ $branch->name }}</span>
                             @endforeach
@@ -311,21 +319,20 @@
                                 <span class="text-xs text-slate-400">-</span>
                             @endif
                         </td>
-                        @endif
-                        @endauth
-                        <td class="text-center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
                             <div class="text-sm font-medium" style="color:var(--text-dark)">
                                 {{ $product->stock_available }}/{{ $product->stock_total }}
                             </div>
                             <div class="text-xs" style="color:var(--text-soft)">tersedia</div>
                         </td>
-                        <td class="text-right">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-right">
                             <span class="font-semibold text-sm" style="color:var(--text-dark)">
                                 Rp {{ number_format($product->rental_price, 0, ',', '.') }}
                             </span>
                             <div class="text-xs" style="color:var(--text-soft)">/hari</div>
                         </td>
-                        <td class="text-center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex justify-center">
                             @if($product->status === 'available')
                                 <span class="badge badge-green">Tersedia</span>
                             @elseif($product->status === 'rented')
@@ -335,20 +342,23 @@
                             @else
                                 <span class="badge badge-gray">{{ $product->status }}</span>
                             @endif
+                            </div>
                         </td>
-                        <td class="text-center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex justify-center">
                             @if($product->condition === 'excellent')
                                 <span class="badge badge-gold">Excellent</span>
                             @elseif($product->condition === 'good')
                                 <span class="badge badge-green">Good</span>
                             @elseif($product->condition === 'fair')
-                                <span class="badge badge-yellow">Fair</span>
+                                <span class="badge badge-gold">Fair</span>
                             @else
                                 <span class="badge badge-red">{{ $product->condition ?? '-' }}</span>
                             @endif
+                            </div>
                         </td>
-                        <td class="text-center">
-                            <div class="flex items-center justify-center gap-1">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex items-center justify-center gap-2">
                                 <a href="{{ route('products.show', $product) }}"
                                    class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Detail">
                                     <i data-lucide="eye" class="w-4 h-4" style="color:var(--text-soft)"></i>
@@ -386,25 +396,25 @@
 @push('scripts')
 <script>
 function setView(view) {
-    const cardView = document.getElementById('view-card');
+    const ds-cardView = document.getElementById('view-ds-card');
     const tableView = document.getElementById('view-table');
-    const btnCard = document.getElementById('btn-card');
+    const btnCard = document.getElementById('btn-ds-card');
     const btnTable = document.getElementById('btn-table');
 
-    if (view === 'card') {
-        cardView.classList.remove('hidden');
+    if (view === 'ds-card') {
+        ds-cardView.classList.remove('hidden');
         tableView.classList.add('hidden');
-        btnCard.style.background = 'var(--card-bg)';
+        btnCard.style.background = 'var(--ds-card-bg)';
         btnCard.style.color = 'var(--text-dark)';
         btnCard.style.boxShadow = '0 1px 3px rgba(0,0,0,.08)';
         btnTable.style.background = 'transparent';
         btnTable.style.color = 'var(--text-soft)';
         btnTable.style.boxShadow = 'none';
-        localStorage.setItem('productView', 'card');
+        localStorage.setItem('productView', 'ds-card');
     } else {
-        cardView.classList.add('hidden');
+        ds-cardView.classList.add('hidden');
         tableView.classList.remove('hidden');
-        btnTable.style.background = 'var(--card-bg)';
+        btnTable.style.background = 'var(--ds-card-bg)';
         btnTable.style.color = 'var(--text-dark)';
         btnTable.style.boxShadow = '0 1px 3px rgba(0,0,0,.08)';
         btnCard.style.background = 'transparent';
@@ -415,10 +425,9 @@ function setView(view) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const savedView = localStorage.getItem('productView') || 'card';
+    const savedView = localStorage.getItem('productView') || 'ds-card';
     setView(savedView);
 });
 </script>
 @endpush
 @endsection
-

@@ -118,18 +118,18 @@
                 @if ($isSuperAdmin)
                     @if ($selectedBranchId)
                         <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
-                        Export untuk cabang
+                        Ekspor untuk cabang
                         <span class="font-semibold" style="color: var(--text-dark)">
                             {{ $branches->firstWhere('id', $selectedBranchId)?->name }}
                         </span>
                     @else
                         <i data-lucide="globe" class="w-3.5 h-3.5" style="color: var(--gold)"></i>
-                        Export akan mencakup
+                        Ekspor akan mencakup
                         <span class="font-semibold" style="color: var(--text-dark)">semua cabang</span>
                     @endif
                 @else
                     <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-                    Export hanya untuk cabang Anda
+                    Ekspor hanya untuk cabang Anda
                 @endif
             </div>
 

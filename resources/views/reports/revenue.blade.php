@@ -93,7 +93,7 @@
 </div>
 
 {{-- ── TABEL DATA ── --}}
-<div class="card overflow-hidden">
+<div class="ds-card overflow-hidden">
     <div class="px-5 py-4 flex items-center justify-between"
          style="border-bottom: 1px solid var(--border)">
         <h2 class="font-semibold text-sm" style="color: var(--text-dark)">
@@ -105,25 +105,31 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="elegant-table w-full">
+        <table class="w-full text-left text-sm">
+            <colgroup>
+                <col style="width: 35%">
+                <col style="width: 20%">
+                <col style="width: 25%">
+                <col style="width: 20%">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="text-left">Tanggal</th>
-                    <th class="text-right">Total Rental</th>
-                    <th class="text-right">Denda</th>
-                    <th class="text-right">Pendapatan</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Tanggal</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Total Rental</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-right">Denda</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-right">Pendapatan</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-cream-sand/30">
                 @forelse ($revenueData as $row)
-                    <tr>
-                        <td style="color: var(--text-dark)">
+                    <tr class="transition-colors">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle" style="color: var(--text-dark)">
                             {{ \Carbon\Carbon::parse($row->date)->isoFormat('dddd, D MMMM Y') }}
                         </td>
-                        <td class="text-right" style="color: var(--text-soft)">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center" style="color: var(--text-soft)">
                             {{ number_format($row->total_rentals) }}
                         </td>
-                        <td class="text-right">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-right">
                             @if ($row->total_late_fee > 0)
                                 <span style="color: #C0392B" class="font-medium">
                                     Rp {{ number_format($row->total_late_fee, 0, ',', '.') }}
@@ -132,13 +138,13 @@
                                 <span style="color: var(--text-soft)">—</span>
                             @endif
                         </td>
-                        <td class="text-right font-semibold" style="color: #15803D">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-right font-semibold" style="color: #15803D">
                             Rp {{ number_format($row->total_revenue, 0, ',', '.') }}
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-center py-12">
+                        <td colspan="4" class="px-5 py-12 text-center">
                             <div class="flex flex-col items-center gap-2">
                                 <i data-lucide="inbox" class="w-8 h-8 opacity-30"
                                    style="color: var(--text-soft)"></i>
@@ -153,18 +159,17 @@
 
             @if ($revenueData->isNotEmpty())
                 <tfoot>
-                    <tr style="background: linear-gradient(135deg, #F8F5F0, #EDE7DE);
-                                border-top: 2px solid var(--border)">
-                        <td class="font-bold text-sm px-4 py-3" style="color: var(--text-dark)">
+                    <tr>
+                        <td class="px-5 py-3.5 font-bold text-sm" style="color: var(--text-dark); background: linear-gradient(135deg, #F8F5F0, #EDE7DE);">
                             Total Keseluruhan
                         </td>
-                        <td class="text-right font-bold text-sm px-4 py-3" style="color: var(--text-dark)">
+                        <td class="px-5 py-3.5 text-center font-bold text-sm" style="color: var(--text-dark); background: linear-gradient(135deg, #F8F5F0, #EDE7DE);">
                             {{ number_format($revenueData->sum('total_rentals')) }}
                         </td>
-                        <td class="text-right font-bold text-sm px-4 py-3" style="color: #C0392B">
+                        <td class="px-5 py-3.5 text-right font-bold text-sm" style="color: #C0392B; background: linear-gradient(135deg, #F8F5F0, #EDE7DE);">
                             Rp {{ number_format($totalLateFee ?? 0, 0, ',', '.') }}
                         </td>
-                        <td class="text-right font-bold text-sm px-4 py-3" style="color: #15803D">
+                        <td class="px-5 py-3.5 text-right font-bold text-sm" style="color: #15803D; background: linear-gradient(135deg, #F8F5F0, #EDE7DE);">
                             Rp {{ number_format($totalRevenue, 0, ',', '.') }}
                         </td>
                     </tr>

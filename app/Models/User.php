@@ -22,6 +22,7 @@ class User extends Authenticatable
         'avatar',
         'is_active',
         'theme',
+        'opt_out',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -30,6 +31,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password'          => 'hashed',
         'is_active'         => 'boolean',
+        'opt_out'           => 'boolean',
     ];
 
     // ─── Roles Constants ─────────────────────────────────────────────────────
@@ -141,9 +143,9 @@ class User extends Authenticatable
         return $query->where('role', $role);
     }
 
-    public function notifications()
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
-        return $this->hasMany(\App\Models\Notification::class);
+        return $this->morphMany(\App\Models\Notification::class, 'notifiable');
     }
 
     public function getAvatarUrlAttribute(): string

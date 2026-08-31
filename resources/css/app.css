@@ -404,6 +404,12 @@ textarea:focus {
    Table
    ===================================================================== */
 
+.elegant-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
 .ds-table {
     width: 100%;
     border-collapse: separate;
@@ -424,22 +430,22 @@ thead th {
     position: sticky;
     top: 0;
     z-index: 1;
-    background: var(--bg-dark) !important;
-    color: rgba(15, 23, 42, 0.90) !important;
+    background: #f8fafc;
+    color: #64748b;
     border-bottom: 1px solid rgba(226, 232, 240, 0.95) !important;
-    font-weight: 700 !important;
-    font-size: .75rem !important;
-    letter-spacing: .06em !important;
-    text-transform: uppercase !important;
-    padding: 1rem 1.25rem !important;
+    font-weight: 600;
+    font-size: .75rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.25rem;
 }
 
 .elegant-table tbody td,
 .ds-table tbody td,
 tbody td {
-    padding: 0.95rem 1.25rem !important;
+    padding: 0.875rem 1.25rem;
     border-bottom: 1px solid rgba(226, 232, 240, 0.75) !important;
-    color: var(--text) !important;
+    color: #334155;
     background: #fff;
     transition: background-color var(--duration) var(--ease);
 }
@@ -1020,8 +1026,11 @@ textarea.form-input { min-height: 96px !important; resize: vertical; }
     outline: 4px solid #ffffff;
 }
 
+.ds-input-icon { padding-left: 44px !important; }
+.ds-input-icon-sm { padding-left: 40px !important; }
+
 /* =====================================================================
-   Chart styling
+    Chart styling
    ===================================================================== */
 
 #dashboard-root canvas {

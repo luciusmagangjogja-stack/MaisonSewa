@@ -415,8 +415,25 @@ class RentalService
             $guaranteeType = $data['guarantee_type'] ?? ($data['guarantee']['type'] ?? null);
             if (!empty($guaranteeType)) {
                 $idPhotoPath = null;
-                if (!empty($data['guarantee_id_photo']) && is_a($data['guarantee_id_photo'], \Illuminate\Http\UploadedFile::class)) {
-                    $idPhotoPath = $data['guarantee_id_photo']->store('guarantees/id_photos', 'public');
+
+                if ($guaranteeType === 'ktp' || $guaranteeType === 'sim') {
+                    if (!empty($data['guarantee_id_photo']) && is_a($data['guarantee_id_photo'], \Illuminate\Http\UploadedFile::class)) {
+                        $idPhotoPath = $data['guarantee_id_photo']->store('guarantees/id_photos', 'public');
+                    }
+                }
+
+                if ($guaranteeType === 'deposit') {
+                    $depositAmount = (float) ($data['guarantee_deposit'] ?? 0);
+                    if ($depositAmount <= 0) {
+                        abort(422, 'Jumlah deposit wajib diisi untuk jenis jaminan Deposit Uang.');
+                    }
+                }
+
+                if ($guaranteeType === 'custom') {
+                    $description = trim((string) ($data['guarantee_notes'] ?? ''));
+                    if ($description === '') {
+                        abort(422, 'Deskripsi jaminan custom wajib diisi.');
+                    }
                 }
 
                 Guarantee::create([
@@ -424,7 +441,7 @@ class RentalService
                     'type'           => $guaranteeType,
                     'id_number'      => $data['guarantee_id_number'] ?? ($data['guarantee']['id_number'] ?? null),
                     'id_name'        => $data['guarantee_id_name'] ?? ($data['guarantee']['id_name'] ?? null),
-                    'deposit_amount' => $data['guarantee_deposit'] ?? ($data['guarantee']['deposit_amount'] ?? 0),
+                    'deposit_amount' => $guaranteeType === 'deposit' ? (float) ($data['guarantee_deposit'] ?? 0) : 0,
                     'description'    => $data['guarantee_notes'] ?? ($data['guarantee']['description'] ?? null),
                     'id_photo'       => $idPhotoPath,
                     'status'         => 'held',

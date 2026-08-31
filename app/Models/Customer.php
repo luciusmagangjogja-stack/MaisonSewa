@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Customer extends Model
 {
@@ -16,11 +17,12 @@ class Customer extends Model
         'branch_id', 'user_id', 'name', 'phone', 'email', 'address',
         'id_number', 'photo',
         'height', 'weight',
-        'notes', 'is_blacklisted', 'blacklist_reason',
+        'notes', 'is_blacklisted', 'blacklist_reason', 'opt_out',
     ];
 
     protected $casts = [
         'is_blacklisted' => 'boolean',
+        'opt_out' => 'boolean',
     ];
 
     public function branch(): BelongsTo
@@ -36,6 +38,11 @@ class Customer extends Model
     public function rentals(): HasMany
     {
         return $this->hasMany(Rental::class);
+    }
+
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(\App\Models\Notification::class, 'notifiable');
     }
 
     public function getPhotoUrlAttribute(): string

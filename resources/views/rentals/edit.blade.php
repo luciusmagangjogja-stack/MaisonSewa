@@ -197,7 +197,9 @@
                     <select name="payment_method" class="form-input">
                         <option value="">Pilih Metode</option>
                         <option value="cash" {{ (string)($rental->payment_method ?? '') === 'cash' ? 'selected' : '' }}>Tunai</option>
+                        @if($qris['available'])
                         <option value="qris" {{ (string)($rental->payment_method ?? '') === 'qris' ? 'selected' : '' }}>QRIS</option>
+                        @endif
                         <option value="transfer" {{ (string)($rental->payment_method ?? '') === 'transfer' ? 'selected' : '' }}>Transfer</option>
                     </select>
                 </div>
@@ -212,24 +214,22 @@
                         <option value="">Pilih Jaminan</option>
                         <option value="ktp" {{ $guarantee && $guarantee->type === 'ktp' ? 'selected' : '' }}>KTP</option>
                         <option value="sim" {{ $guarantee && $guarantee->type === 'sim' ? 'selected' : '' }}>SIM</option>
-<option value="deposit" hidden {{ $guarantee && $guarantee->type === 'deposit' ? 'selected' : '' }}>Deposit Uang</option>
-                        <option value="custom" hidden {{ $guarantee && $guarantee->type === 'custom' ? 'selected' : '' }}>Jaminan Custom</option>
+                        <option value="deposit" {{ $guarantee && $guarantee->type === 'deposit' ? 'selected' : '' }}>Deposit Uang</option>
+                        <option value="custom" {{ $guarantee && $guarantee->type === 'custom' ? 'selected' : '' }}>Jaminan Custom</option>
                     </select>
                 </div>
 
-                <div>
-                    <!-- Hidden field for backward compatibility -->
-                    <input type="hidden" name="guarantee_id_number" value="{{ old('guarantee_id_number', $guarantee->id_number ?? '') }}">
-                </div>
-
+                @if($guarantee && $guarantee->type === 'custom')
                 <div class="sm:col-span-2">
-                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Catatan Jaminan</label>
-                    <textarea name="guarantee_notes" class="form-input" rows="2" placeholder="Catatan tambahan tentang jaminan">{{ old('guarantee_notes', $guarantee->description ?? '') }}</textarea>
+                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Deskripsi Jaminan</label>
+                    <textarea name="guarantee_notes" class="form-input" rows="2" placeholder="Contoh: Motor Vario plat AD 1234 XX">{{ old('guarantee_notes', $guarantee->description ?? '') }}</textarea>
+                    @error('guarantee_notes')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
                 </div>
+                @endif
 
-                {{-- KTP Photo --}}
+                @if($guarantee && ($guarantee->type === 'ktp' || $guarantee->type === 'sim'))
                 <div class="sm:col-span-2">
-                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Upload Foto KTP/SIM</label>
+                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Upload Foto {{ $guarantee->type === 'ktp' ? 'KTP' : 'SIM' }}</label>
 
                     @if($guarantee && $guarantee->id_photo)
                         <div class="mb-3" x-data="{ showPreview: false }">

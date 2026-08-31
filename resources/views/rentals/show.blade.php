@@ -157,7 +157,7 @@
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Customer</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pelanggan</p>
                             <p class="mt-2 text-sm font-semibold text-slate-900" x-text="rental.customer.name"></p>
                             <p class="mt-1 text-sm text-slate-500" x-text="rental.customer.phone || '-'"></p>
                         </div>
@@ -422,10 +422,12 @@
                                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold" :class="guarantee.status === 'returned' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'" x-text="guarantee.status === 'returned' ? 'Dikembalikan' : 'Ditahan'"></span>
                                 </div>
                                 <div class="mt-3 space-y-2 text-sm">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <span class="text-slate-500">Nomor</span>
-                                        <span class="font-semibold text-slate-900" x-text="guarantee.id_number || '-'"></span>
-                                    </div>
+                                    <template x-if="guarantee.id_number">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="text-slate-500">Nomor</span>
+                                            <span class="font-semibold text-slate-900" x-text="guarantee.id_number"></span>
+                                        </div>
+                                    </template>
                                     <div class="flex items-center justify-between gap-3">
                                         <span class="text-slate-500">Deposit</span>
                                         <span class="font-semibold text-slate-900" x-text="fmt(guarantee.deposit_amount)"></span>
@@ -554,11 +556,17 @@
                                 <select name="method" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" x-model="paymentMethod">
                                     <option value="cash">Tunai</option>
                                     <option value="transfer">Transfer</option>
+                                    @if($qris['available'])
                                     <option value="qris">QRIS</option>
+                                    @endif
                                 </select>
                                 <div x-show="paymentMethod === 'qris'" x-transition class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 text-center">
                                     <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Scan QR code di bawah untuk membayar via QRIS</p>
-                                    <img src="{{ asset('images/qris-payment.png') }}" alt="QRIS Payment" class="mx-auto h-48 w-48 rounded-xl border border-slate-100 object-contain">
+                                    @if($qris['url'])
+                                        <img src="{{ $qris['url'] }}" alt="QRIS Payment" class="mx-auto h-48 w-48 rounded-xl border border-slate-100 object-contain">
+                                    @else
+                                        <p class="text-sm text-slate-500">QRIS belum diupload di Pengaturan.</p>
+                                    @endif
                                 </div>
                             </div>
                             <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
@@ -592,7 +600,7 @@
                                     <span class="ml-2 font-semibold text-slate-900" x-text="rental.invoice_number"></span>
                                 </div>
                                 <div>
-                                    <span class="text-slate-500">Customer:</span>
+                                    <span class="text-slate-500">Pelanggan:</span>
                                     <span class="ml-2 font-semibold text-slate-900" x-text="rental.customer.name"></span>
                                 </div>
                                 <div>

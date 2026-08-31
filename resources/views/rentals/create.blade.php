@@ -206,15 +206,19 @@
                     <select name="payment_method" class="form-input" @change="paymentMethodError = false" x-model="paymentMethod">
                         <option value="">Pilih Metode</option>
                         <option value="cash" {{ old('payment_method') === 'cash' ? 'selected' : '' }}>Cash</option>
+                        @if($qris['available'])
                         <option value="qris" {{ old('payment_method') === 'qris' ? 'selected' : '' }}>QRIS</option>
+                        @endif
                         <option value="transfer" {{ old('payment_method') === 'transfer' ? 'selected' : '' }}>Transfer</option>
                     </select>
                     @error('payment_method')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
                     <p x-show="paymentMethodError" x-transition class="text-xs text-red-400 mt-1">Metode pembayaran wajib dipilih</p>
+                    @if($qris['available'])
                     <div x-show="paymentMethod === 'qris'" x-transition class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 text-center">
                         <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Scan QR code di bawah untuk membayar via QRIS</p>
-                        <img src="{{ asset('images/qris-payment.png') }}" alt="QRIS Payment" class="mx-auto h-48 w-48 rounded-xl border border-slate-100 object-contain">
+                        <img src="{{ $qris['url'] }}" alt="QRIS Payment" class="mx-auto h-48 w-48 rounded-xl border border-slate-100 object-contain">
                     </div>
+                    @endif
                 </div>
 
                 <div>
@@ -236,13 +240,18 @@
                         <p x-show="guaranteeDepositError" x-transition class="text-xs text-red-400 mt-1">Jumlah deposit wajib diisi</p>
                     </div>
 
-                    <!-- Hidden field for backward compatibility -->
-                    <input type="hidden" name="guarantee_id_number" value="{{ old('guarantee_id_number', '') }}">
+                    <div x-show="guaranteeType === 'custom'" x-transition class="mt-3">
+                        <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Deskripsi Jaminan <span class="text-red-400">*</span></label>
+                        <textarea name="guarantee_notes" rows="2" placeholder="Contoh: Motor Vario plat AD 1234 XX" class="form-input">{{ old('guarantee_notes') }}</textarea>
+                        @error('guarantee_notes')<p class="mt-1 text-xs text-red-400">{{ $message }}</p>@enderror
+                    </div>
                 </div>
 
                 <!-- Upload Foto Identitas -->
-                <div class="sm:col-span-2">
-                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Upload Foto KTP/SIM <span class="text-red-400">*</span></label>
+                <div class="sm:col-span-2" x-show="guaranteeType === 'ktp' || guaranteeType === 'sim'" x-transition>
+                    <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">
+                        Upload Foto <span x-text="guaranteeType === 'ktp' ? 'KTP' : 'SIM'"></span> <span class="text-red-400">*</span>
+                    </label>
 
                     <!-- Drop Zone -->
                     <div
@@ -570,9 +579,19 @@
                 }
             }
 
-            if (!this.photoState.file) {
-                this.photoError = true;
-                hasError = true;
+            if (this.guaranteeType === 'ktp' || this.guaranteeType === 'sim') {
+                if (!this.photoState.file) {
+                    this.photoError = true;
+                    hasError = true;
+                }
+            }
+
+            if (this.guaranteeType === 'custom') {
+                const notesInput = document.querySelector('textarea[name="guarantee_notes"]');
+                if (!notesInput || !notesInput.value.trim()) {
+                    this.guaranteeTypeError = true;
+                    hasError = true;
+                }
             }
 
             if (hasError) {
@@ -798,6 +817,20 @@
                 } else {
                     this.guaranteeDeposit = '';
                     this.depositManualEdited = false;
+                }
+
+                if (newVal === 'ktp' || newVal === 'sim') {
+                    // keep photo state as is if already uploaded
+                } else {
+                    // reset photo state when switching away from KTP/SIM
+                    this.photoState.file = null;
+                    this.photoState.previewUrl = null;
+                    this.photoState.checked = false;
+                    this.photoState.verified = false;
+                    this.photoState.resolutionOk = false;
+                    this.photoState.blurOk = false;
+                    this.photoState.brightnessOk = false;
+                    this.photoError = false;
                 }
             }
         }

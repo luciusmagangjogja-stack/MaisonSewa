@@ -1,7 +1,7 @@
 @extends('Layouts.app')
 
-@section('title', isset($customer) ? 'Edit Customer' : 'Tambah Customer')
-@section('page-title', isset($customer) ? 'Edit Customer' : 'Tambah Customer Baru')
+@section('title', isset($customer) ? 'Edit Pelanggan' : 'Tambah Pelanggan')
+@section('page-title', isset($customer) ? 'Edit Pelanggan' : 'Tambah Pelanggan Baru')
 @section('subtitle', isset($customer) ? $customer->name : 'Input data pelanggan baru')
 
 @section('content')
@@ -10,7 +10,7 @@
     <div class="flex items-center gap-3 mb-5">
 <a href="{{ isset($customer) ? route('customers.show', $customer) : route('customers.index') }}" class="btn-secondary">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            {{ isset($customer) ? 'Kembali ke Detail Customer' : 'Kembali ke Customer' }}
+            {{ isset($customer) ? 'Kembali ke Detail Pelanggan' : 'Kembali ke Pelanggan' }}
         </a>
     </div>
 
@@ -29,7 +29,7 @@
                 <div class="sm:col-span-2">
                     <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Nama Lengkap <span class="text-red-400">*</span></label>
                     <input type="text" name="name" value="{{ old('name', $customer->name ?? '') }}"
-                           class="form-input" placeholder="Nama lengkap customer" required>
+                           class="form-input"                            placeholder="Nama lengkap pelanggan" required>
                     @error('name')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
                 </div>
 
@@ -117,7 +117,7 @@
             </a>
             <button type="submit" class="btn-primary px-8">
                 <i data-lucide="{{ isset($customer) ? 'save' : 'user-plus' }}" class="w-4 h-4"></i>
-                {{ isset($customer) ? 'Simpan Perubahan' : 'Tambah Customer' }}
+                {{ isset($customer) ? 'Simpan Perubahan' : 'Tambah Pelanggan' }}
             </button>
         </div>
 

@@ -42,48 +42,58 @@
     </div>
 
     {{-- ── TERLAMBAT (OVERDUE) ─────────────────────────────────── --}}
-    {{-- controller: $overdue — status active/rented, return_due_date < today --}}
+    {{-- controller: $overdue -- status active/rented, return_due_date < today --}}
     @if($overdue->count() > 0)
-    <div class="card overflow-hidden border-l-4" style="border-left-color:#EF4444">
-        <div class="p-5 border-b flex items-center gap-2" style="border-color:var(--border)">
+    <div class="ds-card overflow-hidden border-l-4" style="border-left-color:#EF4444">
+        <div class="px-5 py-4 border-b flex items-center gap-2" style="border-color:var(--border)">
             <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500"></i>
             <h2 class="font-semibold text-sm text-red-600">Terlambat Dikembalikan ({{ $overdue->count() }})</h2>
         </div>
         <div class="overflow-x-auto">
-        <table class="w-full elegant-table">
+        <table class="w-full text-left text-sm">
+            <colgroup>
+                <col style="width: 12%">
+                <col style="width: 22%">
+                <col style="width: 15%">
+                <col style="width: 12%">
+                <col style="width: 20%">
+                <col style="width: 19%">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="text-left">Invoice</th>
-                    <th class="text-left">Customer</th>
-                    <th class="text-left">Tgl Kembali</th>
-                    <th class="text-center">Terlambat</th>
-                    <th class="text-right">Total Denda</th>
-                    <th class="text-center">Aksi</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Invoice</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Pelanggan</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Tgl Kembali</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Terlambat</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-right">Total Denda</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-cream-sand/30">
                 @foreach($overdue as $t)
-                <tr class="bg-red-50">
+                <tr class="bg-red-50 transition-colors">
                     {{-- controller: invoice_number --}}
-                    <td class="font-mono text-xs font-semibold" style="color:var(--primary)">{{ $t->invoice_number }}</td>
-                    <td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle font-mono text-xs font-semibold" style="color:var(--primary)">{{ $t->invoice_number }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         {{-- controller: with(['customer']), relasi customer --}}
                         <p class="font-medium text-sm" style="color:var(--text-dark)">{{ $t->customer?->name ?? '-' }}</p>
                         <p class="text-xs" style="color:var(--text-soft)">{{ $t->customer?->phone ?? '-' }}</p>
                     </td>
                     {{-- controller: return_due_date --}}
-                    <td class="text-sm font-semibold text-red-500">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-sm font-semibold text-red-500">
                         {{ $t->return_due_date ? \Carbon\Carbon::parse($t->return_due_date)->format('d M Y') : '-' }}
                     </td>
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex justify-center">
                         <span class="badge badge-red">
                             {{ $t->return_due_date ? \Carbon\Carbon::parse($t->return_due_date)->diffForHumans() : '-' }}
                         </span>
+                        </div>
                     </td>
-                    <td class="text-right text-sm font-semibold" style="color:var(--text-dark)">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-right text-sm font-semibold" style="color:var(--text-dark)">
                         {{ $t->fine_amount ? 'Rp ' . number_format($t->fine_amount, 0, ',', '.') : '-' }}
                     </td>
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
                         <a href="{{ route('rentals.show', $t) }}"
                            class="btn-primary text-xs py-1 px-3 inline-flex items-center gap-1">
                             <i data-lucide="eye" class="w-3 h-3"></i> Detail
@@ -98,29 +108,35 @@
     @endif
 
     {{-- ── JATUH TEMPO HARI INI ────────────────────────────────── --}}
-    {{-- controller: $dueToday — status active/rented, return_due_date = today --}}
+    {{-- controller: $dueToday -- status active/rented, return_due_date = today --}}
     @if($dueToday->count() > 0)
-    <div class="card overflow-hidden border-l-4" style="border-left-color:#F59E0B">
-        <div class="p-5 border-b flex items-center gap-2" style="border-color:var(--border)">
+    <div class="ds-card overflow-hidden border-l-4" style="border-left-color:#F59E0B">
+        <div class="px-5 py-4 border-b flex items-center gap-2" style="border-color:var(--border)">
             <i data-lucide="clock" class="w-4 h-4" style="color:#F59E0B"></i>
             <h2 class="font-semibold text-sm" style="color:#92400E">Jatuh Tempo Hari Ini ({{ $dueToday->count() }})</h2>
         </div>
         <div class="overflow-x-auto">
-        <table class="w-full elegant-table">
+        <table class="w-full text-left text-sm">
+            <colgroup>
+                <col style="width: 15%">
+                <col style="width: 25%">
+                <col style="width: 25%">
+                <col style="width: 35%">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="text-left">Invoice</th>
-                    <th class="text-left">Customer</th>
-                    <th class="text-left">No. HP</th>
-                    <th class="text-center">Aksi</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Invoice</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Pelanggan</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">No. HP</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-cream-sand/30">
                 @foreach($dueToday as $t)
-                <tr style="background:#FFFBEB">
-                    <td class="font-mono text-xs font-semibold" style="color:var(--primary)">{{ $t->invoice_number }}</td>
-                    <td class="font-medium text-sm" style="color:var(--text-dark)">{{ $t->customer?->name ?? '-' }}</td>
-                    <td>
+                <tr class="transition-colors" style="background:#FFFBEB">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle font-mono text-xs font-semibold" style="color:var(--primary)">{{ $t->invoice_number }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle font-medium text-sm" style="color:var(--text-dark)">{{ $t->customer?->name ?? '-' }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         {{-- customer->phone dari relasi --}}
                         @if($t->customer?->phone)
                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $t->customer->phone) }}"
@@ -133,7 +149,7 @@
                         <span class="text-sm" style="color:var(--text-soft)">-</span>
                         @endif
                     </td>
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
                         <a href="{{ route('rentals.show', $t) }}"
                            class="btn-secondary text-xs py-1 px-3 inline-flex items-center gap-1">
                             <i data-lucide="eye" class="w-3 h-3"></i> Detail
@@ -148,7 +164,7 @@
     @endif
 
     {{-- ── FILTER PENGEMBALIAN ─────────────────────────────────── --}}
-    <div class="card p-5">
+    <div class="ds-card p-5">
         <form method="GET" action="{{ route('reports.returns') }}" class="flex flex-wrap items-end gap-3">
             <div>
                 <label class="block text-xs font-medium mb-1" style="color:var(--text-soft)">Dari Tanggal</label>
@@ -166,51 +182,77 @@
     </div>
 
     {{-- ── RIWAYAT PENGEMBALIAN ────────────────────────────────── --}}
-    {{-- controller: $returned — filter actual_return_date, status returned/completed --}}
-    <div class="card overflow-hidden">
-        <div class="p-5 border-b" style="border-color:var(--border)">
+    {{-- controller: $returned -- filter actual_return_date, status returned/completed --}}
+    <div class="ds-card overflow-hidden">
+        <div class="px-5 py-4 border-b" style="border-color:var(--border)">
             <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Riwayat Pengembalian</h2>
         </div>
         <div class="overflow-x-auto">
-        <table class="w-full elegant-table">
+        <table class="w-full text-left text-sm">
+            <colgroup>
+                <col style="width: 12%">
+                <col style="width: 20%">
+                <col style="width: 14%">
+                <col style="width: 18%">
+                <col style="width: 17%">
+                <col style="width: 12%">
+                <col style="width: 7%">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="text-left">Invoice</th>
-                    <th class="text-left">Customer</th>
-                    <th class="text-left">Tgl Sewa</th>
-                    <th class="text-left">Tgl Dikembalikan</th>
-                    <th class="text-right">Total</th>
-                    <th class="text-center">Status</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Invoice</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Pelanggan</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Tgl Sewa</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Tgl Dikembalikan</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-right">Total</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Status</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-cream-sand/30">
                 @forelse($returned as $t)
-                <tr>
-                    <td class="font-mono text-xs font-semibold" style="color:var(--primary)">{{ $t->invoice_number }}</td>
-                    <td>
+                <tr class="transition-colors">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle font-mono text-xs font-semibold" style="color:var(--primary)">{{ $t->invoice_number }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         <p class="font-medium text-sm" style="color:var(--text-dark)">{{ $t->customer?->name ?? '-' }}</p>
                         <p class="text-xs" style="color:var(--text-soft)">{{ $t->customer?->phone ?? '-' }}</p>
                     </td>
                     {{-- controller: created_at sebagai tanggal sewa --}}
-                    <td class="text-sm" style="color:var(--text-soft)">{{ $t->created_at->format('d M Y') }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-sm" style="color:var(--text-soft)">{{ $t->created_at->format('d M Y') }}</td>
                     {{-- controller: actual_return_date --}}
-                    <td class="text-sm" style="color:var(--text-soft)">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-sm" style="color:var(--text-soft)">
                         {{ $t->actual_return_date ? \Carbon\Carbon::parse($t->actual_return_date)->format('d M Y') : '-' }}
                     </td>
                     {{-- controller: total_amount --}}
-                    <td class="text-right font-semibold text-sm" style="color:var(--text-dark)">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-right font-semibold text-sm" style="color:var(--text-dark)">
                         Rp {{ number_format($t->total_amount, 0, ',', '.') }}
                     </td>
                     {{-- controller: rental_status --}}
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex justify-center">
                         <span class="badge {{ $t->rental_status === 'completed' ? 'badge-green' : 'badge-blue' }}">
-                            {{ ucfirst($t->rental_status) }}
+                            {{ match($t->rental_status) {
+                                'pending'   => 'Menunggu',
+                                'active'    => 'Aktif',
+                                'rented'    => 'Disewa',
+                                'returned'  => 'Selesai',
+                                'completed' => 'Selesai',
+                                'cancelled' => 'Dibatalkan',
+                                default     => ucfirst($t->rental_status)
+                            } }}
                         </span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <a href="{{ route('rentals.show', $t) }}"
+                           class="p-1.5 rounded-lg hover:bg-gray-100 inline-flex" style="color:var(--text-soft)">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                        </a>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="py-12 text-center">
+                    <td colspan="7" class="px-5 py-12 text-center">
                         <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2" style="color:var(--border)"></i>
                         <p class="text-sm" style="color:var(--text-soft)">Belum ada data pengembalian</p>
                     </td>

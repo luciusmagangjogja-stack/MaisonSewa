@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -32,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'route_action'     => optional($route)->getActionName(),
                 'middleware'       => optional($route)->gatherMiddleware() ?? [],
                 'user_id'          => auth()->id(),
-                'session_id'       => $request->session()->getId(),
+                'session_id'       => $request->hasSession() ? $request->session()->getId() : null,
                 'request_method'   => $request->method(),
                 'referer'          => $request->headers->get('referer'),
                 'previous_url'     => $request->headers->get('referer'),

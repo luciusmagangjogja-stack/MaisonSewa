@@ -42,7 +42,7 @@
                 @if(in_array(auth()->user()->role, ['super_admin','admin_toko']))
                 <a href="{{ route('customers.export') }}" class="btn-secondary">
                     <i data-lucide="download" class="w-4 h-4"></i>
-                    Export Excel
+                    Ekspor Excel
                 </a>
                 @endif
                 @endauth
@@ -52,7 +52,7 @@
                 <div class="relative flex-1 sm:w-80">
                     <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
                     <input type="text" placeholder="Cari nama atau nomor HP..."
-                           class="form-input" style="padding-left: 44px !important"
+                           class="form-input ds-input-icon"
                            id="search-customer"
                            value="{{ request('search') }}"
                            onkeyup="if(event.key === 'Enter') applyCustomerFilters()">
@@ -69,9 +69,9 @@
                 @endauth
 
                 <select class="form-input sm:w-40" id="bl-filter" onchange="applyCustomerFilters()">
-                    <option value="">Blacklist: Semua</option>
+                    <option value="">Daftar Blokir: Semua</option>
                     <option value="normal" {{ request('bl_status') === 'normal' ? 'selected' : '' }}>Normal</option>
-                    <option value="blacklisted" {{ request('bl_status') === 'blacklisted' ? 'selected' : '' }}>Blacklist</option>
+                    <option value="blacklisted" {{ request('bl_status') === 'blacklisted' ? 'selected' : '' }}>Daftar Blokir</option>
                 </select>
             </div>
         </div>
@@ -80,15 +80,23 @@
     <!-- Table Container -->
     <div class="ds-card overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="elegant-table w-full">
+                <table class="w-full text-left text-sm">
+                    <colgroup>
+                        <col style="width: 22%">
+                        <col style="width: 18%">
+                        <col style="width: 10%">
+                        <col style="width: 12%">
+                        <col style="width: 22%">
+                        <col style="width: 16%">
+                    </colgroup>
                     <thead>
                         <tr>
-                            <th class="text-left">Nama</th>
-                            <th class="text-left">Nomor Handphone</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Jumlah Transaksi</th>
-                            <th class="text-center">Tanggal Bergabung</th>
-                            <th class="text-center">Aksi</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Nama</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Nomor Handphone</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Status</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Jumlah Transaksi</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Tanggal Bergabung</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-cream-sand/30">
@@ -96,8 +104,8 @@
                         @php
                             $isDeactivated = $customer->trashed();
                         @endphp
-                        <tr class="hover:bg-cream/20 transition-colors {{ $isDeactivated ? 'opacity-70 bg-slate-50' : '' }}">
-                            <td class="px-6 py-4">
+                        <tr class="transition-colors {{ $isDeactivated ? 'opacity-70 bg-slate-50' : '' }}">
+                            <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0 {{ $isDeactivated ? 'grayscale' : '' }}"
                                          style="background-image: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #fff; outline: 3px solid #fff; outline-offset: 0; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.22), 0 3px 8px rgba(99, 102, 241, 0.12);">
@@ -109,30 +117,33 @@
                                         <span class="text-xs text-amber-600 font-medium">Dinonaktifkan</span>
                                         @endif
                                     </div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-semibold text-bark-light">{{ $customer->phone }}</div>
+                            <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
+                                <div class="font-semibold text-bark-light">{{ $customer->phone }}</div>
                             </td>
-                            <td class="px-6 py-4 text-center">
+                            <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                                <div class="flex justify-center">
                                 @if($isDeactivated)
-                                <span class="badge bg-amber-100 text-amber-700 border border-amber-200">Dinonaktifkan</span>
+                                <span class="badge badge-gold">Dinonaktifkan</span>
                                 @elseif($customer->is_blacklisted)
                                 <span class="badge badge-red">Blacklist</span>
                                 @else
                                 <span class="badge badge-green">Aktif</span>
                                 @endif
+                                </div>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="text-sm font-bold text-bark-dark">{{ $customer->rentals_count ?? 0 }}</div>
+                            <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                                <div class="font-bold text-bark-dark">{{ $customer->rentals_count ?? 0 }}</div>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="text-sm text-bark-light">{{ $customer->created_at ? $customer->created_at->format('d M Y') : '-' }}</div>
+                            <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-left">
+                                <div class="text-bark-light">{{ $customer->created_at ? $customer->created_at->format('d M Y') : '-' }}</div>
                                 @if($isDeactivated && $customer->deleted_at)
-                                <div class="text-xs text-amber-500 mt-1">Nonaktif: {{ $customer->deleted_at->format('d M Y') }}</div>
+                                <div class="text-xs text-amber-500 mt-1">Dinonaktifkan: {{ $customer->deleted_at->format('d M Y') }}</div>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="flex items-center justify-center gap-1.5">
+                            <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                                <div class="flex items-center justify-center gap-2">
                                     @if($isDeactivated)
                                         @auth
                                         @if(auth()->user()->isSuperAdmin())
@@ -182,7 +193,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center bg-cream/10">
+                            <td colspan="6" class="px-5 py-12 text-center bg-cream/10">
                                 <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
                                     <div class="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center text-gold mb-4 shadow-sm">
                                         <i data-lucide="users" class="w-8 h-8"></i>

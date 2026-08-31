@@ -101,43 +101,55 @@
     </div>
 
     {{-- ── TABEL STOK ──────────────────────────────────────────── --}}
-    <div class="card overflow-hidden">
-        <div class="p-5 border-b" style="border-color:var(--border)">
+    <div class="ds-card overflow-hidden">
+        <div class="px-5 py-4 border-b" style="border-color:var(--border)">
             <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Daftar Stok Produk</h2>
         </div>
         <div class="overflow-x-auto">
-        <table class="w-full elegant-table">
+        <table class="w-full text-left text-sm">
+            <colgroup>
+                <col style="width: 5%">
+                <col style="width: 20%">
+                <col style="width: 12%">
+                <col style="width: 14%">
+                <col style="width: 10%">
+                <col style="width: 12%">
+                <col style="width: 17%">
+                <col style="width: 10%">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="text-left">#</th>
-                    <th class="text-left">Nama Produk</th>
-                    <th class="text-left">Kode</th>
-                    <th class="text-left">Kategori</th>
-                    <th class="text-center">Stok Total</th>
-                    <th class="text-center">Tersedia</th>
-                    <th class="text-center">Kondisi</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">#</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Nama Produk</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Kode</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Kategori</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Stok Total</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Tersedia</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Kondisi</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-cream-sand/30">
                 {{-- controller: $products (paginated), relasi product->category --}}
                 @forelse($products as $i => $product)
-                <tr>
-                    <td class="text-xs" style="color:var(--text-soft)">{{ $products->firstItem() + $i }}</td>
-                    <td>
+                <tr class="transition-colors">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center text-xs" style="color:var(--text-soft)">{{ $products->firstItem() + $i }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         <p class="font-medium text-sm" style="color:var(--text-dark)">{{ $product->name }}</p>
                     </td>
-                    <td class="font-mono text-xs" style="color:var(--text-soft)">{{ $product->code ?? '-' }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle font-mono text-xs" style="color:var(--text-soft)">{{ $product->code ?? '-' }}</td>
                     {{-- controller: with('category'), relasi category --}}
-                    <td class="text-sm" style="color:var(--text-soft)">{{ $product->category?->name ?? '-' }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-sm" style="color:var(--text-soft)">{{ $product->category?->name ?? '-' }}</td>
                     {{-- controller: stock_total --}}
-                    <td class="text-center font-semibold text-sm" style="color:var(--text-dark)">{{ $product->stock_total }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center font-semibold text-sm" style="color:var(--text-dark)">{{ $product->stock_total }}</td>
                     {{-- controller: stock_available --}}
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
                         <span class="font-bold text-lg font-playfair {{ $product->stock_available == 0 ? 'text-red-500' : ($product->stock_available <= 2 ? 'text-yellow-500' : 'stock-available-normal') }}">
                             {{ $product->stock_available }}
                         </span>
                     </td>
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex justify-center">
                         @if($product->stock_available == 0)
                             <span class="badge badge-red">Habis</span>
                         @elseif($product->stock_available <= 2)
@@ -145,11 +157,33 @@
                         @else
                             <span class="badge badge-green">Tersedia</span>
                         @endif
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ route('products.show', $product) }}"
+                               class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Detail">
+                                <i data-lucide="eye" class="w-4 h-4" style="color:var(--text-soft)"></i>
+                            </a>
+                            @if (!auth()->user()->isSales())
+                            <a href="{{ route('products.edit', $product) }}"
+                               class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Edit">
+                                <i data-lucide="pencil" class="w-4 h-4" style="color:var(--primary)"></i>
+                            </a>
+                            <form method="POST" action="{{ route('products.destroy', $product) }}" id="deleteProductStock_{{ $product->id }}" class="hidden">
+                                @csrf @method('DELETE')
+                            </form>
+                            <button type="button" onclick="confirmDelete('deleteProductStock_{{ $product->id }}', 'produk {{ $product->name }}')"
+                                    class="p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Hapus">
+                                <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i>
+                            </button>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="py-12 text-center">
+                    <td colspan="8" class="px-5 py-12 text-center">
                         <i data-lucide="package-x" class="w-8 h-8 mx-auto mb-2" style="color:var(--border)"></i>
                         <p class="text-sm" style="color:var(--text-soft)">Tidak ada data produk</p>
                     </td>

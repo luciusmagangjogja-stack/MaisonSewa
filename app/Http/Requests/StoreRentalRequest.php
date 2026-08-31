@@ -27,7 +27,6 @@ class StoreRentalRequest extends FormRequest
             'payment_method'        => 'required|string|in:cash,qris,transfer',
             'guarantee_type'        => 'required|string|in:ktp,sim,deposit,custom',
             'guarantee_deposit'     => 'nullable|numeric|min:0',
-            'guarantee_id_number'   => 'nullable|string|max:50',
             'guarantee_notes'       => 'nullable|string|max:500',
             'guarantee_id_photo'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ];
@@ -62,6 +61,28 @@ class StoreRentalRequest extends FormRequest
                         'items',
                         "Stok produk {$product->name} tidak mencukupi (tersedia: {$product->stock_available}, diminta: {$requested})."
                     );
+                }
+            }
+
+            $guaranteeType = $this->input('guarantee_type');
+
+            if ($guaranteeType === 'deposit') {
+                $deposit = $this->input('guarantee_deposit');
+                if (!$deposit || (float) $deposit <= 0) {
+                    $validator->errors()->add('guarantee_deposit', 'Jumlah deposit wajib diisi untuk jenis jaminan Deposit Uang.');
+                }
+            }
+
+            if ($guaranteeType === 'ktp' || $guaranteeType === 'sim') {
+                if (!$this->hasFile('guarantee_id_photo')) {
+                    $validator->errors()->add('guarantee_id_photo', 'Foto identitas wajib diupload untuk jenis jaminan ' . ($guaranteeType === 'ktp' ? 'KTP' : 'SIM') . '.');
+                }
+            }
+
+            if ($guaranteeType === 'custom') {
+                $notes = trim((string) ($this->input('guarantee_notes') ?? ''));
+                if ($notes === '') {
+                    $validator->errors()->add('guarantee_notes', 'Deskripsi jaminan custom wajib diisi.');
                 }
             }
         });

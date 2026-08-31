@@ -1,7 +1,7 @@
 @extends('Layouts.app')
 
-@section('title', isset($customer) ? 'Edit Customer' : 'Tambah Customer')
-@section('page-title', isset($customer) ? 'Edit Customer' : 'Tambah Customer Baru')
+@section('title', isset($customer) ? 'Edit Pelanggan' : 'Tambah Pelanggan')
+@section('page-title', isset($customer) ? 'Edit Pelanggan' : 'Tambah Pelanggan Baru')
 @section('subtitle', isset($customer) ? $customer->name : 'Input data pelanggan baru')
 
 @section('content')
@@ -10,7 +10,7 @@
 <div class="flex items-center gap-3 mb-5">
         <a href="{{ isset($customer) ? route('customers.show', $customer) : route('customers.index') }}" class="btn-secondary">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            {{ isset($customer) ? 'Kembali ke Detail Customer' : 'Kembali ke Customer' }}
+            {{ isset($customer) ? 'Kembali ke Detail Pelanggan' : 'Kembali ke Pelanggan' }}
         </a>
     </div>
 
@@ -34,7 +34,7 @@
                 <div class="sm:col-span-2">
                     <label class="block text-sm font-medium mb-1.5" style="color: var(--text-dark)">Nama Lengkap <span class="text-red-400">*</span></label>
                     <input type="text" name="name" value="{{ old('name', $customer->name ?? '') }}"
-                           class="form-input" placeholder="Nama lengkap customer" required>
+                           class="form-input" placeholder="Nama lengkap pelanggan" required>
                     @error('name')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
                 </div>
 
@@ -63,18 +63,18 @@
                                     <i data-lucide="info" class="w-5 h-5 text-amber-600"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-amber-900">Customer Found</p>
+                                    <p class="text-sm font-semibold text-amber-900">Pelanggan Ditemukan</p>
                                     <div class="mt-2 space-y-1 text-sm text-amber-800">
                                         <p><span class="font-medium">Name:</span> {{ session('deleted_customer.name') }}</p>
                                         <p><span class="font-medium">Phone:</span> {{ session('deleted_customer.phone') }}</p>
                                         <p><span class="font-medium">Deleted At:</span> {{ session('deleted_customer.deleted_at') }}</p>
                                     </div>
-                                    <p class="text-xs text-amber-700 mt-2">This customer has been deactivated.</p>
+                                    <p class="text-xs text-amber-700 mt-2">Pelanggan ini telah dinonaktifkan.</p>
                                     <form method="POST" action="{{ route('customers.restore', session('deleted_customer.id')) }}" class="mt-3">
                                         @csrf
                                         <button type="submit" class="btn-primary">
                                             <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                                            Restore Customer
+                                            Restore Pelanggan
                                         </button>
                                     </form>
                                 </div>
@@ -107,7 +107,7 @@
             </a>
             <button type="submit" class="btn-primary px-8">
                 <i data-lucide="{{ isset($customer) ? 'save' : 'user-plus' }}" class="w-4 h-4"></i>
-                {{ isset($customer) ? 'Simpan Perubahan' : 'Tambah Customer' }}
+                {{ isset($customer) ? 'Simpan Perubahan' : 'Tambah Pelanggan' }}
             </button>
         </div>
 

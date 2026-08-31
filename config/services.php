@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'broadcast_worker' => [
+        'url' => env('BROADCAST_WORKER_URL', 'http://localhost:3001'),
+    ],
+
 ];

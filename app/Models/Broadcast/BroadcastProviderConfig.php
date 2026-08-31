@@ -19,6 +19,8 @@ class BroadcastProviderConfig extends Model
         'is_active',
         'is_default',
         'config',
+        'session_path',
+        'last_connected_at',
         'priority',
     ];
 
@@ -26,6 +28,7 @@ class BroadcastProviderConfig extends Model
         'is_active' => 'boolean',
         'is_default' => 'boolean',
         'config' => 'encrypted:array',
+        'last_connected_at' => 'datetime',
     ];
 }
 

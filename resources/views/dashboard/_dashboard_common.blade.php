@@ -97,7 +97,7 @@
                         <i data-lucide="users" class="h-4 w-4 text-primary"></i>
                         <span class="font-bold">Kelola Admin</span>
                     </a>
-                    <a href="{{ route('broadcasts.index') }}" class="ds-hover-lift btn btn-secondary">
+                    <a href="{{ route('broadcast-campaigns.index') }}" class="ds-hover-lift btn btn-secondary">
                         <i data-lucide="send" class="h-4 w-4 text-primary"></i>
                         <span class="font-bold">Broadcast</span>
                     </a>
@@ -114,7 +114,7 @@
                 @if($role === 'admin_toko')
                     <a href="{{ route('customers.index') }}" class="ds-hover-lift btn btn-secondary">
                         <i data-lucide="user-plus" class="h-4 w-4 text-primary"></i>
-                        <span class="font-bold">Tambah Customer</span>
+                        <span class="font-bold">Tambah Pelanggan</span>
                     </a>
                     <a href="{{ route('rentals.create') }}" class="ds-hover-lift btn btn-secondary">
                         <i data-lucide="plus-circle" class="h-4 w-4 text-primary"></i>
@@ -128,9 +128,9 @@
                         <i data-lucide="shirt" class="h-4 w-4 text-primary"></i>
                         <span class="font-bold">Laundry</span>
                     </a>
-                    <a href="{{ route('broadcasts.index') }}" class="ds-hover-lift btn btn-secondary">
+                    <a href="{{ route('broadcast-campaigns.index') }}" class="ds-hover-lift btn btn-secondary">
                         <i data-lucide="send" class="h-4 w-4 text-primary"></i>
-                        <span class="font-bold">Broadcast Cabang</span>
+                        <span class="font-bold">Broadcast</span>
                     </a>
                     <a href="{{ route('rentals.scan') }}" class="ds-hover-lift btn btn-secondary">
                         <i data-lucide="scan-line" class="h-4 w-4 text-primary"></i>
@@ -145,7 +145,7 @@
                     </a>
                     <a href="{{ route('customers.index') }}" class="ds-hover-lift btn btn-secondary">
                         <i data-lucide="user" class="h-4 w-4 text-primary"></i>
-                        <span class="font-bold">Customer Saya</span>
+                        <span class="font-bold">Pelanggan Saya</span>
                     </a>
                     <a href="{{ route('rentals.scan') }}" class="ds-hover-lift btn btn-secondary">
                         <i data-lucide="scan-line" class="h-4 w-4 text-primary"></i>

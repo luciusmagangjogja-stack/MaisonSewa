@@ -2,11 +2,11 @@
 
 @section('title', 'Penyewaan — SewaJas')
 @section('page-title', 'Penyewaan')
-@section('subtitle', 'Kelola semua transaksi penyewaan jas')
+@section('subtitle', 'Daftar semua transaksi penyewaan')
 
 @section('content')
     <!-- Quick Actions & Filters -->
-    <div class="card-container mb-6">
+    <div class="ds-card mb-6">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div class="flex items-center gap-3 flex-wrap">
                 <a href="{{ route('rentals.create') }}" class="btn-primary">
@@ -16,7 +16,8 @@
             </div>
 
             <form method="GET" class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                <!-- Status Filter -->
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari invoice atau pelanggan..." class="form-input sm:w-64">
+
                 <select name="status" class="form-input sm:w-44">
                     <option value="">Semua Status</option>
                     <option value="waiting" {{ request('status') === 'waiting' ? 'selected' : '' }}>Menunggu</option>
@@ -42,36 +43,47 @@
     </div>
 
     <!-- Table Container -->
-    <div class="card-container p-0 overflow-hidden">
+    <div class="ds-card overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="elegant-table w-full">
+            <table class="w-full text-left text-sm">
+                <colgroup>
+                    <col style="width: 12%">
+                    <col style="width: 22%">
+                    <col style="width: 8%">
+                    <col style="width: 18%">
+                    <col style="width: 12%">
+                    <col style="width: 14%">
+                    <col style="width: 14%">
+                </colgroup>
                 <thead>
                     <tr>
-                        <th class="text-left">No. Invoice</th>
-                        <th class="text-left">Pelanggan</th>
-                        <th class="text-center">Koleksi</th>
-                        <th class="text-left">Tanggal Sewa</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-right">Total Bayar</th>
-                        <th class="text-center">Aksi</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">No. Invoice</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Pelanggan</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Koleksi</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Tanggal Sewa</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Status</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-right">Total Bayar</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-cream-sand/30">
                     @forelse($rentals as $rental)
                     <tr class="transition-colors">
-                        <td class="px-6 py-4">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                             <div class="font-serif font-bold text-bark-dark text-sm leading-tight">{{ $rental->invoice_number }}</div>
                         </td>
-<td class="px-6 py-4">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                             <div class="font-semibold text-bark-dark text-sm leading-tight">{{ optional($rental->customer)->name ?? '-' }}</div>
                             <div class="text-xs text-stone-400 mt-0.5">{{ optional($rental->customer)->phone ?? '-' }}</div>
                         </td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="badge badge-gray text-xs">
-                                {{ $rental->items->count() }} Item
-                            </span>
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex justify-center">
+                                <span class="badge badge-gray">
+                                    {{ $rental->items->count() }} Item
+                                </span>
+                            </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                             <div class="text-xs font-semibold text-bark-light leading-tight">
                                 {{ optional($rental->rental_date)->format('d M Y') ?? '' }}
                             </div>
@@ -79,15 +91,15 @@
                                 Tempo: {{ optional($rental->return_due_date)->format('d M Y') ?? '' }}
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
                             @php
                                 $statusClasses = [
-                                    'waiting' => 'badge-menunggu',
+                                    'waiting' => 'badge-gold',
                                     'processing' => 'badge-blue',
-                                    'active' => 'badge-active',
-                                    'overdue' => 'badge-terlambat',
-                                    'returned' => 'badge-selesai',
-                                    'cancelled' => 'badge-dibatalkan',
+                                    'active' => 'badge-green',
+                                    'overdue' => 'badge-red',
+                                    'returned' => 'badge-green',
+                                    'cancelled' => 'badge-gray',
                                 ];
                                 $statusLabels = [
                                     'waiting' => 'Menunggu',
@@ -98,15 +110,17 @@
                                     'cancelled' => 'Dibatalkan',
                                 ];
                             @endphp
-                            <span class="badge {{ $statusClasses[$rental->rental_status] ?? 'badge-gray' }} text-xs">
-                                {{ $statusLabels[$rental->rental_status] ?? $rental->rental_status }}
-                            </span>
+                            <div class="flex justify-center">
+                                <span class="badge {{ $statusClasses[$rental->rental_status] ?? 'badge-gray' }}">
+                                    {{ $statusLabels[$rental->rental_status] ?? $rental->rental_status }}
+                                </span>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-right">
                             <div class="font-serif font-bold text-bark-dark text-sm">Rp{{ number_format($rental->total_amount, 0, ',', '.') }}</div>
                         </td>
-                        <td class="px-6 py-4 text-center min-w-[180px]">
-                            <div class="flex items-center justify-center gap-1.5">
+                        <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                            <div class="flex items-center justify-center gap-2">
                                 <a href="{{ route('rentals.show', $rental) }}" class="action-btn" title="View">
                                     <i data-lucide="eye" class="w-4 h-4"></i>
                                 </a>
@@ -115,13 +129,8 @@
                                 <a href="{{ route('rentals.edit', $rental) }}" class="action-btn" title="Edit">
                                     <i data-lucide="edit-3" class="w-4 h-4"></i>
                                 </a>
-                                @else
-                                <span class="inline-block w-4 h-4"></span>
                                 @endif
                                 @endauth
-                                @guest
-                                <span class="inline-block w-4 h-4"></span>
-                                @endguest
                                 <a href="{{ route('rentals.receipt.show', $rental) }}" class="action-btn" title="Receipt">
                                     <i data-lucide="receipt" class="w-4 h-4"></i>
                                 </a>
@@ -139,38 +148,29 @@
                                     @csrf
                                     @method('DELETE')
                                 </form>
-                                <button type="button" onclick="confirmDelete('deleteRentalForm_{{ $rental->id }}', 'penyewaan {{ $rental->invoice_number }}')" class="action-btn" style="border-color: #ef4444; color: #ef4444;" title="Hapus Penyewaan">
+                                <button type="button" onclick="confirmDelete('deleteRentalForm_{{ $rental->id }}', 'penyewaan {{ $rental->invoice_number }}')" class="action-btn" title="Hapus Penyewaan">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
-                                @else
-                                <span class="inline-block w-4 h-4"></span>
                                 @endif
                                 @endauth
-                                @guest
-                                <span class="inline-block w-4 h-4"></span>
-                                @endguest
 
                                 @if($rental->rental_status == 'active' || $rental->rental_status == 'overdue')
                                     <a href="{{ route('rentals.show', $rental) }}" class="action-btn" title="Process Payment">
                                         <i data-lucide="wallet" class="w-4 h-4"></i>
                                     </a>
-                                @else
-                                    <span class="inline-block w-4 h-4"></span>
                                 @endif
 
                                 @if($rental->rental_status == 'returned')
                                     <a href="{{ route('rentals.show', $rental) }}" class="action-btn" title="Payment History">
                                         <i data-lucide="history" class="w-4 h-4"></i>
                                     </a>
-                                @else
-                                    <span class="inline-block w-4 h-4"></span>
                                 @endif
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center bg-cream/10">
+                        <td colspan="7" class="px-5 py-12 text-center bg-cream/10">
                             <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
                                 <div class="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center text-gold mb-4 shadow-sm">
                                     <i data-lucide="shirt" class="w-8 h-8"></i>

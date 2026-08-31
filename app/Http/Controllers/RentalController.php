@@ -20,6 +20,20 @@ class RentalController extends Controller
 {
     public function __construct(protected RentalService $rentalService) {}
 
+    private function qrisData(): array
+    {
+        $qrisPath = \App\Services\SettingsService::get('qris_image');
+        if (!$qrisPath || !Storage::disk('public')->exists($qrisPath)) {
+            return ['available' => false, 'url' => null];
+        }
+
+        $fullPath = storage_path('app/public/' . $qrisPath);
+        $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+        $url = 'data:image/' . $extension . ';base64,' . base64_encode(file_get_contents($fullPath));
+
+        return ['available' => true, 'url' => $url];
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -69,7 +83,9 @@ class RentalController extends Controller
             $q->whereHas('branches', fn($bq) => $bq->where('branches.id', $user->branch_id));
         })->where("status", "available")->where("stock_available", ">", 0)->get();
 
-        return view("rentals.create", compact("customers", "products"));
+        $qris = $this->qrisData();
+
+        return view("rentals.create", compact("customers", "products", "qris"));
     }
 
     public function store(StoreRentalRequest $request)
@@ -82,7 +98,8 @@ class RentalController extends Controller
     {
         $rental->load(["customer", "items.product.category", "createdBy", "payments", "guarantees", "activityLogs.user", "branch"]);
         $rentalData = $this->rentalService->buildDetailPayload($rental);
-        return view("rentals.show", compact("rental", "rentalData"));
+        $qris = $this->qrisData();
+        return view("rentals.show", compact("rental", "rentalData", "qris"));
     }
 
     public function edit(Rental $rental)
@@ -101,7 +118,9 @@ class RentalController extends Controller
             $q->where("branch_id", $user->branch_id);
         })->get();
 
-        return view("rentals.edit", compact("rental", "customers", "products"));
+        $qris = $this->qrisData();
+
+        return view("rentals.edit", compact("rental", "customers", "products", "qris"));
     }
 
     public function update(Request $request, Rental $rental)

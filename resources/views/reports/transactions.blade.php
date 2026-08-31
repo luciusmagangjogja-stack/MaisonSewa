@@ -7,7 +7,7 @@
 <div class="space-y-6">
 
     {{-- ── FILTER ─────────────────────────────────────────────── --}}
-    <div class="card p-5">
+    <div class="ds-card p-5">
         <form method="GET" action="{{ route('reports.transactions') }}" class="flex flex-wrap items-end gap-3">
             <div>
                 <label class="block text-xs font-medium mb-1" style="color:var(--text-soft)">Dari Tanggal</label>
@@ -24,7 +24,15 @@
                     {{-- controller: $statuses dari distinct rental_status --}}
                     @foreach($statuses as $s)
                         <option value="{{ $s }}" {{ $status === $s ? 'selected' : '' }}>
-                            {{ ucfirst($s) }}
+                            {{ match($s) {
+                                'pending'   => 'Menunggu',
+                                'active'    => 'Aktif',
+                                'rented'    => 'Disewa',
+                                'returned'  => 'Selesai',
+                                'completed' => 'Selesai',
+                                'cancelled' => 'Dibatalkan',
+                                default     => ucfirst($s)
+                            } }}
                         </option>
                     @endforeach
                 </select>
@@ -73,48 +81,58 @@
     </div>
 
     {{-- ── TABEL ───────────────────────────────────────────────── --}}
-    <div class="card overflow-hidden">
-        <div class="p-5 border-b flex items-center justify-between" style="border-color:var(--border)">
+    <div class="ds-card overflow-hidden">
+        <div class="px-5 py-4 border-b flex items-center justify-between" style="border-color:var(--border)">
             <h2 class="font-semibold text-sm" style="color:var(--text-dark)">Daftar Transaksi</h2>
             {{-- controller: $rentals (paginated) --}}
             <span class="text-xs" style="color:var(--text-soft)">{{ $rentals->total() }} transaksi</span>
         </div>
         <div class="overflow-x-auto">
-        <table class="w-full elegant-table">
+        <table class="w-full text-left text-sm">
+            <colgroup>
+                <col style="width: 12%">
+                <col style="width: 18%">
+                <col style="width: 14%">
+                <col style="width: 15%">
+                <col style="width: 17%">
+                <col style="width: 14%">
+                <col style="width: 10%">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="text-left">Invoice</th>
-                    <th class="text-left">Customer</th>
-                    <th class="text-left">Tgl Transaksi</th>
-                    <th class="text-left">Tgl Kembali</th>
-                    <th class="text-right">Total</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center">Aksi</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Invoice</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Pelanggan</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Tgl Transaksi</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Tgl Kembali</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-right">Total</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Status</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-cream-sand/30">
                 @forelse($rentals as $t)
-                <tr>
+                <tr class="transition-colors">
                     {{-- controller: invoice_number --}}
-                    <td class="font-mono text-xs font-semibold" style="color:var(--primary)">{{ $t->invoice_number }}</td>
-                    <td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle font-mono text-xs font-semibold" style="color:var(--primary)">{{ $t->invoice_number }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         {{-- controller: with(['customer']), relasi customer --}}
                         <p class="font-medium text-sm" style="color:var(--text-dark)">{{ $t->customer?->name ?? '-' }}</p>
                         <p class="text-xs" style="color:var(--text-soft)">{{ $t->customer?->phone ?? '-' }}</p>
                     </td>
-                    <td class="text-sm" style="color:var(--text-soft)">{{ $t->created_at->format('d M Y') }}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-sm" style="color:var(--text-soft)">{{ $t->created_at->format('d M Y') }}</td>
                     {{-- controller: return_due_date --}}
-                    <td class="text-sm {{ $t->rental_status === 'active' && $t->return_due_date < now()->format('Y-m-d') ? 'text-red-500 font-semibold' : '' }}"
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-sm {{ $t->rental_status === 'active' && $t->return_due_date < now()->format('Y-m-d') ? 'text-red-500 font-semibold' : '' }}"
                         style="{{ $t->rental_status === 'active' && $t->return_due_date < now()->format('Y-m-d') ? '' : 'color:var(--text-soft)' }}">
                         {{ $t->return_due_date ? \Carbon\Carbon::parse($t->return_due_date)->format('d M Y') : '-' }}
                     </td>
                     {{-- controller: total_amount --}}
-                    <td class="text-right font-semibold text-sm" style="color:var(--text-dark)">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-right font-semibold text-sm" style="color:var(--text-dark)">
                         Rp {{ number_format($t->total_amount, 0, ',', '.') }}
                     </td>
                     {{-- controller: rental_status --}}
-                    <td class="text-center">
-                        <span class="badge text-[10px] {{ match($t->rental_status) {
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex justify-center">
+                        <span class="badge {{ match($t->rental_status) {
                             'pending'   => 'badge-gold',
                             'active'    => 'badge-blue',
                             'rented'    => 'badge-blue',
@@ -122,18 +140,29 @@
                             'completed' => 'badge-green',
                             'cancelled' => 'badge-red',
                             default     => 'badge-gray'
-                        } }}">{{ ucfirst($t->rental_status) }}</span>
+                        } }}">{{ match($t->rental_status) {
+                            'pending'   => 'Menunggu',
+                            'active'    => 'Aktif',
+                            'rented'    => 'Disewa',
+                            'returned'  => 'Selesai',
+                            'completed' => 'Selesai',
+                            'cancelled' => 'Dibatalkan',
+                            default     => ucfirst($t->rental_status)
+                        } }}</span>
+                        </div>
                     </td>
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex items-center justify-center">
                         <a href="{{ route('rentals.show', $t) }}"
                            class="p-1.5 rounded-lg hover:bg-gray-100 inline-flex" style="color:var(--text-soft)">
                             <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                         </a>
+                        </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="py-12 text-center">
+                    <td colspan="7" class="px-5 py-12 text-center">
                         <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2" style="color:var(--border)"></i>
                         <p class="text-sm" style="color:var(--text-soft)">Tidak ada transaksi ditemukan</p>
                     </td>

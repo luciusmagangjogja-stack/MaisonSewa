@@ -22,22 +22,22 @@
 
     {{-- STATS --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="stat-card">
+        <div class="stat-ds-card">
             <p class="text-xs font-medium uppercase tracking-wide" style="color:var(--text-soft)">Total Cabang</p>
             <p class="text-2xl font-bold mt-1" style="color:var(--text-dark)">{{ $branches->count() }}</p>
         </div>
-        <div class="stat-card">
+        <div class="stat-ds-card">
             <p class="text-xs font-medium uppercase tracking-wide" style="color:var(--text-soft)">Cabang Aktif</p>
             <p class="text-2xl font-bold mt-1 text-green-600">{{ $branches->where('is_active', true)->count() }}</p>
         </div>
-        <div class="stat-card">
+        <div class="stat-ds-card">
             <p class="text-xs font-medium uppercase tracking-wide" style="color:var(--text-soft)">Cabang Nonaktif</p>
             <p class="text-2xl font-bold mt-1 text-red-500">{{ $branches->where('is_active', false)->count() }}</p>
         </div>
     </div>
 
     {{-- TABEL --}}
-    <div class="card overflow-hidden">
+    <div class="ds-card overflow-hidden">
         @if($branches->isEmpty())
         <div class="flex flex-col items-center justify-center py-20 text-center">
             <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style="background: var(--secondary)">
@@ -52,38 +52,49 @@
         @else
         {{-- Desktop table --}}
         <div class="hidden md:block">
-        <table class="elegant-table w-full">
+        <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <colgroup>
+                <col style="width: 20%">
+                <col style="width: 8%">
+                <col style="width: 14%">
+                <col style="width: 14%">
+                <col style="width: 10%">
+                <col style="width: 10%">
+                <col style="width: 12%">
+                <col style="width: 12%">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="text-left">Cabang</th>
-                    <th class="text-left">Kode</th>
-                    <th class="text-left">Kota</th>
-                    <th class="text-left">Kontak</th>
-                    <th class="text-center">Pengguna</th>
-                    <th class="text-center">Produk</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center">Aksi</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Cabang</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Kode</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Kota</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-left">Kontak</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Pengguna</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Produk</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Status</th>
+                    <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-cream-sand/30">
                 @foreach($branches as $branch)
-                <tr>
-                    <td>
+                <tr class="transition-colors">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         <p class="font-semibold text-sm" style="color:var(--text-dark)">{{ $branch->name }}</p>
                         @if($branch->address)
                         <p class="text-xs mt-0.5 line-clamp-1" style="color:var(--text-soft)">{{ $branch->address }}</p>
                         @endif
                     </td>
-                    <td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         <span class="text-xs font-mono px-2 py-1 rounded-lg font-bold" style="background:var(--secondary); color:var(--primary)">
                             {{ $branch->code }}
                         </span>
                     </td>
-                    <td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         <p class="text-sm" style="color:var(--text-dark)">{{ $branch->city ?? '-' }}</p>
                         <p class="text-xs" style="color:var(--text-soft)">{{ $branch->province ?? '' }}</p>
                     </td>
-                    <td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle">
                         @if($branch->phone)
                         <p class="text-sm" style="color:var(--text-dark)">{{ $branch->phone }}</p>
                         @endif
@@ -94,21 +105,27 @@
                         <span class="text-xs" style="color:var(--text-soft)">-</span>
                         @endif
                     </td>
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex justify-center">
                         <span class="badge badge-blue">{{ $branch->users_count }}</span>
+                        </div>
                     </td>
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex justify-center">
                         <span class="badge badge-gold">{{ $branch->products_count }}</span>
+                        </div>
                     </td>
-                    <td class="text-center">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex justify-center">
                         @if($branch->is_active)
                             <span class="badge badge-green">Aktif</span>
                         @else
                             <span class="badge badge-gray">Nonaktif</span>
                         @endif
+                        </div>
                     </td>
-                    <td class="text-center">
-                        <div class="flex items-center justify-center gap-1">
+                    <td class="px-5 py-3.5 text-sm text-slate-700 align-middle text-center">
+                        <div class="flex items-center justify-center gap-2">
                             <a href="{{ route('branches.show', $branch) }}"
                                class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Detail">
                                 <i data-lucide="eye" class="w-4 h-4" style="color:var(--text-soft)"></i>
@@ -135,11 +152,12 @@
             </tbody>
         </table>
         </div>
+        </div>
 
-        {{-- Mobile cards --}}
+        {{-- Mobile ds-cards --}}
         <div class="md:hidden space-y-3">
             @foreach($branches as $branch)
-            <div class="card border rounded-xl p-4 space-y-3">
+            <div class="ds-card border rounded-xl p-4 space-y-3">
                 {{-- Top: name + code + status --}}
                 <div class="flex items-center gap-3">
                     <div class="flex-1 min-w-0">

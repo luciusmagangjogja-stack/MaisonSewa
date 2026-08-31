@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models\Broadcast;
 
 use App\Models\Branch;
+use App\Models\Customer;
 use App\Models\User;
+use App\Jobs\SendBroadcastMessage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,9 +25,12 @@ class BroadcastCampaign extends Model
         'trigger_event',
         'template_id',
         'custom_message',
+        'message_template',
         'target_type',
+        'recipient_type',
         'target_filters',
         'provider',
+        'channels',
         'status',
         'total_target',
         'total_success',
@@ -39,6 +44,8 @@ class BroadcastCampaign extends Model
 
     protected $casts = [
         'target_filters' => 'array',
+        'channels' => 'array',
+        'custom_message' => 'array',
         'scheduled_at' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -63,5 +70,176 @@ class BroadcastCampaign extends Model
     {
         return $this->hasMany(BroadcastLog::class, 'campaign_id');
     }
+
+    public function queueMessages(): void
+    {
+        $recipients = $this->resolveRecipients();
+
+        $this->update([
+            'status' => 'processing',
+            'started_at' => now(),
+            'total_target' => $recipients->count(),
+        ]);
+
+        $message = $this->resolveMessage();
+        $channels = $this->channels ?? ['whatsapp'];
+
+        if (in_array('in_app', $channels, true)) {
+            $inAppRecipients = $recipients->filter(fn ($r) => in_array($r['type'], ['user', 'customer'], true))->values();
+
+            if ($inAppRecipients->isNotEmpty()) {
+                app(\App\Services\NotificationService::class)->broadcast(
+                    $inAppRecipients->map(fn ($r) => [
+                        'type' => $r['type'] === 'user' ? \App\Models\User::class : \App\Models\Customer::class,
+                        'id' => $r['id'],
+                    ])->toArray(),
+                    'system',
+                    'Broadcast: ' . $this->name,
+                    $message,
+                    [
+                        'broadcast' => true,
+                        'sender_id' => $this->created_by,
+                        'sender_name' => $this->created_by ? (\App\Models\User::find($this->created_by)?->name ?? null) : null,
+                        'target' => $this->target_type,
+                        'role' => null,
+                        'branch_id' => $this->branch_id,
+                        'recipient_count' => $inAppRecipients->count(),
+                    ],
+                    $this->branch_id,
+                    null,
+                    'send',
+                    'blue'
+                );
+            }
+        }
+
+        if (in_array('whatsapp', $channels, true)) {
+            $whatsappRecipients = $recipients->filter(fn ($r) => $r['type'] === 'customer')->values();
+
+            foreach ($whatsappRecipients as $recipient) {
+                $renderedMessage = $this->pickRandomVariant($recipient);
+
+                $log = $this->logs()->create([
+                    'recipient_type' => $recipient['type'],
+                    'recipient_id' => $recipient['id'],
+                    'phone' => $recipient['phone'],
+                    'rendered_message' => $renderedMessage,
+                    'provider' => $this->provider,
+                    'status' => 'pending',
+                ]);
+
+                SendBroadcastMessage::dispatch($log);
+            }
+        }
+    }
+
+    private function resolveRecipients()
+    {
+        $filters = $this->target_filters ?? [];
+        $branchId = $filters['branch_id'] ?? $this->branch_id;
+
+        $customers = collect();
+        $users = collect();
+
+        if (in_array($this->recipient_type, ['customer', 'both'])) {
+            $query = Customer::query()->where('opt_out', false);
+
+            if ($branchId) {
+                $query->where('branch_id', $branchId);
+            }
+
+            if ($this->target_type === 'customer') {
+                $selectedIds = $filters['recipient_ids'] ?? [];
+                if ($selectedIds) {
+                    $query->whereIn('id', $selectedIds);
+                }
+            }
+
+            $customers = $query->get(['id', 'name', 'phone', 'branch_id'])->map(fn ($c) => [
+                'id' => $c->id,
+                'type' => 'customer',
+                'phone' => $c->phone,
+                'name' => $c->name,
+            ]);
+        }
+
+        if (in_array($this->recipient_type, ['user', 'both'])) {
+            $query = User::query()->active()->where('opt_out', false);
+
+            if ($branchId) {
+                $query->where('branch_id', $branchId);
+            }
+
+            if ($this->target_type === 'sales') {
+                $query->whereIn('role', [User::ROLE_ADMIN_TOKO, User::ROLE_SALES]);
+            }
+
+            if ($this->target_type === 'customer' && $this->recipient_type === 'both') {
+                $selectedIds = $filters['recipient_ids'] ?? [];
+                if ($selectedIds) {
+                    $query->whereIn('id', $selectedIds);
+                }
+            }
+
+            $users = $query->get(['id', 'name', 'phone', 'role', 'branch_id'])->map(fn ($u) => [
+                'id' => $u->id,
+                'type' => 'user',
+                'phone' => $u->phone,
+                'name' => $u->name,
+            ]);
+        }
+
+        $allRecipients = $customers->merge($users)->values();
+
+        $dailyLimit = (int) env('BROADCAST_DAILY_LIMIT', 50);
+        $todaySent = BroadcastLog::whereIn('status', ['submitted', 'sent', 'delivered', 'read'])
+            ->whereDate('created_at', now()->toDateString())
+            ->count();
+
+        $remaining = max(0, $dailyLimit - $todaySent);
+
+        return $allRecipients->take($remaining);
+    }
+
+    private function resolveMessage(): array|string
+    {
+        if ($this->message_template) {
+            return $this->message_template;
+        }
+
+        if ($this->template_id && $this->template) {
+            return $this->template->content;
+        }
+
+        return $this->custom_message ?? '';
+    }
+
+    private function renderTemplate(string $template, array $recipient): string
+    {
+        $replacements = [
+            '{{name}}' => $recipient['name'] ?? '',
+            '{{phone}}' => $recipient['phone'] ?? '',
+            '{{sender_name}}' => $this->created_by ? (\App\Models\User::find($this->created_by)?->name ?? '') : '',
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $template);
+    }
+
+    private function pickRandomVariant(array $recipient): string
+    {
+        $message = $this->resolveMessage();
+
+        if (is_string($message)) {
+            return $this->renderTemplate($message, $recipient);
+        }
+
+        if (is_array($message) && count($message) > 0) {
+            $variant = $message[array_rand($message)];
+            return $this->renderTemplate($variant, $recipient);
+        }
+
+        return '';
+    }
 }
+
 

@@ -2,7 +2,7 @@
 
 @section('title', 'Pencarian - SewaJas')
 @section('page-title', 'Pencarian')
-@section('subtitle', 'Temukan invoice, customer, dan produk dari satu tempat')
+@section('subtitle', 'Temukan invoice, pelanggan, dan produk dari satu tempat')
 
 @section('content')
 <div class="space-y-6">
@@ -10,7 +10,7 @@
         <form method="GET" action="{{ route('search.index') }}" class="flex flex-col gap-3 lg:flex-row">
             <div class="relative flex-1">
                 <i data-lucide="search" class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" style="margin-top: -1px;"></i>
-                <input type="search" name="q" value="{{ $query }}" class="form-input text-base" style="padding-left: 3rem !important; line-height: 1.2;" placeholder="Ketik nomor HP, nama customer, invoice, kode produk...">
+                <input type="search" name="q" value="{{ $query }}" class="form-input text-base" style="padding-left: 3rem !important; line-height: 1.2;" placeholder="Ketik nomor HP, nama pelanggan, invoice, kode produk...">
             </div>
             <button type="submit" class="btn-primary px-6">
                 <i data-lucide="search" class="h-4 w-4"></i>
@@ -24,14 +24,14 @@
             <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
                 <i data-lucide="scan-search" class="h-7 w-7"></i>
             </div>
-            <h2 class="text-lg font-extrabold text-slate-950">Mulai dengan nomor HP customer</h2>
-            <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">Pencarian akan menampilkan customer, invoice terkait, dan produk yang cocok secara bersamaan.</p>
+            <h2 class="text-lg font-extrabold text-slate-950">Mulai dengan nomor HP pelanggan</h2>
+            <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">Pencarian akan menampilkan pelanggan, invoice terkait, dan produk yang cocok secara bersamaan.</p>
         </div>
     @else
         <div class="grid gap-6 xl:grid-cols-3">
             <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-card-sm">
                 <div class="mb-4 flex items-center justify-between">
-                    <h2 class="font-extrabold text-slate-950">Customer</h2>
+                    <h2 class="font-extrabold text-slate-950">Pelanggan</h2>
                     <span class="badge badge-blue">{{ $customers->count() }}</span>
                 </div>
                 <div class="space-y-3">
@@ -52,7 +52,7 @@
                             </div>
                         </a>
                     @empty
-                        <p class="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Tidak ada customer yang cocok.</p>
+                        <p class="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Tidak ada pelanggan yang cocok.</p>
                     @endforelse
                 </div>
             </section>
