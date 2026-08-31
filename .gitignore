@@ -20,6 +20,7 @@
 /storage/pail
 /vendor
 /storage/logs
+/storage/app/wa-sessions
 Homestead.json
 Homestead.yaml
 Thumbs.db

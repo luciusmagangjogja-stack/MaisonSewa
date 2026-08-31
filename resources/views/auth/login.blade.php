@@ -51,7 +51,7 @@
     <style>
         .login-page body {
             min-height: 100vh;
-            background: #f8fafc;
+            background: transparent;
             color: #0f172a;
             font-family: "DM Sans", system-ui, sans-serif;
             margin: 0;
@@ -61,10 +61,11 @@
         }
         .login-page .login-main {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: stretch;
+            justify-content: stretch;
             min-height: 100vh;
-            padding: 1.5rem;
+            background: linear-gradient(to bottom, #2563eb, #1d4ed8);
+            padding: 0;
         }
         .login-page .login-card {
             width: 100%;
@@ -128,7 +129,7 @@
                 width: 40%;
                 position: relative;
                 overflow: hidden;
-                background: linear-gradient(to bottom, #2563eb, #1d4ed8);
+                background: transparent;
                 color: #ffffff;
             }
             .login-page .login-main {
@@ -140,7 +141,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="login-page min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden" x-data="loginPage()" :class="{ 'opacity-60 pointer-events-none': loading }">
+<body class="login-page min-h-screen text-slate-900 font-sans overflow-x-hidden" x-data="loginPage()" :class="{ 'opacity-60 pointer-events-none': loading }">
     {{-- Mobile top bar --}}
     <div class="lg:hidden fixed top-0 inset-x-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div class="flex items-center justify-between px-4 py-3">
