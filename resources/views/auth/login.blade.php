@@ -71,7 +71,6 @@
             align-items: stretch;
             width: 100%;
             background: linear-gradient(to bottom, #2563eb, #1d4ed8);
-            border-radius: 1.5rem;
             overflow: hidden;
             box-shadow: 0 8px 30px rgba(15, 23, 42, .15);
         }
