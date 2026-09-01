@@ -125,30 +125,28 @@ class BroadcastCampaignController extends Controller
         }
 
         if ($channel === 'in_app') {
-            if (!in_array($validated['recipient_type'], ['user', 'both'], true)) {
+            if ($validated['recipient_type'] !== 'user') {
                 return back()->withErrors(['channel' => 'Channel Notifikasi In-App hanya bisa digunakan untuk target User/Sales.'])->withInput();
             }
 
-            if ($validated['recipient_type'] === 'user' || $validated['recipient_type'] === 'both') {
-                $selectedUserIds = $validated['target_filters']['recipient_ids'] ?? [];
+            $selectedUserIds = $validated['target_filters']['recipient_ids'] ?? [];
+            
+            if (!empty($selectedUserIds)) {
+                $allowedUserIds = User::query()
+                    ->where('is_active', true)
+                    ->when(!$user->isSuperAdmin(), fn ($q) => $q->where('branch_id', $user->branch_id))
+                    ->when($user->isSuperAdmin(), fn ($q) => $q->where('id', '!=', $user->id))
+                    ->when($user->isAdminToko(), function ($q) use ($user) {
+                        $q->whereIn('role', [User::ROLE_ADMIN_TOKO, User::ROLE_SALES])
+                          ->where('id', '!=', $user->id);
+                    })
+                    ->pluck('id')
+                    ->toArray();
                 
-                if (!empty($selectedUserIds)) {
-                    $allowedUserIds = User::query()
-                        ->where('is_active', true)
-                        ->when(!$user->isSuperAdmin(), fn ($q) => $q->where('branch_id', $user->branch_id))
-                        ->when($user->isSuperAdmin(), fn ($q) => $q->where('id', '!=', $user->id))
-                        ->when($user->isAdminToko(), function ($q) use ($user) {
-                            $q->whereIn('role', [User::ROLE_ADMIN_TOKO, User::ROLE_SALES])
-                              ->where('id', '!=', $user->id);
-                        })
-                        ->pluck('id')
-                        ->toArray();
-                    
-                    $invalidUsers = array_diff($selectedUserIds, $allowedUserIds);
-                    
-                    if (!empty($invalidUsers)) {
-                        return back()->withErrors(['recipient_ids' => 'Anda tidak memiliki akses untuk memilih beberapa user yang dipilih.'])->withInput();
-                    }
+                $invalidUsers = array_diff($selectedUserIds, $allowedUserIds);
+                
+                if (!empty($invalidUsers)) {
+                    return back()->withErrors(['recipient_ids' => 'Anda tidak memiliki akses untuk memilih beberapa user yang dipilih.'])->withInput();
                 }
             }
         }

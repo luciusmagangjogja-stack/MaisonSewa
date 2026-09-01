@@ -16,7 +16,7 @@ class NotificationController extends Controller
         $user = $request->user();
 
         $query = Notification::query()
-            ->where('notifiable_type', User::class)
+            ->where('notifiable_type', 'user')
             ->where('notifiable_id', $user->id)
             ->latest();
 
@@ -35,7 +35,7 @@ class NotificationController extends Controller
         $user  = $request->user();
 
         $query = Notification::query()
-            ->where('notifiable_type', User::class)
+            ->where('notifiable_type', 'user')
             ->where('notifiable_id', $user->id)
             ->latest();
 
@@ -70,7 +70,7 @@ class NotificationController extends Controller
     public function markRead(int $id): JsonResponse
     {
         $user = auth()->user();
-        $notification = Notification::where('notifiable_type', User::class)
+        $notification = Notification::where('notifiable_type', 'user')
             ->where('notifiable_id', $user->id)
             ->findOrFail($id);
         $notification->markAsRead();
@@ -81,7 +81,7 @@ class NotificationController extends Controller
     public function markAllRead(Request $request): JsonResponse
     {
         $user = $request->user();
-        $q = Notification::where('notifiable_type', User::class)
+        $q = Notification::where('notifiable_type', 'user')
             ->where('notifiable_id', $user->id)
             ->unread();
 
@@ -97,7 +97,7 @@ class NotificationController extends Controller
     public function destroy(int $id): JsonResponse
     {
         $user = auth()->user();
-        $notification = Notification::where('notifiable_type', User::class)
+        $notification = Notification::where('notifiable_type', 'user')
             ->where('notifiable_id', $user->id)
             ->findOrFail($id);
         $notification->delete();
@@ -112,7 +112,7 @@ class NotificationController extends Controller
     {
         $user = auth()->user();
 
-        $rows = Notification::where('notifiable_type', User::class)
+        $rows = Notification::where('notifiable_type', 'user')
             ->where('notifiable_id', $user->id)
             ->unread()
             ->selectRaw('type, COUNT(*) as total')
@@ -134,7 +134,7 @@ class NotificationController extends Controller
     public function show(int $id): View
     {
         $user = auth()->user();
-        $notification = Notification::where('notifiable_type', User::class)
+        $notification = Notification::where('notifiable_type', 'user')
             ->where('notifiable_id', $user->id)
             ->findOrFail($id);
 

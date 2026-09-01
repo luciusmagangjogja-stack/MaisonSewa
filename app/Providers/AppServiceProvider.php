@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
 
             $overdueCount = $overdueQuery->count();
 
-            $unreadNotif = Notification::where('notifiable_type', User::class)
+            $unreadNotif = Notification::where('notifiable_type', 'user')
                 ->where('notifiable_id', $user->id)
                 ->where('is_read', false)
                 ->count();

@@ -34,7 +34,7 @@ class Notification extends Model
     }
 
     public function scopeUnread($q)        { return $q->where('is_read', false); }
-    public function scopeForUser($q, $uid) { return $q->where('notifiable_type', User::class)->where('notifiable_id', $uid); }
+    public function scopeForUser($q, $uid) { return $q->where('notifiable_type', 'user')->where('notifiable_id', $uid); }
     public function scopeByType($q, $type) { return $q->where('type', $type); }
 
     public function markAsRead(): void

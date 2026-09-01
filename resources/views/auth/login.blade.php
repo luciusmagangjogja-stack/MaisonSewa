@@ -64,13 +64,12 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 1.5rem;
+            padding: 1.5rem 0;
         }
         .login-page .login-panel {
             display: flex;
             align-items: stretch;
             width: 100%;
-            max-width: 1100px;
             background: linear-gradient(to bottom, #2563eb, #1d4ed8);
             border-radius: 1.5rem;
             overflow: hidden;
