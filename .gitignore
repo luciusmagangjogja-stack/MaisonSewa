@@ -21,6 +21,7 @@
 /vendor
 /storage/logs
 /storage/app/wa-sessions
+/storage/framework/views
 Homestead.json
 Homestead.yaml
 Thumbs.db

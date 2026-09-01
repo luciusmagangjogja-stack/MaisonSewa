@@ -51,7 +51,7 @@
     <style>
         .login-page body {
             min-height: 100vh;
-            background: transparent;
+            background: #f8fafc;
             color: #0f172a;
             font-family: "DM Sans", system-ui, sans-serif;
             margin: 0;
@@ -61,11 +61,20 @@
         }
         .login-page .login-main {
             display: flex;
-            align-items: stretch;
-            justify-content: stretch;
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
+            padding: 1.5rem;
+        }
+        .login-page .login-panel {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            max-width: 1100px;
             background: linear-gradient(to bottom, #2563eb, #1d4ed8);
-            padding: 0;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, .15);
         }
         .login-page .login-card {
             width: 100%;
@@ -141,7 +150,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="login-page min-h-screen text-slate-900 font-sans overflow-x-hidden" x-data="loginPage()" :class="{ 'opacity-60 pointer-events-none': loading }">
+<body class="login-page min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden" x-data="loginPage()" :class="{ 'opacity-60 pointer-events-none': loading }">
     {{-- Mobile top bar --}}
     <div class="lg:hidden fixed top-0 inset-x-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div class="flex items-center justify-between px-4 py-3">
@@ -166,14 +175,14 @@
         </div>
     </div>
 
-    <div class="min-h-screen flex items-stretch login-main">
-        {{-- Desktop hero + form --}}
-        <div class="hidden lg:flex w-5/12 relative overflow-hidden login-hero">
-            <div class="absolute inset-0 bg-gradient-to-b from-blue-600 to-blue-700"></div>
-            <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle, rgba(255,255,255,.8) 1px, transparent 1px); background-size: 18px 18px;"></div>
-            <div class="absolute inset-0 opacity-25" style="background-image: linear-gradient(135deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,0) 60%);"></div>
+    <div class="min-h-screen flex items-center justify-center login-main">
+        <div class="login-panel">
+            {{-- Desktop hero + form --}}
+            <div class="hidden lg:flex w-5/12 relative overflow-hidden login-hero">
+                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle, rgba(255,255,255,.8) 1px, transparent 1px); background-size: 18px 18px;"></div>
+                <div class="absolute inset-0 opacity-25" style="background-image: linear-gradient(135deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,0) 60%);"></div>
 
-            <div class="relative z-10 flex flex-col justify-center w-full px-10 py-12 text-white">
+                <div class="relative z-10 flex flex-col justify-center w-full px-10 py-12 text-white">
                 <div class="max-w-md">
                     <div class="flex items-center gap-3">
                         @if($appLogoUrl)
@@ -455,9 +464,10 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
-    <script>
+<script>
         function loginPage() {
             return { showPass: false, loading: false }
         }
