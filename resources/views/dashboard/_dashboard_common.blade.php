@@ -527,6 +527,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
+                            grace: '5%',
                             ticks: { font: fontConfig, color: '#64748B' },
                             grid: { color: 'rgba(226,232,240,.8)' }
                         },
@@ -583,6 +584,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
+                            grace: '5%',
                             ticks: { font: fontConfig, color: '#64748B' },
                             grid: { color: 'rgba(226,232,240,.8)' }
                         },
@@ -609,14 +611,16 @@
                             'rgba(239,68,68,.85)',
                             'rgba(245,158,11,.85)'
                         ],
-                        borderRadius: 16,
+                        borderRadius: 8,
                         borderSkipped: false,
                         hoverBackgroundColor: [
                             'rgba(96,165,250,1)',
                             'rgba(34,197,94,1)',
                             'rgba(239,68,68,1)',
                             'rgba(245,158,11,1)'
-                        ]
+                        ],
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7,
                     }]
                 },
                 options: {
@@ -640,7 +644,11 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { font: fontConfig, color: '#64748B' },
+                            ticks: {
+                                font: fontConfig,
+                                color: '#64748B',
+                                stepSize: 1,
+                            },
                             grid: { color: 'rgba(226,232,240,.8)' }
                         },
                         x: {
