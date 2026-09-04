@@ -141,6 +141,23 @@
             </div>
 
             <div>
+                <label class="mb-2 block text-sm font-bold text-slate-700">Jeda Antar Pesan (WhatsApp)</label>
+                <select name="delay_seconds" class="form-input">
+                    <option value="0" {{ old('delay_seconds', '30') == '0' ? 'selected' : '' }}>Tanpa jeda</option>
+                    <option value="30" {{ old('delay_seconds', '30') == '30' ? 'selected' : '' }}>30 detik</option>
+                    <option value="60" {{ old('delay_seconds', '30') == '60' ? 'selected' : '' }}>1 menit</option>
+                    <option value="300" {{ old('delay_seconds', '30') == '300' ? 'selected' : '' }}>5 menit</option>
+                    <option value="custom" {{ old('delay_seconds') == 'custom' ? 'selected' : '' }}>Custom...</option>
+                </select>
+                <div id="customDelayContainer" class="mt-2 {{ old('delay_seconds') == 'custom' ? '' : 'hidden' }}">
+                    <input type="number" name="delay_seconds_custom" value="{{ old('delay_seconds_custom') }}" min="0" max="3600" class="form-input" placeholder="Masukkan jeda dalam detik (0-3600)">
+                    @error('delay_seconds_custom') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                @error('delay_seconds') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                <p class="mt-1 text-xs text-slate-500">Jeda ini diterapkan per pesan untuk menghindari deteksi spam WhatsApp.</p>
+            </div>
+
+            <div>
                 <label class="mb-2 block text-sm font-bold text-slate-700">Jadwalkan Pengiriman (Opsional)</label>
                 <input type="datetime-local" name="scheduled_at" value="{{ old('scheduled_at') }}" class="form-input">
                 @error('scheduled_at') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -414,6 +431,30 @@ document.addEventListener('DOMContentLoaded', () => {
     updateRecipientTypeLock();
     updateTargetOptions();
     lucide.createIcons();
+
+    const delaySelect = document.querySelector('select[name="delay_seconds"]');
+    const customDelayContainer = document.getElementById('customDelayContainer');
+    const customDelayInput = document.querySelector('input[name="delay_seconds_custom"]');
+
+    if (delaySelect && customDelayContainer) {
+        delaySelect.addEventListener('change', () => {
+            if (delaySelect.value === 'custom') {
+                customDelayContainer.classList.remove('hidden');
+                if (customDelayInput) customDelayInput.focus();
+            } else {
+                customDelayContainer.classList.add('hidden');
+            }
+        });
+    }
+
+    const form = document.querySelector('form[action="{{ route('broadcast-campaigns.store') }}"]');
+    if (form && delaySelect) {
+        form.addEventListener('submit', () => {
+            if (delaySelect.value === 'custom' && customDelayInput) {
+                customDelayInput.name = 'delay_seconds';
+            }
+        });
+    }
 });
 </script>
 @endpush

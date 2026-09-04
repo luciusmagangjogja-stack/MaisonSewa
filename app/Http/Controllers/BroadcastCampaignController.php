@@ -113,6 +113,7 @@ class BroadcastCampaignController extends Controller
             'scheduled_at' => ['nullable', 'date', 'after:now'],
             'recipient_ids' => ['nullable', 'array'],
             'recipient_ids.*' => ['integer'],
+            'delay_seconds' => ['nullable', 'integer', 'min:0', 'max:3600'],
         ]);
 
         if ($channel === 'whatsapp') {
@@ -159,6 +160,7 @@ class BroadcastCampaignController extends Controller
         $validated['type'] = 'manual';
         $validated['channels'] = $channels;
         $validated['provider'] = $validated['provider'] ?? 'in_app';
+        $validated['delay_seconds'] = (int) ($validated['delay_seconds'] ?? 0);
 
         $campaign = BroadcastCampaign::create($validated);
 

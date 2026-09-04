@@ -46,6 +46,16 @@
                         <p class="text-xs font-semibold text-slate-500">Scheduled At</p>
                         <p class="mt-1 text-sm font-medium text-slate-900">{{ optional($campaign->scheduled_at)->format('d M Y H:i') ?? '-' }}</p>
                     </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500">Jeda Antar Pesan</p>
+                        <p class="mt-1 text-sm font-medium text-slate-900">
+                            @if($campaign->delay_seconds > 0)
+                                {{ $campaign->delay_seconds }} detik
+                            @else
+                                Tanpa jeda
+                            @endif
+                        </p>
+                    </div>
                 </div>
             </div>
 

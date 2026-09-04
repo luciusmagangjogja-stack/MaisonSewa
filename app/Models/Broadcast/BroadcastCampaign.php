@@ -40,6 +40,7 @@ class BroadcastCampaign extends Model
         'completed_at',
         'created_by',
         'branch_id',
+        'delay_seconds',
     ];
 
     protected $casts = [
@@ -49,6 +50,7 @@ class BroadcastCampaign extends Model
         'scheduled_at' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'delay_seconds' => 'integer',
     ];
 
     public function template(): BelongsTo
@@ -116,7 +118,9 @@ class BroadcastCampaign extends Model
         if (in_array('whatsapp', $channels, true)) {
             $whatsappRecipients = $recipients->filter(fn ($r) => $r['type'] === 'customer')->values();
 
-            foreach ($whatsappRecipients as $recipient) {
+            $delaySeconds = (int) ($this->delay_seconds ?? 0);
+
+            foreach ($whatsappRecipients as $index => $recipient) {
                 $renderedMessage = $this->pickRandomVariant($recipient);
 
                 $log = $this->logs()->create([
@@ -128,7 +132,11 @@ class BroadcastCampaign extends Model
                     'status' => 'pending',
                 ]);
 
-                SendBroadcastMessage::dispatch($log);
+                $dispatch = SendBroadcastMessage::dispatch($log);
+
+                if ($delaySeconds > 0) {
+                    $dispatch->delay(now()->addSeconds($delaySeconds * $index));
+                }
             }
         }
     }
